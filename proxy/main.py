@@ -5,8 +5,10 @@ k-apt-alert proxy server
 """
 
 import logging
+from datetime import datetime
 from contextlib import asynccontextmanager
 
+import requests
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -32,44 +34,45 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="k-apt-alert proxy",
     description="공공데이터포털 청약 API 프록시 — 사용자 API 키 불필요",
-    version="1.0.0",
+    version="2.0.0",
     lifespan=lifespan,
 )
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_methods=["GET"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
 
-@app.get("/health")
-def health():
-    return {"status": "ok", "api_key_configured": bool(DATA_GO_KR_API_KEY)}
+def _add_d_day(ann: dict) -> dict:
+    """rcept_end 기반 D-day 계산."""
+    rcept_end = ann.get("rcept_end", "")
+    if rcept_end and len(rcept_end) >= 8:
+        try:
+            fmt = "%Y-%m-%d" if "-" in rcept_end else "%Y%m%d"
+            end_date = datetime.strptime(rcept_end[:10], fmt).date()
+            today = datetime.now().date()
+            delta = (end_date - today).days
+            ann["d_day"] = delta
+            if delta < 0:
+                ann["d_day_label"] = "마감"
+            elif delta == 0:
+                ann["d_day_label"] = "D-Day (오늘 마감)"
+            else:
+                ann["d_day_label"] = f"D-{delta}"
+        except ValueError:
+            ann["d_day"] = None
+            ann["d_day_label"] = ""
+    else:
+        ann["d_day"] = None
+        ann["d_day_label"] = ""
+    return ann
 
 
-@app.get("/v1/apt/announcements")
-def get_all_announcements(
-    category: str = Query(
-        default="all",
-        description="조회 카테고리: all, apt, officetell, lh, remndr, pbl_pvt_rent, opt",
-    ),
-    active_only: bool = Query(default=True, description="접수 마감 전 공고만"),
-    months_back: int = Query(default=2, ge=1, le=12, description="조회 기간 (개월)"),
-    region: str = Query(
-        default="",
-        description="지역 필터 (쉼표 구분, 예: 서울,경기,인천). 비우면 전체.",
-    ),
-    district: str = Query(
-        default="",
-        description="세부 지역 필터 (구/군, 쉼표 구분, 예: 강남구,서초구). 비우면 전체.",
-    ),
-):
-    """청약 공고 통합 조회. category, region, district로 필터링 가능."""
-    if not DATA_GO_KR_API_KEY:
-        raise HTTPException(status_code=503, detail="Server API key not configured")
-
+def _fetch_and_filter(category, active_only, months_back, region_filter, district_filter):
+    """공통 조회 + 필터링 로직."""
     fetchers = {
         "apt": ("APT 일반분양", lambda: applyhome.fetch(months_back, active_only)),
         "officetell": ("오피스텔/도시형", lambda: officetell.fetch(min(months_back, 1), active_only)),
@@ -80,22 +83,9 @@ def get_all_announcements(
     }
 
     if category != "all" and category not in fetchers:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid category. Choose from: all, {', '.join(fetchers.keys())}",
-        )
+        return None, None, f"Invalid category: {category}"
 
     targets = fetchers if category == "all" else {category: fetchers[category]}
-
-    # 지역 필터 파싱
-    region_filter = set()
-    if region.strip():
-        region_filter = {r.strip() for r in region.split(",") if r.strip()}
-
-    # 세부 지역 필터 파싱
-    district_filter = set()
-    if district.strip():
-        district_filter = {d.strip() for d in district.split(",") if d.strip()}
 
     announcements = []
     errors = []
@@ -109,19 +99,44 @@ def get_all_announcements(
             logger.error(f"[{label}] crawl failed: {e}")
             errors.append(f"{label}: {str(e)}")
 
-    # ID 기준 전역 중복 제거 + 필터링
+    # ID 기준 중복 제거 + 필터링 + D-day
     seen = set()
     unique = []
     for ann in announcements:
         if ann["id"] not in seen:
             seen.add(ann["id"])
-            # 지역 필터 ("전국"은 항상 통과)
             if region_filter and ann.get("region") not in region_filter and ann.get("region") != "전국":
                 continue
-            # 세부 지역 필터
             if district_filter and ann.get("district") and ann.get("district") not in district_filter:
                 continue
-            unique.append(ann)
+            unique.append(_add_d_day(ann))
+
+    return unique, errors, None
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok", "api_key_configured": bool(DATA_GO_KR_API_KEY)}
+
+
+@app.get("/v1/apt/announcements")
+def get_all_announcements(
+    category: str = Query(default="all", description="조회 카테고리"),
+    active_only: bool = Query(default=True, description="접수 마감 전 공고만"),
+    months_back: int = Query(default=2, ge=1, le=12, description="조회 기간 (개월)"),
+    region: str = Query(default="", description="지역 필터 (쉼표 구분)"),
+    district: str = Query(default="", description="세부 지역 필터 (구/군, 쉼표 구분)"),
+):
+    """청약 공고 통합 조회. D-day 포함."""
+    if not DATA_GO_KR_API_KEY:
+        raise HTTPException(status_code=503, detail="Server API key not configured")
+
+    region_filter = {r.strip() for r in region.split(",") if r.strip()} if region.strip() else set()
+    district_filter = {d.strip() for d in district.split(",") if d.strip()} if district.strip() else set()
+
+    unique, errors, err_msg = _fetch_and_filter(category, active_only, months_back, region_filter, district_filter)
+    if err_msg:
+        raise HTTPException(status_code=400, detail=err_msg)
 
     return {
         "count": len(unique),
@@ -135,6 +150,91 @@ def get_all_announcements(
             "months_back": months_back,
         },
     }
+
+
+@app.post("/v1/apt/notify")
+def notify(
+    webhook_url: str = Query(description="Slack Incoming Webhook URL"),
+    category: str = Query(default="all"),
+    active_only: bool = Query(default=True),
+    months_back: int = Query(default=2, ge=1, le=12),
+    region: str = Query(default=""),
+    district: str = Query(default=""),
+):
+    """청약 공고 조회 후 Slack으로 자동 발송. cron/외부 스케줄러에서 호출."""
+    if not DATA_GO_KR_API_KEY:
+        raise HTTPException(status_code=503, detail="Server API key not configured")
+    if not webhook_url:
+        raise HTTPException(status_code=400, detail="webhook_url is required")
+
+    region_filter = {r.strip() for r in region.split(",") if r.strip()} if region.strip() else set()
+    district_filter = {d.strip() for d in district.split(",") if d.strip()} if district.strip() else set()
+
+    unique, errors, err_msg = _fetch_and_filter(category, active_only, months_back, region_filter, district_filter)
+    if err_msg:
+        raise HTTPException(status_code=400, detail=err_msg)
+
+    if not unique:
+        return {"sent": 0, "message": "No announcements to notify"}
+
+    # 접수 중인 공고만 (D-day >= 0)
+    active = [a for a in unique if a.get("d_day") is not None and a.get("d_day", -1) >= 0]
+    if not active:
+        return {"sent": 0, "message": "No active announcements"}
+
+    # D-day 기준 정렬 (마감 임박순)
+    active.sort(key=lambda x: x.get("d_day", 999))
+
+    # Slack Block Kit 메시지 빌드
+    blocks = [
+        {
+            "type": "header",
+            "text": {"type": "plain_text", "text": f"🏠 청약 공고 알림 ({len(active)}건)", "emoji": True},
+        },
+        {"type": "divider"},
+    ]
+
+    for ann in active[:10]:  # 최대 10건
+        name = ann.get("name", "?")
+        reg = ann.get("region", "")
+        dist = ann.get("district", "")
+        d_label = ann.get("d_day_label", "")
+        period = ann.get("period", "")
+        units = ann.get("total_units", "")
+        cat = ann.get("house_category", "")
+        url = ann.get("url", "https://www.applyhome.co.kr")
+
+        location = f"{reg} {dist}".strip()
+        urgency = "🔴" if ann.get("d_day", 99) <= 1 else "🟡" if ann.get("d_day", 99) <= 3 else "🟢"
+
+        blocks.append({
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": (
+                    f"*{urgency} {name}* — {location}\n"
+                    f"📅 {period} | ⏰ {d_label} | 🏗️ {units}세대 | 📂 {cat}\n"
+                    f"<{url}|청약홈 바로가기>"
+                ),
+            },
+        })
+
+    if len(active) > 10:
+        blocks.append({
+            "type": "section",
+            "text": {"type": "mrkdwn", "text": f"_...외 {len(active) - 10}건 더_"},
+        })
+
+    payload = {"blocks": blocks}
+
+    try:
+        resp = requests.post(webhook_url, json=payload, timeout=10)
+        resp.raise_for_status()
+        logger.info(f"Slack notify sent: {len(active)} announcements")
+        return {"sent": len(active), "message": "Slack notification sent successfully"}
+    except Exception as e:
+        logger.error(f"Slack notify failed: {e}")
+        raise HTTPException(status_code=502, detail=f"Slack delivery failed: {str(e)}")
 
 
 @app.get("/v1/apt/categories")
