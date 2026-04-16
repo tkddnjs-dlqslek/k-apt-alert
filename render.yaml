@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: k-apt-alert-proxy
+    runtime: docker
+    dockerfilePath: proxy/Dockerfile
+    dockerContext: proxy
+    plan: free
+    envVars:
+      - key: DATA_GO_KR_API_KEY
+        sync: false
+    healthCheckPath: /health
