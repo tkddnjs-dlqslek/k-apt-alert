@@ -33,10 +33,27 @@ cp -r korea-apt-alert .claude/skills/
 
 ```
 /korea-apt-alert                     # 최신 청약 공고 전체 조회
+/korea-apt-alert setup               # 개인 프로필 설정 (맞춤 추천)
 /korea-apt-alert 서울 아파트           # 서울 APT만 필터링
-/korea-apt-alert LH 공공분양           # LH 공공분양만 조회
+/korea-apt-alert 내 조건에 맞는 청약    # 프로필 기반 맞춤 조회
 /korea-apt-alert --notify             # 조회 후 Slack/Telegram 발송
 ```
+
+## 개인화 프로필
+
+`/korea-apt-alert setup`으로 프로필을 설정하면 맞춤 추천을 받을 수 있습니다.
+
+| 항목 | 설명 | 용도 |
+|------|------|------|
+| 출생연도 | 만 나이 계산 | 청약 자격 (만 19세+) |
+| 선호 지역 | 복수 선택 | 지역 필터링 |
+| 가구 구성 | 1인/신혼/기혼+자녀 등 | 특별공급 자격 판정 |
+| 무주택 여부 | 본인 명의 주택 유무 | 대부분의 청약 자격 요건 |
+| 청약통장 | 보유 여부 + 가입기간 | APT/LH 자격 + 가점 |
+| 연소득 | 구간 선택 | LH/공공임대 소득 기준 |
+| 선호 평형 | 소형/중형/대형 | 평형 필터링 |
+
+프로필은 `~/.config/k-skill/apt-alert-profile.json`에 로컬 저장되며 서버로 전송되지 않습니다.
 
 ## 알림 설정 (선택)
 
@@ -102,6 +119,7 @@ DATA_GO_KR_API_KEY=your_key uvicorn main:app --reload
 | `category` | `all` | `all`, `apt`, `officetell`, `lh`, `remndr`, `pbl_pvt_rent`, `opt` |
 | `active_only` | `true` | 접수 마감 전 공고만 |
 | `months_back` | `2` | 조회 기간 (1~12개월) |
+| `region` | (전체) | 지역 필터 (쉼표 구분, 예: `서울,경기,인천`) |
 
 ## License
 

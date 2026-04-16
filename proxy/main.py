@@ -57,8 +57,12 @@ def get_all_announcements(
     ),
     active_only: bool = Query(default=True, description="접수 마감 전 공고만"),
     months_back: int = Query(default=2, ge=1, le=12, description="조회 기간 (개월)"),
+    region: str = Query(
+        default="",
+        description="지역 필터 (쉼표 구분, 예: 서울,경기,인천). 비우면 전체.",
+    ),
 ):
-    """청약 공고 통합 조회. category로 특정 유형만 조회 가능."""
+    """청약 공고 통합 조회. category, region으로 필터링 가능."""
     if not DATA_GO_KR_API_KEY:
         raise HTTPException(status_code=503, detail="Server API key not configured")
 
@@ -79,6 +83,11 @@ def get_all_announcements(
 
     targets = fetchers if category == "all" else {category: fetchers[category]}
 
+    # 지역 필터 파싱
+    region_filter = set()
+    if region.strip():
+        region_filter = {r.strip() for r in region.split(",") if r.strip()}
+
     announcements = []
     errors = []
 
@@ -97,12 +106,21 @@ def get_all_announcements(
     for ann in announcements:
         if ann["id"] not in seen:
             seen.add(ann["id"])
+            # 지역 필터 적용
+            if region_filter and ann.get("region") not in region_filter:
+                continue
             unique.append(ann)
 
     return {
         "count": len(unique),
         "announcements": unique,
         "errors": errors if errors else None,
+        "filters": {
+            "category": category,
+            "region": list(region_filter) if region_filter else "all",
+            "active_only": active_only,
+            "months_back": months_back,
+        },
     }
 
 
