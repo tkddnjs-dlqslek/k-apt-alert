@@ -12,6 +12,8 @@ metadata:
 
 # 한국 청약 공고 알리미
 
+> **이 파일만 받으셨나요?** 설치 방법 · 사전 조건 · 실제 출력 예시는 [GitHub 레포 README](https://github.com/tkddnjs-dlqslek/k-apt-alert#readme)를 먼저 확인하세요. 이 SKILL.md는 스킬 폴더(`~/.claude/skills/korea-apt-alert/`)에 배치된 뒤 Claude Code가 로드할 때 사용되는 런타임 지시문입니다.
+
 공공데이터포털의 청약홈 분양정보 API를 프록시 경유로 조회하여 **사용자 프로필 기반**으로 최신 청약 공고를 필터링·분석·알림한다.
 
 ## 사용 예시

@@ -2,6 +2,30 @@
 
 > 한국 청약 공고를 개인 프로필 기반으로 조회·분석하고 Slack/Telegram으로 알림받는 Claude Code 스킬.
 
+- **무엇인가**: 청약홈·LH 등 **6개 공공 API를 통합 조회**하는 Claude Code 스킬. 대화창에 "내 조건에 맞는 청약 알려줘"라고 쓰면 바로 답합니다.
+- **누가 쓰나**: 청약 준비 중인 개인(자격·가점 확인용), 부동산 관련 정보를 자동화하고 싶은 개발자
+- **얼마나 걸리나**: 설치 2분, 프로필 설정 3분, 첫 조회 5초(캐시 히트 기준)
+
+## Claude Code가 처음이신가요?
+
+이 스킬은 Anthropic의 [Claude Code CLI](https://claude.com/claude-code) 위에서 동작합니다. Claude Code는 터미널에서 Claude와 대화하며 코드·문서·외부 API를 다룰 수 있는 공식 도구입니다.
+- 설치 가이드: [claude.com/docs/claude-code](https://docs.claude.com/en/docs/claude-code/overview)
+- macOS / Linux / Windows (WSL 또는 PowerShell) 지원
+
+Claude Code 설치 후, 아래 "처음 시작하는 순서"를 따라오세요.
+
+## Prerequisites
+
+| 항목 | 필요 여부 | 비고 |
+|------|-----------|------|
+| [Claude Code CLI](https://claude.com/claude-code) | **필수** | 본 스킬이 동작하는 런타임 |
+| 운영체제 | macOS / Linux / Windows 10+ | Windows는 PowerShell 또는 WSL |
+| Python·Node 등 런타임 | ❌ 불필요 | 스킬 동작에는 필요 없음 (프록시 자체 호스팅 시에만 Python 3.11+) |
+| 공공데이터포털 API 키 | ❌ 불필요 | 공용 프록시가 관리 |
+| Slack/Telegram 계정 | 선택 | 알림 발송 시에만 필요 |
+
+---
+
 공공데이터포털 청약홈 분양정보 API 6종을 프록시 서버 경유로 통합 조회합니다. 사용자는 **API 키 없이** 최신 공고를 받아볼 수 있고, 개인 프로필을 등록하면 가점 추정·특별공급 자격·추천 유형까지 맞춤 분석됩니다.
 
 [NomaDamas/k-skill](https://github.com/NomaDamas/k-skill) 생태계 컨벤션(`~/.config/k-skill/*.json`)을 따릅니다.
@@ -27,13 +51,38 @@
 
 ### 1단계: 스킬 설치
 
+먼저 이 레포를 clone:
 ```bash
-# 개인 스킬 디렉토리로 복사 (Claude Code 전역)
-cp -r korea-apt-alert ~/.claude/skills/
-
-# 또는 프로젝트 스킬로 설치
-cp -r korea-apt-alert .claude/skills/
+git clone https://github.com/tkddnjs-dlqslek/k-apt-alert.git
+cd k-apt-alert
 ```
+
+**macOS / Linux / WSL**:
+```bash
+# 개인 스킬 디렉토리 (Claude Code 전역)
+mkdir -p ~/.claude/skills && cp -r korea-apt-alert ~/.claude/skills/
+
+# 또는 현재 프로젝트 한정
+mkdir -p .claude/skills && cp -r korea-apt-alert .claude/skills/
+```
+
+**Windows PowerShell**:
+```powershell
+# 개인 스킬 디렉토리 (Claude Code 전역)
+$dst = "$env:USERPROFILE\.claude\skills"
+New-Item -ItemType Directory -Force -Path $dst | Out-Null
+Copy-Item -Recurse -Force korea-apt-alert $dst
+
+# 또는 현재 프로젝트 한정
+New-Item -ItemType Directory -Force -Path ".claude\skills" | Out-Null
+Copy-Item -Recurse -Force korea-apt-alert ".claude\skills"
+```
+
+**설치 검증**: Claude Code를 재시작하고 대화창에서 아래 명령이 동작하면 성공입니다.
+```
+/korea-apt-alert 청약이 뭐야?
+```
+→ 초보 가이드·핵심 용어 사전이 응답으로 나오면 스킬이 정상 로드된 것입니다.
 
 ### 2단계: 프로필 설정 (선택이지만 강력 권장)
 
@@ -78,6 +127,67 @@ GitHub Actions·cron 등에서 매일 호출:
 ```bash
 curl -X POST "https://k-apt-alert-proxy.onrender.com/v1/apt/notify?webhook_url=...&region=서울,경기,인천&reminder=d3"
 ```
+
+## 실제 출력 예시
+
+### 예시 1) `/korea-apt-alert 내 조건에 맞는 청약` (프로필 28세·서울·통장 3년)
+
+```
+📋 프로필: 만 28세 / 서울·경기·인천 / 1인 가구 / 무주택 / 통장 3년
+📊 추정 가점: 11점 / 84점
+   - 무주택 기간: 0점 (만 30세 미만, 혼인 이력 없음)
+   - 부양가족: 5점 (0명)
+   - 통장 가입기간: 6점 (3년)
+⭐ 특별공급: 생애최초 (통장 2년+ 충족)
+
+⚠️ 가점이 낮아 수도권 APT 가점제 당첨은 현실적으로 어렵습니다.
+   오피스텔·잔여세대·임의공급, 지방 중소도시 APT, 특별공급이 더 유리합니다.
+
+🎯 추천 Top 3:
+  1. 오피스텔/도시형 — 가점 무관, 통장 불필요
+  2. APT 잔여세대 — 무순위 추첨, 즉시 신청 가능
+  3. 생애최초 특별공급 — 통장 2년 + 무주택 + 소득 충족
+
+📌 접수 중 공고 (서울·경기·인천, 3건):
+| 이름                  | 지역       | D-day | 세대수 | 타입   |
+|---------------------|-----------|-------|-------|--------|
+| 인천가정2지구 B2블록   | 인천 서구   | D-13  | 308   | APT    |
+| 동탄 그웬 160         | 경기 화성   | D-12  | 160   | APT    |
+| 용인 고림 동문 디 이스트 | 경기 처인구 | D-5   | 350   | APT    |
+
+💡 다음 단계:
+1. 관심 공고의 청약홈 원문을 확인하세요
+2. 청약 일정: 특별공급 → 1순위 → 2순위
+3. 당첨자 발표: 접수 마감 후 7~10일
+```
+
+### 예시 2) `/korea-apt-alert 청약이 뭐야?`
+
+```
+청약이란?
+새로 짓는 아파트(신축)를 분양받기 위해 신청하는 제도입니다.
+추첨 또는 가점(점수) 방식으로 당첨자를 선정하며, 당첨되면 시세보다
+저렴하게 내 집을 마련할 수 있습니다.
+
+핵심 용어 사전
+| 용어         | 뜻 |
+|------------|-----|
+| 청약통장     | 청약 신청에 필요한 전용 저축 통장 ... |
+| 가점제       | 무주택 기간 + 부양가족 + 통장 기간으로 ... |
+| 추첨제       | 가점 무관, 무작위 추첨 ... |
+| 특별공급     | 신혼부부·다자녀 등 별도 물량 ... |
+...
+```
+
+### 예시 3) 매칭 0건 — 인접 지역 제안
+
+```
+⚠️ 광주 지역 현재 접수 중인 공고 0건입니다.
+💡 인접 지역(전남·전북)으로 확장하시겠어요?
+   "전남 포함해서 다시 찾아줘"라고 말씀해주세요.
+```
+
+---
 
 ## 포함된 기능
 
