@@ -5,8 +5,10 @@ k-apt-alert proxy server
 """
 
 import logging
+import time
 from datetime import datetime
 from contextlib import asynccontextmanager
+from threading import Lock
 
 import requests
 from fastapi import FastAPI, Query, HTTPException
@@ -14,6 +16,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from config import DATA_GO_KR_API_KEY
 from crawlers import applyhome, officetell, lh, remndr, pbl_pvt_rent, opt
+
+CACHE_TTL_SECONDS = 600
+_cache: dict = {}
+_cache_lock = Lock()
 
 logging.basicConfig(
     level=logging.INFO,
@@ -71,15 +77,56 @@ def _add_d_day(ann: dict) -> dict:
     return ann
 
 
+def _fetch_category(key: str, label: str, fn) -> list:
+    """카테고리별 fetch + in-memory 캐시 (TTL 10분)."""
+    now = time.time()
+    with _cache_lock:
+        entry = _cache.get(key)
+        if entry and now - entry["ts"] < CACHE_TTL_SECONDS:
+            logger.info(f"[{label}] cache hit ({len(entry['items'])} items, age {int(now - entry['ts'])}s)")
+            return entry["items"]
+    items = fn()
+    logger.info(f"[{label}] {len(items)} items fetched (cache miss)")
+    with _cache_lock:
+        _cache[key] = {"ts": now, "items": items}
+    return items
+
+
+def _dedup_announcements(announcements: list) -> list:
+    """ID 기준 1차 + name+region+district 기준 2차 중복 제거.
+    서브타입별로 같은 단지가 중복 등록되는 경우 (예: 공공지원민간임대 AP1BL/AP2BL) 제거.
+    """
+    seen_ids = set()
+    seen_names = set()
+    unique = []
+    for ann in announcements:
+        ann_id = ann.get("id")
+        if ann_id in seen_ids:
+            continue
+        seen_ids.add(ann_id)
+
+        name_key = (
+            ann.get("name", "").split("(")[0].strip(),
+            ann.get("region", ""),
+            ann.get("district", ""),
+        )
+        if name_key[0] and name_key in seen_names:
+            continue
+        seen_names.add(name_key)
+
+        unique.append(ann)
+    return unique
+
+
 def _fetch_and_filter(category, active_only, months_back, region_filter, district_filter):
     """공통 조회 + 필터링 로직."""
     fetchers = {
-        "apt": ("APT 일반분양", lambda: applyhome.fetch(months_back, active_only)),
-        "officetell": ("오피스텔/도시형", lambda: officetell.fetch(min(months_back, 1), active_only)),
-        "lh": ("LH 공공분양", lambda: lh.fetch(days_back=30 * months_back, active_only=active_only)),
-        "remndr": ("APT 잔여세대", lambda: remndr.fetch(months_back, active_only)),
-        "pbl_pvt_rent": ("공공지원민간임대", lambda: pbl_pvt_rent.fetch(min(months_back, 1), active_only)),
-        "opt": ("임의공급", lambda: opt.fetch(min(months_back, 1), active_only)),
+        "apt": ("APT 일반분양", lambda: applyhome.fetch(months_back, active_only), f"apt:{months_back}:{active_only}"),
+        "officetell": ("오피스텔/도시형", lambda: officetell.fetch(min(months_back, 1), active_only), f"officetell:{min(months_back,1)}:{active_only}"),
+        "lh": ("LH 공공분양", lambda: lh.fetch(days_back=30 * months_back, active_only=active_only), f"lh:{months_back}:{active_only}"),
+        "remndr": ("APT 잔여세대", lambda: remndr.fetch(months_back, active_only), f"remndr:{months_back}:{active_only}"),
+        "pbl_pvt_rent": ("공공지원민간임대", lambda: pbl_pvt_rent.fetch(min(months_back, 1), active_only), f"pbl_pvt_rent:{min(months_back,1)}:{active_only}"),
+        "opt": ("임의공급", lambda: opt.fetch(min(months_back, 1), active_only), f"opt:{min(months_back,1)}:{active_only}"),
     }
 
     if category != "all" and category not in fetchers:
@@ -90,26 +137,21 @@ def _fetch_and_filter(category, active_only, months_back, region_filter, distric
     announcements = []
     errors = []
 
-    for key, (label, fn) in targets.items():
+    for key, (label, fn, cache_key) in targets.items():
         try:
-            items = fn()
-            logger.info(f"[{label}] {len(items)} items fetched")
+            items = _fetch_category(cache_key, label, fn)
             announcements.extend(items)
         except Exception as e:
             logger.error(f"[{label}] crawl failed: {e}")
             errors.append(f"{label}: {str(e)}")
 
-    # ID 기준 중복 제거 + 필터링 + D-day
-    seen = set()
     unique = []
-    for ann in announcements:
-        if ann["id"] not in seen:
-            seen.add(ann["id"])
-            if region_filter and ann.get("region") not in region_filter and ann.get("region") != "전국":
-                continue
-            if district_filter and ann.get("district") and ann.get("district") not in district_filter:
-                continue
-            unique.append(_add_d_day(ann))
+    for ann in _dedup_announcements(announcements):
+        if region_filter and ann.get("region") not in region_filter and ann.get("region") != "전국":
+            continue
+        if district_filter and ann.get("district") and ann.get("district") not in district_filter:
+            continue
+        unique.append(_add_d_day(ann))
 
     return unique, errors, None
 
@@ -232,9 +274,35 @@ def notify(
         resp.raise_for_status()
         logger.info(f"Slack notify sent: {len(active)} announcements")
         return {"sent": len(active), "message": "Slack notification sent successfully"}
+    except requests.HTTPError as e:
+        body = getattr(e.response, "text", "")[:200]
+        logger.error(f"Slack notify HTTP error: {e} body={body}")
+        raise HTTPException(status_code=502, detail=f"Slack delivery failed: HTTP {e.response.status_code} — {body}")
+    except requests.Timeout:
+        logger.error("Slack notify timeout")
+        raise HTTPException(status_code=504, detail="Slack delivery timed out after 10s")
     except Exception as e:
         logger.error(f"Slack notify failed: {e}")
         raise HTTPException(status_code=502, detail=f"Slack delivery failed: {str(e)}")
+
+
+@app.get("/v1/apt/cache")
+def cache_status():
+    """디버깅용 — 카테고리별 캐시 상태."""
+    now = time.time()
+    with _cache_lock:
+        return {
+            "entries": [
+                {
+                    "key": key,
+                    "items": len(entry["items"]),
+                    "age_seconds": int(now - entry["ts"]),
+                    "ttl_remaining": max(0, CACHE_TTL_SECONDS - int(now - entry["ts"])),
+                }
+                for key, entry in _cache.items()
+            ],
+            "ttl_seconds": CACHE_TTL_SECONDS,
+        }
 
 
 @app.get("/v1/apt/categories")
