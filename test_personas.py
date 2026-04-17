@@ -1,9 +1,10 @@
 """8명 페르소나 E2E 시뮬레이션 테스트."""
 import json
+import os
 import sys
 import requests
 
-PROXY = "http://localhost:8002"
+PROXY = os.environ.get("PROXY_URL", "http://localhost:8002")
 
 personas = [
     {
