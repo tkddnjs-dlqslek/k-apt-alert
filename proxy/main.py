@@ -118,6 +118,16 @@ def _add_d_day(ann: dict) -> dict:
     return ann
 
 
+def _fetch_category_with_age(key: str, label: str, fn) -> tuple[list, int]:
+    """_fetch_category 대체 — items와 age_seconds 함께 반환."""
+    items = _fetch_category(key, label, fn)
+    now = time.time()
+    with _cache_lock:
+        entry = _cache.get(key)
+        age = int(now - entry["ts"]) if entry else 0
+    return items, age
+
+
 def _fetch_category(key: str, label: str, fn) -> list:
     """카테고리별 fetch + in-memory 캐시 (카테고리별 TTL) + rate limit 보호 + 실패 시 stale fallback."""
     now = time.time()
@@ -326,10 +336,23 @@ def get_all_announcements(
     unique = _apply_extra_filters(unique, min_units, constructor_contains, exclude_ids)
     unique = _apply_reminder_filter(unique, reminder)
 
+    # 가장 오래된 카테고리 캐시 나이 = 전체 데이터의 "최신성" 기준
+    max_age = 0
+    fetched_keys = [category] if category != "all" else ["apt", "officetell", "lh", "remndr", "pbl_pvt_rent", "opt"]
+    now = time.time()
+    with _cache_lock:
+        for k, entry in _cache.items():
+            if any(k.startswith(fk + ":") for fk in fetched_keys):
+                age = int(now - entry["ts"])
+                if age > max_age:
+                    max_age = age
+
     return {
         "count": len(unique),
         "announcements": unique,
         "errors": errors if errors else None,
+        "data_age_seconds": max_age,
+        "fetched_at": datetime.fromtimestamp(now - max_age).strftime("%Y-%m-%d %H:%M:%S"),
         "filters": {
             "category": category,
             "region": list(region_filter) if region_filter else "all",

@@ -155,11 +155,14 @@ KSKILL_APT_TELEGRAM_CHAT_ID=-1001234567890
 /loop 24h /korea-apt-alert 내 조건에 맞는 청약 알림 보내줘
 ```
 
-**(B) 프록시 notify API — 세션 불필요**
+**(B) 프록시 notify API — 세션 불필요, 가장 안정적**
+
 GitHub Actions·cron 등에서 매일 호출:
 ```bash
 curl -X POST "https://k-apt-alert-proxy.onrender.com/v1/apt/notify?webhook_url=...&region=서울,경기,인천&reminder=d3"
 ```
+
+📘 **자동화 전체 가이드**: [`examples/user-automation/`](./examples/user-automation/) — 본인 GitHub 계정에 **빈 repo 1개 + yaml 파일 1개**만 올리면 매일 오전 7시(KST) 자동 발송 (Fork 불필요, 5분 셋업)
 
 ## 실제 출력 예시
 

@@ -1,0 +1,53 @@
+name: 청약 알림 (매일 오전 7시 KST)
+
+# 사용자가 자기 GitHub 계정에 빈 repo 하나 만들고 .github/workflows/ 아래에 이 파일만
+# 복사하면 끝. 우리 레포를 fork할 필요 없음.
+#
+# 셋업 순서:
+#   1. GitHub에서 새 repo 만들기 (예: my-apt-alerts, private 추천)
+#   2. .github/workflows/apt-notify.yml 로 이 파일 복사
+#   3. 해당 repo의 Settings → Secrets and variables → Actions → New secret 에서
+#      - SLACK_WEBHOOK: https://hooks.slack.com/services/T.../B.../xxx 추가
+#      - (선택) TELEGRAM_TOKEN, TELEGRAM_CHAT_ID
+#   4. 아래 env 섹션의 REGION, MIN_UNITS 등 본인 조건에 맞게 수정
+#   5. commit + push → Actions 탭에서 첫 실행 (workflow_dispatch 버튼)
+
+on:
+  schedule:
+    # UTC 22:00 = KST 07:00 (다음 날 아침)
+    # 다른 시각 원하면: 오전 8시 = '0 23 * * *', 오후 7시 = '0 10 * * *'
+    - cron: "0 22 * * *"
+  workflow_dispatch:  # 수동 실행 버튼
+
+env:
+  PROXY_URL: https://k-apt-alert-proxy.onrender.com
+  # 본인 조건에 맞게 수정
+  REGION: "서울,경기,인천"
+  DISTRICT: ""                # 예: "강남구,서초구" (비우면 전체)
+  MIN_UNITS: "0"              # 예: "500" (대단지만)
+  CONSTRUCTOR: ""             # 예: "삼성,현대,GS" (비우면 전체)
+  CATEGORY: "all"             # all / apt / officetell / lh / remndr / pbl_pvt_rent / opt
+  REMINDER: ""                # (없음) / d3 / d1 / winners / contract
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack notification
+        run: |
+          URL="${{ env.PROXY_URL }}/v1/apt/notify"
+          URL="${URL}?webhook_url=${{ secrets.SLACK_WEBHOOK }}"
+          URL="${URL}&category=${{ env.CATEGORY }}"
+          URL="${URL}&active_only=true"
+          URL="${URL}&region=$(python3 -c "import urllib.parse; print(urllib.parse.quote('${{ env.REGION }}'))")"
+          [ -n "${{ env.DISTRICT }}" ] && URL="${URL}&district=$(python3 -c "import urllib.parse; print(urllib.parse.quote('${{ env.DISTRICT }}'))")"
+          [ "${{ env.MIN_UNITS }}" != "0" ] && URL="${URL}&min_units=${{ env.MIN_UNITS }}"
+          [ -n "${{ env.CONSTRUCTOR }}" ] && URL="${URL}&constructor_contains=$(python3 -c "import urllib.parse; print(urllib.parse.quote('${{ env.CONSTRUCTOR }}'))")"
+          [ -n "${{ env.REMINDER }}" ] && URL="${URL}&reminder=${{ env.REMINDER }}"
+
+          echo "Calling: ${URL//${{ secrets.SLACK_WEBHOOK }}/***REDACTED***}"
+          response=$(curl -sS --max-time 180 -X POST "$URL")
+          echo "Response: $response"
+
+          # 실패 시 종료 코드 1
+          echo "$response" | grep -q '"sent"' && exit 0 || exit 1
