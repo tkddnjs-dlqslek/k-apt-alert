@@ -17,7 +17,7 @@ from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import DATA_GO_KR_API_KEY
-from crawlers import applyhome, officetell, lh, remndr, pbl_pvt_rent, opt
+from crawlers import applyhome, officetell, lh, remndr, pbl_pvt_rent, opt, sh, gh
 from crawlers.applyhome_page import enrich_schedules, cache_status as enrich_cache_status
 
 SENTRY_DSN = os.environ.get("SENTRY_DSN", "")
@@ -38,6 +38,9 @@ CACHE_TTLS = {
     "lh": 600,
     "remndr": 600,
     "opt": 600,
+    # SH·GH는 공식 API가 아니라 HTML 크롤링이므로 더 길게 (서버 부하 배려)
+    "sh": 1800,
+    "gh": 1800,
 }
 _cache: dict = {}
 _cache_lock = Lock()
@@ -208,6 +211,8 @@ def _fetch_and_filter(category, active_only, months_back, region_filter, distric
         "remndr": ("APT 잔여세대", lambda: remndr.fetch(months_back, False), f"remndr:{months_back}"),
         "pbl_pvt_rent": ("공공지원민간임대", lambda: pbl_pvt_rent.fetch(min(months_back, 1), False), f"pbl_pvt_rent:{min(months_back,1)}"),
         "opt": ("임의공급", lambda: opt.fetch(min(months_back, 1), False), f"opt:{min(months_back,1)}"),
+        "sh": ("SH 공공주택", lambda: sh.fetch(months_back, False), f"sh:{months_back}"),
+        "gh": ("GH 공공주택", lambda: gh.fetch(months_back, False), f"gh:{months_back}"),
     }
 
     if category != "all" and category not in fetchers:
@@ -338,7 +343,7 @@ def get_all_announcements(
 
     # 가장 오래된 카테고리 캐시 나이 = 전체 데이터의 "최신성" 기준
     max_age = 0
-    fetched_keys = [category] if category != "all" else ["apt", "officetell", "lh", "remndr", "pbl_pvt_rent", "opt"]
+    fetched_keys = [category] if category != "all" else ["apt", "officetell", "lh", "remndr", "pbl_pvt_rent", "opt", "sh", "gh"]
     now = time.time()
     with _cache_lock:
         for k, entry in _cache.items():
@@ -578,5 +583,7 @@ def list_categories():
             {"id": "remndr", "name": "APT 잔여세대", "description": "미계약/미분양 재공급 — 청약통장 불필요"},
             {"id": "pbl_pvt_rent", "name": "공공지원민간임대", "description": "시세 대비 저렴, 최대 10년 거주"},
             {"id": "opt", "name": "임의공급", "description": "사업주체 자율 공급 — 선착순 계약"},
+            {"id": "sh", "name": "SH 공공주택", "description": "서울주택도시공사 — 장기전세·청년안심·매입임대 등"},
+            {"id": "gh", "name": "GH 공공주택", "description": "경기주택도시공사 — 경기행복주택·매입임대 등"},
         ]
     }

@@ -5,7 +5,7 @@ license: MIT
 metadata:
   category: real-estate
   locale: ko-KR
-  phase: v2.6
+  phase: v2.7
   homepage: https://github.com/tkddnjs-dlqslek/k-apt-alert
   k_skill_family: NomaDamas/k-skill
 ---
@@ -668,7 +668,7 @@ jobs:
 | `webhook_url` | Slack Incoming Webhook URL (Slack 발송 시) |
 | `telegram_token` | Telegram Bot Token (Telegram 발송 시) |
 | `telegram_chat_id` | Telegram Chat ID (Telegram 발송 시, token과 세트) |
-| `category` | 카테고리 필터 (기본: all) |
+| `category` | 카테고리 필터 (기본: all, 8종: apt/officetell/lh/remndr/pbl_pvt_rent/opt/sh/gh) |
 | `region` | 지역 필터 (쉼표 구분) |
 | `district` | 세부 지역 필터 (쉼표 구분) |
 | `active_only` | 접수 중인 공고만 (기본: true) |
@@ -797,14 +797,18 @@ if (!(Test-Path $FILE)) { New-Item -ItemType File -Path $FILE | Out-Null }
 
 ## 조회 가능한 카테고리
 
-| ID | 이름 | 설명 |
-|---|---|---|
-| `apt` | APT 일반분양 | 아파트 일반분양 (월 25일 배치 업데이트) |
-| `officetell` | 오피스텔/도시형 | 오피스텔, 도시형생활주택, 민간임대 (실시간) |
-| `lh` | LH 공공분양 | 뉴홈, 행복주택 등 공공주택 (실시간) |
-| `remndr` | APT 잔여세대 | 미계약/미분양 재공급 — 청약통장 불필요 |
-| `pbl_pvt_rent` | 공공지원민간임대 | 시세 대비 저렴, 최대 10년 거주 |
-| `opt` | 임의공급 | 사업주체 자율 공급 — 선착순 계약 |
+| ID | 이름 | 설명 | 데이터 소스 |
+|---|---|---|---|
+| `apt` | APT 일반분양 | 아파트 일반분양 (월 25일 배치 업데이트) | 공공데이터포털 |
+| `officetell` | 오피스텔/도시형 | 오피스텔, 도시형생활주택, 민간임대 (실시간) | 공공데이터포털 |
+| `lh` | LH 공공분양 | 뉴홈, 행복주택 등 공공주택 (실시간) | 공공데이터포털 |
+| `remndr` | APT 잔여세대 | 미계약/미분양 재공급 — 청약통장 불필요 | 공공데이터포털 |
+| `pbl_pvt_rent` | 공공지원민간임대 | 시세 대비 저렴, 최대 10년 거주 | 공공데이터포털 |
+| `opt` | 임의공급 | 사업주체 자율 공급 — 선착순 계약 | 공공데이터포털 |
+| `sh` | SH 공공주택 | 서울주택도시공사 — 장기전세·청년안심·매입임대 | i-sh.co.kr HTML 크롤링 |
+| `gh` | GH 공공주택 | 경기주택도시공사 — 경기행복주택·매입임대 | gh.or.kr HTML 크롤링 |
+
+**v2.7 추가**: `sh`·`gh` 카테고리는 공식 OpenAPI 부재로 각 공사 게시판 HTML 크롤링. 일정 필드(`rcept_end`·`period`)는 상세 페이지에서 별도 파싱 필요 — 현재는 `schedule_source="unavailable"`로 기본 표기. 사용자가 `url`을 클릭해 공식 사이트에서 일정 직접 확인 권장.
 
 ## 워크플로우
 
