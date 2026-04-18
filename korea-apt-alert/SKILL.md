@@ -616,6 +616,19 @@ POST /v1/apt/notify?...&exclude_ids=2026000123,2026000456
 
 ## 자동 조회 및 알림 설정
 
+> ⚠️ **기본 동작은 1회성입니다.** `/korea-apt-alert 알림 보내줘`는 그 시점에 **한 번만** Slack/Telegram으로 발송합니다. 매일 자동 발송하려면 아래 3가지 방법 중 하나를 별도 설정해야 합니다.
+
+### 자동화가 필요한 경우 vs 필요 없는 경우
+
+| 상황 | 권장 방법 |
+|------|----------|
+| 가끔 생각날 때마다 조회·알림 | 매번 `/korea-apt-alert 알림 보내줘` (자동화 불필요) |
+| 매일 아침 체크하고 싶음 | **방법 2 (GitHub Actions)** — 가장 견고 |
+| Claude Code 세션 항상 열어두는 편 | **방법 1 (/loop)** — 간단하지만 세션 꺼지면 중단 |
+| 로컬 PC 항상 켜둠 | **방법 3 (cron / Task Scheduler)** — 로컬 스케줄러 |
+
+사용자가 "매일", "자동", "정기", "스케줄" 등을 언급하면 위 선택지 표를 먼저 보여주고 어떤 방법 원하는지 확인한다.
+
 ### 방법 1: Claude Code `/loop` (세션 내 반복)
 
 Claude Code 터미널에서:
@@ -664,6 +677,22 @@ jobs:
 
 D-day 기준 마감 임박순 정렬, 최대 10건 발송. D-1 이하는 🔴, D-3 이하는 🟡 표시.
 
+### 방법 3: 로컬 스케줄러 (cron / Task Scheduler)
+
+로컬 PC에서 주기적으로 프록시 notify 엔드포인트를 호출.
+
+**macOS / Linux (cron)** — `crontab -e`에 추가:
+```
+0 7 * * * curl -sS --max-time 60 -X POST "https://k-apt-alert-proxy.onrender.com/v1/apt/notify?webhook_url=$(grep ^KSKILL_APT_SLACK_WEBHOOK= ~/.config/k-skill/secrets.env | cut -d= -f2-)&region=서울,경기,인천&reminder=d3" >> ~/.config/k-skill/apt-alert.log 2>&1
+```
+
+**Windows Task Scheduler**:
+1. 작업 스케줄러 → 기본 작업 만들기
+2. 트리거: 매일 오전 7시
+3. 동작: `powershell.exe -Command "Invoke-RestMethod -Uri 'https://k-apt-alert-proxy.onrender.com/v1/apt/notify?webhook_url=...&region=...&reminder=d3' -Method Post"`
+
+PC 꺼진 시간엔 발송 안 됨. 항상 돌아가는 환경 필요.
+
 ### 리마인더 타입별 활용
 
 | `reminder` | 의미 | 추천 cron |
@@ -695,6 +724,38 @@ KSKILL_APT_SLACK_WEBHOOK=https://hooks.slack.com/services/T.../B.../xxx
 KSKILL_APT_TELEGRAM_TOKEN=123456789:ABCdefGHIjklMNOpqrsTUVwxyz
 KSKILL_APT_TELEGRAM_CHAT_ID=-1001234567890
 ```
+
+### 웹훅 자동 저장 (권장)
+
+사용자가 채팅창에 Slack Webhook URL이나 Telegram Token을 그대로 붙여넣으면 Claude가 **자동으로 secrets.env에 저장**한다.
+
+**패턴 감지:**
+- `https://hooks.slack.com/services/...` → `KSKILL_APT_SLACK_WEBHOOK`
+- `숫자:알파벳` 형태의 Bot Token (예: `123456789:ABCdef...`) → `KSKILL_APT_TELEGRAM_TOKEN` + chat_id 추가 질문
+- `-100` 또는 숫자만 있는 chat_id → `KSKILL_APT_TELEGRAM_CHAT_ID`
+
+**동작 순서:**
+1. URL/토큰 감지 → 사용자에게 확인: "이 Slack Webhook을 `~/.config/k-skill/secrets.env`에 저장할까요? (yes/no)"
+2. yes → 기존 `secrets.env` 있으면 해당 키만 덮어쓰기 (다른 키 유지), 없으면 새로 생성
+3. 저장 후 `chmod 600` 자동 실행 (Unix 계열)
+4. 확인 메시지: "✅ 저장 완료. 이제 '알림 보내줘'로 Slack 발송 가능합니다."
+
+**자동 저장 예시 (Bash):**
+```bash
+# 기존 라인 제거 후 새 값 추가 (key-safe)
+KEY="KSKILL_APT_SLACK_WEBHOOK"
+VAL="https://hooks.slack.com/services/T.../B.../xxx"
+FILE="$HOME/.config/k-skill/secrets.env"
+mkdir -p "$(dirname "$FILE")"
+touch "$FILE"
+grep -v "^${KEY}=" "$FILE" > "$FILE.tmp" && mv "$FILE.tmp" "$FILE"
+echo "${KEY}=${VAL}" >> "$FILE"
+chmod 600 "$FILE" 2>/dev/null || true
+```
+
+Windows는 `%USERPROFILE%\.config\k-skill\secrets.env` 경로이며 PowerShell 등가 명령으로 처리.
+
+**Telegram의 경우**: 토큰 저장 후 chat_id도 필요하므로 "Telegram Chat ID도 알려주세요 (예: -1001234567890)"라고 이어서 질문.
 
 ## 조회 가능한 카테고리
 
@@ -859,6 +920,8 @@ curl -s --max-time 180 "https://k-apt-alert-proxy.onrender.com/v1/apt/announceme
 ### 4단계: 알림 발송 (선택)
 
 사용자가 "알림 보내줘", "Slack으로 보내줘", `--notify` 등을 요청한 경우에만 실행한다.
+
+> ⚠️ **기본은 1회성 발송입니다.** 매일 자동 발송을 원하면 "자동 조회 및 알림 설정" 섹션의 3가지 방법 중 하나를 설정해야 한다. 사용자가 "매일", "자동", "정기" 등을 언급하지 않으면 지금 이 순간만 발송하고 종료.
 
 #### 발송 전 대화 흐름 (필수 규칙)
 
