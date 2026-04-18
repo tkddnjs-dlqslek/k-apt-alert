@@ -29,14 +29,23 @@ my-apt-alerts/
 3. 에디터에 [apt-notify.yml](./apt-notify.yml) 내용 전체 붙여넣기
 4. 하단 "Commit new file"
 
-### 3단계 — Secret 등록
+### 3단계 — Secret 등록 (둘 중 하나 또는 둘 다)
 
-- repo → Settings → Secrets and variables → Actions → **New repository secret**
-- Name: `SLACK_WEBHOOK`
-- Value: `https://hooks.slack.com/services/T.../B.../xxx` (본인 Slack Webhook)
-- (선택) Telegram 사용 시: `TELEGRAM_TOKEN`, `TELEGRAM_CHAT_ID`
+repo → Settings → Secrets and variables → Actions → **New repository secret**
 
-Slack Webhook 발급: [api.slack.com/messaging/webhooks](https://api.slack.com/messaging/webhooks)
+**(A) Slack만** 쓰려면:
+- `SLACK_WEBHOOK` = `https://hooks.slack.com/services/T.../B.../xxx`
+
+**(B) Telegram만** 쓰려면:
+- `TELEGRAM_TOKEN` = `123456789:ABCdef...` (Bot Token)
+- `TELEGRAM_CHAT_ID` = `-1001234567890` 또는 본인 숫자 ID
+
+**(C) 양쪽 다** 받으려면: (A) + (B) 모두 등록 → 양쪽 채널에 동시 발송
+
+발급 방법:
+- Slack Webhook: [api.slack.com/messaging/webhooks](https://api.slack.com/messaging/webhooks)
+- Telegram Bot Token: [@BotFather](https://t.me/botfather)에서 `/newbot` → 토큰 발급
+- Telegram Chat ID: 본인 ID는 [@userinfobot](https://t.me/userinfobot), 그룹 ID는 그룹에 봇 초대 후 `https://api.telegram.org/bot<TOKEN>/getUpdates`에서 확인
 
 ### 4단계 — 조건 커스터마이징 (선택)
 
@@ -87,17 +96,12 @@ A. `env:` 섹션 필터가 충분히 좁은지 확인. `REGION`·`MIN_UNITS`·`C
 **Q. GitHub Actions 무료인가?**
 A. Public repo는 완전 무료, Private repo는 월 2000분(GitHub Free) 무료 → 이 workflow는 실행당 10초 내외라 하루 1회 × 30일 = 5분 수준. 충분.
 
-## 고급: Telegram 발송
+## Telegram 발송 (v2.6+)
 
-`apt-notify.yml`에 아래 step 추가 (Slack step 다음):
+프록시가 Telegram Bot API를 직접 호출합니다. yaml은 수정 불필요 — `TELEGRAM_TOKEN`, `TELEGRAM_CHAT_ID` secret만 등록하면 자동으로 양쪽 채널 발송됩니다.
 
-```yaml
-      - name: Send Telegram (optional)
-        if: ${{ secrets.TELEGRAM_TOKEN != '' }}
-        run: |
-          # 프록시에 Telegram 지원 추가 필요 — 현재는 Slack만 지원
-          # 로컬에서 /korea-apt-alert 알림 보내줘로 Telegram 발송 가능
-          echo "Telegram는 현재 로컬(Claude Code) 경유로만 발송 가능"
-```
+Bot Token 발급: [@BotFather](https://t.me/botfather) → `/newbot` → 봇 이름 설정 → Token 받기
 
-*Telegram 자동 발송은 프록시 확장 예정. 그 전엔 로컬 Claude Code에서 직접 발송하세요.*
+Chat ID 확인:
+- 본인 1:1 채팅: [@userinfobot](https://t.me/userinfobot)에 `/start` → ID 표시
+- 그룹 채팅: 그룹에 본인 봇 초대 → `https://api.telegram.org/bot<TOKEN>/getUpdates` 호출 → `"chat":{"id":-100...}` 확인

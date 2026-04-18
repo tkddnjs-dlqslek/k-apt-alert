@@ -367,9 +367,99 @@ def get_all_announcements(
     }
 
 
+def _build_slack_blocks(active: list[dict]) -> dict:
+    """Slack Block Kit 페이로드 빌드."""
+    blocks = [
+        {"type": "header", "text": {"type": "plain_text", "text": f"🏠 청약 공고 알림 ({len(active)}건)", "emoji": True}},
+        {"type": "divider"},
+    ]
+    for ann in active[:10]:
+        location = f"{ann.get('region','')} {ann.get('district','')}".strip()
+        urgency = "🔴" if ann.get("d_day", 99) <= 1 else "🟡" if ann.get("d_day", 99) <= 3 else "🟢"
+        blocks.append({
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": (
+                    f"*{urgency} {ann.get('name','?')}* — {location}\n"
+                    f"📅 {ann.get('period','')} | ⏰ {ann.get('d_day_label','')} | "
+                    f"🏗️ {ann.get('total_units','')}세대 | 📂 {ann.get('house_category','')}\n"
+                    f"<{ann.get('url','https://www.applyhome.co.kr')}|청약홈 바로가기>"
+                ),
+            },
+        })
+    if len(active) > 10:
+        blocks.append({"type": "section", "text": {"type": "mrkdwn", "text": f"_...외 {len(active) - 10}건 더_"}})
+    return {"blocks": blocks}
+
+
+def _build_telegram_text(active: list[dict]) -> str:
+    """Telegram HTML parse_mode 메시지 빌드. 한 메시지에 최대 10건."""
+    lines = [f"<b>🏠 청약 공고 알림 ({len(active)}건)</b>", ""]
+    for ann in active[:10]:
+        location = f"{ann.get('region','')} {ann.get('district','')}".strip()
+        urgency = "🔴" if ann.get("d_day", 99) <= 1 else "🟡" if ann.get("d_day", 99) <= 3 else "🟢"
+        name = ann.get("name", "?")
+        url = ann.get("url", "https://www.applyhome.co.kr")
+        lines.append(f"{urgency} <b><a href=\"{url}\">{name}</a></b> — {location}")
+        lines.append(
+            f"📅 {ann.get('period','')} | ⏰ {ann.get('d_day_label','')} | "
+            f"🏗️ {ann.get('total_units','')}세대 | 📂 {ann.get('house_category','')}"
+        )
+        lines.append("")
+    if len(active) > 10:
+        lines.append(f"<i>...외 {len(active) - 10}건 더</i>")
+    return "\n".join(lines)
+
+
+def _send_slack(webhook_url: str, active: list[dict]) -> None:
+    """Slack webhook 발송. 실패 시 HTTPException."""
+    payload = _build_slack_blocks(active)
+    try:
+        resp = requests.post(webhook_url, json=payload, timeout=10)
+        resp.raise_for_status()
+        body_text = resp.text.strip()
+        if body_text and body_text != "ok":
+            raise HTTPException(
+                status_code=502,
+                detail=f"Slack 응답이 ok가 아님 — '{body_text[:200]}'. webhook URL 토큰을 확인하세요.",
+            )
+        logger.info(f"Slack notify sent: {len(active)} announcements")
+    except requests.HTTPError as e:
+        body = getattr(e.response, "text", "")[:200]
+        raise HTTPException(status_code=502, detail=f"Slack delivery failed: HTTP {e.response.status_code} — {body}")
+    except requests.Timeout:
+        raise HTTPException(status_code=504, detail="Slack delivery timed out after 10s")
+
+
+def _send_telegram(token: str, chat_id: str, active: list[dict]) -> None:
+    """Telegram Bot API 발송. 실패 시 HTTPException."""
+    text = _build_telegram_text(active)
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    try:
+        resp = requests.post(
+            url,
+            json={"chat_id": chat_id, "text": text, "parse_mode": "HTML", "disable_web_page_preview": True},
+            timeout=10,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        if not data.get("ok"):
+            desc = data.get("description", "unknown error")
+            raise HTTPException(status_code=502, detail=f"Telegram API 응답 실패 — {desc}")
+        logger.info(f"Telegram notify sent: {len(active)} announcements to chat {chat_id}")
+    except requests.HTTPError as e:
+        body = getattr(e.response, "text", "")[:200]
+        raise HTTPException(status_code=502, detail=f"Telegram delivery failed: HTTP {e.response.status_code} — {body}")
+    except requests.Timeout:
+        raise HTTPException(status_code=504, detail="Telegram delivery timed out after 10s")
+
+
 @app.post("/v1/apt/notify")
 def notify(
-    webhook_url: str = Query(description="Slack Incoming Webhook URL"),
+    webhook_url: str = Query(default="", description="Slack Incoming Webhook URL (Slack 발송)"),
+    telegram_token: str = Query(default="", description="Telegram Bot Token (텔레그램 발송)"),
+    telegram_chat_id: str = Query(default="", description="Telegram Chat ID (텔레그램 발송)"),
     category: str = Query(default="all"),
     active_only: bool = Query(default=True),
     months_back: int = Query(default=2, ge=1, le=12),
@@ -380,11 +470,22 @@ def notify(
     exclude_ids: str = Query(default=""),
     reminder: str = Query(default="", description="리마인더: d3/d1/winners/contract"),
 ):
-    """청약 공고 조회 후 Slack으로 자동 발송. cron/외부 스케줄러에서 호출."""
+    """청약 공고 조회 후 Slack/Telegram 자동 발송.
+
+    - webhook_url 단독: Slack 발송
+    - telegram_token + telegram_chat_id 단독: Telegram 발송
+    - 둘 다 제공: 두 채널 모두 발송 (이중)
+    - 아무것도 없으면 400
+    """
     if not DATA_GO_KR_API_KEY:
         raise HTTPException(status_code=503, detail="Server API key not configured")
-    if not webhook_url:
-        raise HTTPException(status_code=400, detail="webhook_url is required")
+
+    has_slack = bool(webhook_url)
+    has_telegram = bool(telegram_token and telegram_chat_id)
+    if telegram_token and not telegram_chat_id:
+        raise HTTPException(status_code=400, detail="telegram_chat_id is required when telegram_token is provided")
+    if not has_slack and not has_telegram:
+        raise HTTPException(status_code=400, detail="Provide webhook_url (Slack) or telegram_token + telegram_chat_id")
 
     region_filter = {r.strip() for r in region.split(",") if r.strip()} if region.strip() else set()
     district_filter = {d.strip() for d in district.split(",") if d.strip()} if district.strip() else set()
@@ -407,76 +508,39 @@ def notify(
     if not active:
         return {"sent": 0, "message": f"No {empty_label} to notify"}
 
-    # D-day 기준 정렬 (마감 임박순)
     active.sort(key=lambda x: x.get("d_day", 999))
 
-    # Slack Block Kit 메시지 빌드
-    blocks = [
-        {
-            "type": "header",
-            "text": {"type": "plain_text", "text": f"🏠 청약 공고 알림 ({len(active)}건)", "emoji": True},
-        },
-        {"type": "divider"},
-    ]
-
-    for ann in active[:10]:  # 최대 10건
-        name = ann.get("name", "?")
-        reg = ann.get("region", "")
-        dist = ann.get("district", "")
-        d_label = ann.get("d_day_label", "")
-        period = ann.get("period", "")
-        units = ann.get("total_units", "")
-        cat = ann.get("house_category", "")
-        url = ann.get("url", "https://www.applyhome.co.kr")
-
-        location = f"{reg} {dist}".strip()
-        urgency = "🔴" if ann.get("d_day", 99) <= 1 else "🟡" if ann.get("d_day", 99) <= 3 else "🟢"
-
-        blocks.append({
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": (
-                    f"*{urgency} {name}* — {location}\n"
-                    f"📅 {period} | ⏰ {d_label} | 🏗️ {units}세대 | 📂 {cat}\n"
-                    f"<{url}|청약홈 바로가기>"
-                ),
-            },
-        })
-
-    if len(active) > 10:
-        blocks.append({
-            "type": "section",
-            "text": {"type": "mrkdwn", "text": f"_...외 {len(active) - 10}건 더_"},
-        })
-
-    payload = {"blocks": blocks}
-
+    channels_sent: list[str] = []
+    channel_errors: dict = {}
     try:
-        resp = requests.post(webhook_url, json=payload, timeout=10)
-        resp.raise_for_status()
-        # Slack은 invalid payload/token도 2xx로 줄 수 있음 → body가 "ok"인지 명시 검증
-        body_text = resp.text.strip()
-        if body_text and body_text != "ok":
-            logger.error(f"Slack notify 2xx but body not 'ok': {body_text[:200]}")
-            raise HTTPException(
-                status_code=502,
-                detail=f"Slack 응답이 ok가 아님 — '{body_text[:200]}'. webhook URL 토큰을 확인하세요.",
-            )
-        logger.info(f"Slack notify sent: {len(active)} announcements")
-        return {"sent": len(active), "message": "Slack notification sent successfully"}
-    except requests.HTTPError as e:
-        body = getattr(e.response, "text", "")[:200]
-        logger.error(f"Slack notify HTTP error: {e} body={body}")
-        raise HTTPException(status_code=502, detail=f"Slack delivery failed: HTTP {e.response.status_code} — {body}")
-    except requests.Timeout:
-        logger.error("Slack notify timeout")
-        raise HTTPException(status_code=504, detail="Slack delivery timed out after 10s")
-    except HTTPException:
-        raise
+        if has_slack:
+            try:
+                _send_slack(webhook_url, active)
+                channels_sent.append("slack")
+            except HTTPException as e:
+                channel_errors["slack"] = e.detail
+        if has_telegram:
+            try:
+                _send_telegram(telegram_token, telegram_chat_id, active)
+                channels_sent.append("telegram")
+            except HTTPException as e:
+                channel_errors["telegram"] = e.detail
     except Exception as e:
-        logger.error(f"Slack notify failed: {e}")
-        raise HTTPException(status_code=502, detail=f"Slack delivery failed: {str(e)}")
+        logger.error(f"notify unexpected: {e}")
+        raise HTTPException(status_code=502, detail=f"Unexpected notify error: {e}")
+
+    if not channels_sent:
+        # 모두 실패
+        raise HTTPException(
+            status_code=502,
+            detail={"message": "All configured channels failed", "errors": channel_errors},
+        )
+    return {
+        "sent": len(active),
+        "channels": channels_sent,
+        "errors": channel_errors or None,
+        "message": f"Sent to {', '.join(channels_sent)}",
+    }
 
 
 @app.get("/v1/apt/cache")

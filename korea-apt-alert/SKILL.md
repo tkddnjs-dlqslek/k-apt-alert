@@ -5,7 +5,7 @@ license: MIT
 metadata:
   category: real-estate
   locale: ko-KR
-  phase: v2.5
+  phase: v2.6
   homepage: https://github.com/tkddnjs-dlqslek/k-apt-alert
   k_skill_family: NomaDamas/k-skill
 ---
@@ -665,7 +665,9 @@ jobs:
 **파라미터:**
 | 파라미터 | 설명 |
 |---------|------|
-| `webhook_url` | Slack Incoming Webhook URL (필수) |
+| `webhook_url` | Slack Incoming Webhook URL (Slack 발송 시) |
+| `telegram_token` | Telegram Bot Token (Telegram 발송 시) |
+| `telegram_chat_id` | Telegram Chat ID (Telegram 발송 시, token과 세트) |
 | `category` | 카테고리 필터 (기본: all) |
 | `region` | 지역 필터 (쉼표 구분) |
 | `district` | 세부 지역 필터 (쉼표 구분) |
@@ -674,6 +676,18 @@ jobs:
 | `constructor_contains` | 시공사 키워드 필터 (쉼표 구분) |
 | `exclude_ids` | 제외할 공고 ID (중복 알림 방지) |
 | `reminder` | 리마인더 타입: `d3` / `d1` / `winners` / `contract` |
+
+**채널 선택 (v2.6):**
+- `webhook_url` 단독 → Slack만
+- `telegram_token` + `telegram_chat_id` 단독 → Telegram만
+- 셋 다 제공 → **양쪽 채널 동시 발송**
+- 아무것도 없으면 `400 Bad Request`
+
+응답 예:
+```json
+{"sent": 5, "channels": ["slack", "telegram"], "errors": null, "message": "Sent to slack, telegram"}
+```
+한쪽 실패 시 `errors`에 사유 기록되고 성공한 채널만 `channels`에 남음.
 
 D-day 기준 마감 임박순 정렬, 최대 10건 발송. D-1 이하는 🔴, D-3 이하는 🟡 표시.
 
