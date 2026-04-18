@@ -37,10 +37,35 @@ metadata:
 | "청약이 뭐야", "초보", "가이드", "설명해줘" | 청약 입문 가이드 |
 | "0건 나왔어, 인접 지역" | 인접 지역 확장 제안 |
 
-### 3. API 호출 최소화
-- 프록시 웜업(`/health`) 호출 **금지** — GitHub Actions가 12분마다 핑 중이므로 불필요
-- 공고 조회는 필요한 `category`와 `region`만 지정해서 단일 호출
-- 캐시가 warm이면 응답 1초 이내 — 여러 번 호출하지 않는다
+### 3. 프록시 호출 규칙 (필수)
+
+**타임아웃**
+- `/v1/apt/announcements` 호출은 **반드시 `--max-time 180`** 이상 (cold cache + apt 크롤링은 60~120초 소요 가능)
+- `/health`는 `--max-time 15`면 충분 (하지만 기본적으로 호출 금지)
+- 30초·60초·90초 타임아웃은 **쓰지 말 것** — cold 상태에서 확정적으로 실패
+
+**URL 형식**
+- URL 전체를 반드시 큰따옴표 `"..."`로 감싸 단일 스트링으로 전달
+- 여러 커맨드를 `&&`로 체이닝하지 말고 **curl 1개만 실행** (셸이 `&`를 background 연산자로 오해하거나 앞 명령 출력이 다음 요청에 섞일 수 있음)
+- `-G --data-urlencode` 사용은 허용하지만 평범한 쿼리스트링이 더 안전
+- 지역명 등 한국어는 이미 URL 안전 문자이므로 별도 인코딩 불필요
+
+**빈 응답 처리**
+- 응답이 `{"count": 0, "announcements": []}`이고 `errors` 필드에 특정 카테고리만 실패 기록이 있다면 → apt 등 느린 카테고리가 아직 적재 중일 가능성. **15~30초 대기 후 1회 재시도**
+- `count: 0 + errors: null`이면 진짜 0건 → 인접 지역 확장 제안
+
+**웜업**
+- `/health` 사전 호출 **금지** (GitHub Actions가 12분마다 핑 중)
+- 예외: 위 "빈 응답 처리" 재시도 시에만 허용
+
+**최소 호출 원칙**
+- 공고 조회는 필요한 `category`와 `region`만 지정해서 **단일 호출**
+- 동일 파라미터로 반복 호출 금지 (캐시가 이미 warm이면 즉시 응답)
+
+**실패 메시지**
+- `Exit code 28` (timeout): "프록시가 기동 중이거나 첫 조회라 시간이 걸립니다. 1~2분 후 다시 시도해주세요."
+- `"Invalid HTTP request"`: 셸 인용 문제 — URL을 `"..."`로 다시 감싸 재시도
+- 2회 이상 실패하면 사용자에게 에러 전달 후 중단 (무한 재시도 금지)
 
 ### 4. Thinking 최소화
 - 복잡한 판단 없이 curl 1번 → 테이블 변환 → 출력
@@ -705,18 +730,20 @@ curl -s --max-time 60 "https://k-apt-alert-proxy.onrender.com/health"
 프록시 서버에서 공고를 가져온다. 프로필이 있으면 추천 카테고리와 지역으로 필터링.
 
 ```bash
-# 전체 조회
-curl -s "https://k-apt-alert-proxy.onrender.com/v1/apt/announcements?category=all&active_only=true"
+# 전체 조회 — 반드시 --max-time 180 이상, URL은 "..." 단일 스트링
+curl -s --max-time 180 "https://k-apt-alert-proxy.onrender.com/v1/apt/announcements?category=all&active_only=true"
 
 # 특정 카테고리
-curl -s "https://k-apt-alert-proxy.onrender.com/v1/apt/announcements?category=apt&active_only=true"
+curl -s --max-time 180 "https://k-apt-alert-proxy.onrender.com/v1/apt/announcements?category=apt&active_only=true"
 
 # 지역 필터 (복수 가능, 쉼표 구분)
-curl -s "https://k-apt-alert-proxy.onrender.com/v1/apt/announcements?region=서울,경기,인천"
+curl -s --max-time 180 "https://k-apt-alert-proxy.onrender.com/v1/apt/announcements?region=서울,경기,인천"
 
 # 세부 지역(구/군) 필터
-curl -s "https://k-apt-alert-proxy.onrender.com/v1/apt/announcements?region=서울&district=강남구,서초구"
+curl -s --max-time 180 "https://k-apt-alert-proxy.onrender.com/v1/apt/announcements?region=서울&district=강남구,서초구"
 ```
+
+**중요**: `&&` 체이닝 금지, URL은 항상 `"..."`로 감싸 단일 스트링. 자세한 규칙은 상단 "빠른 응답 원칙 > 3. 프록시 호출 규칙" 참고.
 
 응답 형식:
 ```json
