@@ -19,6 +19,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from config import DATA_GO_KR_API_KEY
 from crawlers import applyhome, officetell, lh, remndr, pbl_pvt_rent, opt, sh, gh
 from crawlers.applyhome_page import enrich_schedules, cache_status as enrich_cache_status
+import scoring
+import notified as notified_store
 
 SENTRY_DSN = os.environ.get("SENTRY_DSN", "")
 if SENTRY_DSN:
@@ -189,16 +191,32 @@ def _dedup_announcements(announcements: list) -> list:
 
 
 def _is_active(ann) -> bool:
-    """active_only 클라이언트 사이드 필터 — rcept_end가 오늘 이후면 True."""
+    """active_only 클라이언트 사이드 필터.
+
+    1) rcept_end 있으면 → 오늘 이후만 True
+    2) rcept_end 없고 schedule_source == "unavailable" (SH/GH 등 HTML 크롤러)
+       → notice_date 기준 30일 이내면 True (접수 기간 확정 불가 → 최근 공고는 보존)
+    """
     rcept_end = str(ann.get("rcept_end", ""))
-    if not rcept_end or len(rcept_end) < 8:
-        return False
-    try:
-        fmt = "%Y-%m-%d" if "-" in rcept_end else "%Y%m%d"
-        end_date = datetime.strptime(rcept_end[:10], fmt).date()
-        return end_date >= datetime.now().date()
-    except ValueError:
-        return False
+    if rcept_end and len(rcept_end) >= 8:
+        try:
+            fmt = "%Y-%m-%d" if "-" in rcept_end else "%Y%m%d"
+            end_date = datetime.strptime(rcept_end[:10], fmt).date()
+            return end_date >= datetime.now().date()
+        except ValueError:
+            return False
+
+    if ann.get("schedule_source") == "unavailable":
+        notice_date = str(ann.get("notice_date", ""))
+        if notice_date and len(notice_date) >= 8:
+            try:
+                fmt = "%Y-%m-%d" if "-" in notice_date else "%Y%m%d"
+                nd = datetime.strptime(notice_date[:10], fmt).date()
+                return (datetime.now().date() - nd).days <= 30
+            except ValueError:
+                return False
+
+    return False
 
 
 def _fetch_and_filter(category, active_only, months_back, region_filter, district_filter):
@@ -474,6 +492,7 @@ def notify(
     constructor_contains: str = Query(default=""),
     exclude_ids: str = Query(default=""),
     reminder: str = Query(default="", description="리마인더: d3/d1/winners/contract"),
+    dedup: bool = Query(default=True, description="서버 측 7일 중복 알림 방지 (in-memory)"),
 ):
     """청약 공고 조회 후 Slack/Telegram 자동 발송.
 
@@ -515,37 +534,152 @@ def notify(
 
     active.sort(key=lambda x: x.get("d_day", 999))
 
+    # 서버 측 dedup — 채널별로 따로 적용 (Slack/Telegram 각각 고유한 발송 이력)
+    slack_active = active
+    telegram_active = active
+    blocked_summary: dict = {}
+    if dedup:
+        if has_slack:
+            slack_active, blocked = notified_store.filter_already_notified(f"slack:{webhook_url}", active)
+            if blocked:
+                blocked_summary["slack"] = len(blocked)
+        if has_telegram:
+            telegram_active, blocked = notified_store.filter_already_notified(f"tg:{telegram_chat_id}", active)
+            if blocked:
+                blocked_summary["telegram"] = len(blocked)
+
     channels_sent: list[str] = []
     channel_errors: dict = {}
+    sent_counts: dict = {}
     try:
         if has_slack:
-            try:
-                _send_slack(webhook_url, active)
-                channels_sent.append("slack")
-            except HTTPException as e:
-                channel_errors["slack"] = e.detail
+            if slack_active:
+                try:
+                    _send_slack(webhook_url, slack_active)
+                    channels_sent.append("slack")
+                    sent_counts["slack"] = len(slack_active)
+                    if dedup:
+                        notified_store.mark_notified(f"slack:{webhook_url}", slack_active)
+                except HTTPException as e:
+                    channel_errors["slack"] = e.detail
+            else:
+                channel_errors["slack"] = "all announcements already notified within 7-day window"
         if has_telegram:
-            try:
-                _send_telegram(telegram_token, telegram_chat_id, active)
-                channels_sent.append("telegram")
-            except HTTPException as e:
-                channel_errors["telegram"] = e.detail
+            if telegram_active:
+                try:
+                    _send_telegram(telegram_token, telegram_chat_id, telegram_active)
+                    channels_sent.append("telegram")
+                    sent_counts["telegram"] = len(telegram_active)
+                    if dedup:
+                        notified_store.mark_notified(f"tg:{telegram_chat_id}", telegram_active)
+                except HTTPException as e:
+                    channel_errors["telegram"] = e.detail
+            else:
+                channel_errors["telegram"] = "all announcements already notified within 7-day window"
     except Exception as e:
         logger.error(f"notify unexpected: {e}")
         raise HTTPException(status_code=502, detail=f"Unexpected notify error: {e}")
 
     if not channels_sent:
-        # 모두 실패
+        if blocked_summary and not any(
+            isinstance(v, str) and "already notified" not in v for v in channel_errors.values()
+        ):
+            return {
+                "sent": 0,
+                "channels": [],
+                "blocked_by_dedup": blocked_summary,
+                "message": "All target announcements were already notified within the 7-day dedup window.",
+            }
         raise HTTPException(
             status_code=502,
             detail={"message": "All configured channels failed", "errors": channel_errors},
         )
     return {
-        "sent": len(active),
+        "sent": sent_counts,
         "channels": channels_sent,
+        "blocked_by_dedup": blocked_summary or None,
         "errors": channel_errors or None,
         "message": f"Sent to {', '.join(channels_sent)}",
     }
+
+
+@app.post("/v1/apt/score")
+def score_profile(payload: dict):
+    """결정론적 가점 + 특공 자격 계산.
+
+    Request body:
+        {
+          "profile": {
+            "no_house_years": 3.5,
+            "dependents": 2,
+            "subscription_account": {
+              "years": 7.0,
+              "minor_years_pre_2024": 0,
+              "minor_years_post_2024": 0
+            },
+            "no_house": true,
+            "ever_owned_house": false,
+            "marriage_date": "2022-03-15",  // 선택
+            "children": [{"age": 5}, {"age": 2}],
+            "dependent_parents_3y": false,
+            "age": 32
+          },
+          "specials": ["신혼부부", "생애최초", "다자녀"]  // 선택, 기본 4종 전부
+        }
+
+    프로필은 서버에 저장되지 않고 응답 후 즉시 폐기됩니다.
+    """
+    profile = payload.get("profile") or payload  # body 자체가 profile일 때도 허용
+    if not isinstance(profile, dict):
+        raise HTTPException(status_code=400, detail="profile must be an object")
+    specials = payload.get("specials") or ["신혼부부", "생애최초", "다자녀", "노부모부양", "청년"]
+
+    scores = scoring.calc_total_score(profile)
+    eligibility = {}
+    for s in specials:
+        ok, reason = scoring.is_eligible_special(profile, s)
+        eligibility[s] = {"eligible": ok, "reason": reason}
+
+    return {"scores": scores, "specials": eligibility}
+
+
+@app.post("/v1/apt/match")
+def match_announcements(payload: dict):
+    """프로필과 공고 리스트의 카테고리/지역/세대수 적합도 계산.
+
+    Request body:
+        {
+          "profile": {
+            "preferred_categories": ["APT", "공공지원민간임대"],
+            "preferred_regions": ["서울", "경기"],
+            "min_units": 300
+          },
+          "announcements": [{...}, {...}]
+        }
+    """
+    profile = payload.get("profile", {})
+    anns = payload.get("announcements", [])
+    if not isinstance(anns, list):
+        raise HTTPException(status_code=400, detail="announcements must be a list")
+
+    results = []
+    for a in anns:
+        m = scoring.match_announcement(profile, a)
+        results.append({"id": a.get("id"), "name": a.get("name"), **m})
+    return {"matches": results, "count": len(results)}
+
+
+@app.get("/v1/apt/dedup/stats")
+def dedup_stats():
+    """서버 측 중복 알림 방지 store 상태."""
+    return notified_store.stats()
+
+
+@app.post("/v1/apt/dedup/reset")
+def dedup_reset():
+    """dedup store 전체 초기화. 운영자용."""
+    cleared = notified_store.reset()
+    return {"cleared_entries": cleared}
 
 
 @app.get("/v1/apt/cache")
@@ -569,6 +703,7 @@ def cache_status():
         "ttl_seconds": CACHE_TTL_SECONDS,
         "rate_limit": rate,
         "schedule_enrichment": enrich_cache_status(),
+        "dedup": notified_store.stats(),
     }
 
 

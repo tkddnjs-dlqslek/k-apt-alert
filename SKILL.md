@@ -62,8 +62,22 @@ metadata:
 - `count: 0 + errors: null`이면 진짜 0건 → 인접 지역 확장 제안
 
 **웜업**
-- `/health` 사전 호출 **금지** (GitHub Actions가 12분마다 핑 중)
-- 예외: 위 "빈 응답 처리" 재시도 시에만 허용
+- `/health` 사전 호출 **금지** (GitHub Actions가 12분마다 핑 중 — 단 free cron은 5~30분 지연될 수 있어 100% 보장은 아님)
+- 예외: 위 "빈 응답 처리" 재시도 시 또는 첫 호출이 30초+ 지연될 때 허용
+
+**가점·자격 계산 규칙 (중요)**
+- LLM이 자연어로 가점을 계산하지 말고 **반드시 `/v1/apt/score` 엔드포인트를 호출**할 것 (특히 통장 가점, 미성년 인정 한도)
+- 통장 가점 공식: 6개월 미만 1점 / 6개월~1년 2점 / 1년부터 1년당 1점 (15년+=17점) — 단순히 `years × 2`로 계산하면 **틀린다**
+- 미성년 가입분 인정: 2024.7.1. 시행분은 5년, 그 이전은 2년 — 초과분은 차감
+- POST body 예시: `{"profile": {"no_house_years": 3, "dependents": 0, "subscription_account": {"years": 7, "minor_years_post_2024": 0}, "no_house": true, "ever_owned_house": false}}`
+- 응답: `{"scores": {"no_house": 8, "family": 5, "account": 9, "total": 22, "max_total": 84}, "specials": {...}}`
+
+**중복 알림 방지**
+- `/v1/apt/notify`는 기본적으로 **서버 측 7일 dedup**이 켜져 있음 (`dedup=true`)
+- 같은 webhook/chat_id에 같은 공고 ID는 7일 내 재발송 차단됨
+- LLM이 `notified.json`을 읽고 `exclude_ids`를 채우는 작업은 **불필요** (dedup이 자동 처리)
+- 강제 재발송 필요 시 `dedup=false` 추가
+- 한계: Render free tier 재시작 시 dedup 윈도우는 초기화됨 (in-memory)
 
 **최소 호출 원칙**
 - 공고 조회는 필요한 `category`와 `region`만 지정해서 **단일 호출**
@@ -441,7 +455,7 @@ chmod 600 ~/.config/k-skill/*.json 2>/dev/null || true
 |------|------|-----------------|
 | 무주택 기간 (최대 32점) | 1년당 2점, 최초 1년 미만 2점 | **만 30세 도달연도 ↔ 혼인신고연도 중 늦은 해부터** 기산. 만 30세 이전 미혼자는 0점, 만 30세 이전 결혼자도 30세 전까지는 0점 |
 | 부양가족 수 (최대 35점) | 0명=5점, 1명=10점, 2명=15점 ... 6명+=35점 | `dependents_count` 기반. ⚠️ **직계존속(부모·조부모)은 3년 이상 동일 세대 등록된 경우에만 인정**되며, 자동 확인 불가 — 공고문 확인 필수 |
-| 통장 가입기간 (최대 17점) | 6개월당 1점 | `subscription_account.years` × 2 (최대 15년+=17점). ⚠️ **만 19세 미만 가입분은 최대 2년만 인정** — 미성년자 가입자는 전체 기간에서 차감 |
+| 통장 가입기간 (최대 17점) | 6개월 미만=1점, 6개월~1년=2점, 그 이후 1년당 1점 | `subscription_account.years` 기반. 5년→7점, 10년→12점, 15년+=17점. ⚠️ **만 19세 미만 가입분은 최대 5년만 인정** (2024.7.1. 시행, 그 이전엔 2년) — 미성년자 조기가입자는 19세 이전 기간 중 5년 초과분 차감 |
 
 **가점 안내 메시지 예시:**
 ```
@@ -821,7 +835,7 @@ if (!(Test-Path $FILE)) { New-Item -ItemType File -Path $FILE | Out-Null }
 
 ### 0단계: 프록시 웜업 (기본 SKIP)
 
-GitHub Actions가 12분마다 `/health` ping을 보내 Render 슬립을 방지하므로 **일반적으로 불필요**. 공고 조회가 30초 이상 실패할 때만 수동 웜업:
+GitHub Actions가 12분마다 `/health` ping을 보내 Render 슬립을 방지하지만, GitHub Actions free cron은 부하 시 5~30분 지연되어 일부 시간대에 슬립이 발생할 수 있습니다. **일반적으로는 불필요**하지만, 공고 조회가 30초 이상 지연되면 수동 웜업:
 ```bash
 curl -s --max-time 60 "https://k-apt-alert-proxy.onrender.com/health"
 ```

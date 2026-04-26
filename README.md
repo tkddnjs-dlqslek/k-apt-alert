@@ -157,10 +157,10 @@ curl -X POST "https://k-apt-alert-proxy.onrender.com/v1/apt/notify?webhook_url=.
 
 ```
 📋 프로필: 만 28세 / 서울·경기·인천 / 1인 가구 / 무주택 / 통장 3년
-📊 추정 가점: 11점 / 84점
+📊 추정 가점: 10점 / 84점
    - 무주택 기간: 0점 (만 30세 미만, 혼인 이력 없음)
    - 부양가족: 5점 (0명)
-   - 통장 가입기간: 6점 (3년)
+   - 통장 가입기간: 5점 (3년 — 6개월 미만 1점 + 6~12개월 2점 + 1~2년 3점 + 2~3년 4점 + 3년 도래 시 5점)
 ⭐ 특별공급: 생애최초 (통장 2년+ 충족)
 
 ⚠️ 가점이 낮아 수도권 APT 가점제 당첨은 현실적으로 어렵습니다.
@@ -220,7 +220,7 @@ curl -X POST "https://k-apt-alert-proxy.onrender.com/v1/apt/notify?webhook_url=.
 ### 프록시 서버 (운영자가 배포)
 - [`proxy/main.py`](proxy/main.py) — FastAPI 엔드포인트
 - [`proxy/crawlers/`](proxy/crawlers/) — 6종 공공데이터포털 API 크롤러
-- [`.github/workflows/warmup.yml`](.github/workflows/warmup.yml) — Render 슬립 방지 cron (12분 간격)
+- [`.github/workflows/warmup.yml`](.github/workflows/warmup.yml) — Render 슬립 방지 cron (12분 간격 — GitHub Actions free cron은 부하 시 5~30분 지연이 흔하므로 슬립 100% 방지는 아님)
 - [`.github/workflows/test.yml`](.github/workflows/test.yml) — mock 테스트 + E2E CI
 
 ### 페르소나 E2E 테스트
@@ -283,7 +283,7 @@ DATA_GO_KR_API_KEY=your_key uvicorn main:app --reload
 - **카테고리별 TTL**: apt 60분 / pbl_pvt_rent 30분 / 나머지 10분
 - **Stale fallback**: fetch 실패 시 만료된 캐시라도 반환 (가용성 우선)
 - **일일 rate limit**: 9000건 초과 시 stale 캐시만 반환
-- **12분 간격 warmup**: Render free tier 슬립 방지
+- **12분 간격 warmup (best-effort)**: Render free tier 슬립 방지 — 단 GitHub Actions free cron은 부하 시 5~30분 지연이 흔해서 일부 시간대(특히 자정~새벽)는 슬립 발생 가능
 
 ## 보안·프라이버시
 
@@ -298,7 +298,7 @@ DATA_GO_KR_API_KEY=your_key uvicorn main:app --reload
 A. Render free tier는 15분 비활성 시 슬립합니다. warmup cron이 12분 간격으로 핑을 보내지만, 자정~새벽 등은 슬립 상태일 수 있습니다. 첫 호출이 30초~2분 걸릴 수 있습니다.
 
 **Q. 가점 계산이 정확한가요?**
-A. 프로필 기반 추정치입니다. 만 30세 ↔ 혼인신고일 중 늦은 해 기산, 통장 미성년 가입분 최대 2년 인정 등 주요 규칙은 반영되어 있지만, 부양가족 직계존속 3년 동일 세대 등록 요건은 자동 확인이 불가합니다. 정확한 가점은 [청약홈](https://www.applyhome.co.kr)에서 조회하세요.
+A. 프로필 기반 추정치입니다. 만 30세 ↔ 혼인신고일 중 늦은 해 기산, 통장 미성년 가입분 최대 5년 인정(2024.7.1. 시행, 그 이전엔 최대 2년) 등 주요 규칙은 반영되어 있지만, 부양가족 직계존속 3년 동일 세대 등록 요건은 자동 확인이 불가합니다. 정확한 가점은 [청약홈](https://www.applyhome.co.kr)에서 조회하세요.
 
 **Q. 1주택자도 사용할 수 있나요?**
 A. 네. 오피스텔, 잔여세대, 임의공급은 무주택 불문이며, "갈아타기 안내"가 자동 제공됩니다.
