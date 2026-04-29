@@ -1,0 +1,90 @@
+name: Daily API usage check
+
+on:
+  schedule:
+    - cron: "0 0 * * *"   # 매일 오전 9시 KST (00:00 UTC)
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch & report usage
+        id: usage
+        run: |
+          # 응답을 파일로 저장 (JSON 안 특수문자로 인한 shell 파싱 오류 방지)
+          curl -sS --max-time 15 \
+            "https://k-apt-alert-proxy.onrender.com/v1/apt/cache" \
+            -o /tmp/cache.json \
+            || echo '{"error": "fetch_failed"}' > /tmp/cache.json
+
+          python3 << 'PYEOF'
+          import json, os, sys
+
+          with open("/tmp/cache.json") as f:
+              data = json.load(f)
+
+          if "error" in data:
+              summary = "❌ 프록시 응답 없음 (슬립 또는 장애)"
+              status  = "error"
+              pct     = 0.0
+          else:
+              r     = data.get("rate_limit", {})
+              count = r.get("count", 0)
+              limit = r.get("limit", 9000)
+              pct   = count / limit * 100 if limit else 0
+              date  = r.get("date", "?")
+
+              dedup   = data.get("dedup", {})
+              tracked = dedup.get("tracked_entries", 0)
+
+              entries = data.get("entries", [])
+              warmed  = [e["key"].split(":")[0] for e in entries if e.get("ttl_remaining", 0) > 0]
+
+              bar = "█" * int(pct / 5) + "░" * (20 - int(pct / 5))
+              icon = "⚠️" if pct >= 80 else "✅"
+
+              summary = (
+                  f"{icon} API 사용량 ({date})\n"
+                  f"[{bar}] {count:,}/{limit:,} ({pct:.1f}%)\n"
+                  f"캐시 warm: {warmed if warmed else '없음'}\n"
+                  f"dedup 추적: {tracked}건"
+              )
+              status = "warn" if pct >= 80 else "ok"
+
+          print(summary)
+
+          gho = os.environ["GITHUB_OUTPUT"]
+          gss = os.environ["GITHUB_STEP_SUMMARY"]
+
+          with open(gho, "a") as f:
+              f.write(f"status={status}\n")
+              f.write(f"pct={pct:.1f}\n")
+              f.write("summary<<__DELIM__\n")
+              f.write(summary + "\n")
+              f.write("__DELIM__\n")
+
+          with open(gss, "a") as f:
+              f.write(f"```\n{summary}\n```\n")
+          PYEOF
+
+      - name: Slack alert (80% 초과 시에만)
+        if: steps.usage.outputs.status == 'warn'
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK" ]; then
+            echo "SLACK_WEBHOOK 미설정 — Slack 알림 생략"
+            exit 0
+          fi
+          curl -sS -X POST "$SLACK_WEBHOOK" \
+            -H "Content-Type: application/json" \
+            -d "$(python3 -c "
+          import json, sys
+          msg = '''${{ steps.usage.outputs.summary }}'''
+          payload = {
+              'text': '⚠️ *k-apt-alert API 사용량 80% 초과*\n' + msg +
+                      '\n\n한도 소진 전 조치 필요: Render 업그레이드 또는 <https://k-apt-alert-proxy.onrender.com/v1/apt/cache|캐시 상태 확인>'
+          }
+          print(json.dumps(payload))
+          ")"
