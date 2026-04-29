@@ -16,9 +16,20 @@ import requests
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from config import DATA_GO_KR_API_KEY
+from config import (
+    DATA_GO_KR_API_KEY,
+    NOTICE_MAX_CHARS_DEFAULT,
+    NOTICE_RAW_DAILY_LIMIT_FREE,
+    TIER_LIMITS,
+)
 from crawlers import applyhome, officetell, lh, remndr, pbl_pvt_rent, opt, sh, gh
 from crawlers.applyhome_page import enrich_schedules, cache_status as enrich_cache_status
+from crawlers.notice_raw import (
+    extract_notice_raw,
+    is_supported_host,
+    cache_status as notice_raw_cache_status,
+    invalidate as notice_raw_invalidate,
+)
 import scoring
 import notified as notified_store
 
@@ -721,4 +732,125 @@ def list_categories():
             {"id": "sh", "name": "SH 공공주택", "description": "서울주택도시공사 — 장기전세·청년안심·매입임대 등"},
             {"id": "gh", "name": "GH 공공주택", "description": "경기주택도시공사 — 경기행복주택·매입임대 등"},
         ]
+    }
+
+
+# ─────────────────────────────────────────────────────────────────
+# notice-raw — 모집공고 본문 추출 (Phase 1 of notice-interpreter)
+# ─────────────────────────────────────────────────────────────────
+
+_notice_raw_counter = {"date": "", "count": 0}
+_notice_raw_lock = Lock()
+
+
+def _notice_raw_check_limit() -> tuple[int, int]:
+    today = datetime.now().strftime("%Y-%m-%d")
+    with _notice_raw_lock:
+        if _notice_raw_counter["date"] != today:
+            _notice_raw_counter["date"] = today
+            _notice_raw_counter["count"] = 0
+        _notice_raw_counter["count"] += 1
+        return _notice_raw_counter["count"], NOTICE_RAW_DAILY_LIMIT_FREE
+
+
+def _resolve_tier(authorization: str | None) -> str:
+    """Phase 1 스텁 — 토큰 무관하게 free. Phase 2에서 Supabase JWT 검증."""
+    return "free"
+
+
+def _resolve_url_from_cache(notice_id: str) -> str | None:
+    """_cache (announcements 인메모리 캐시) 전체 카테고리에서 id 매칭."""
+    with _cache_lock:
+        for entry in _cache.values():
+            for ann in entry.get("items", []):
+                if ann.get("id") == notice_id:
+                    return ann.get("url", "")
+    return None
+
+
+@app.get("/v1/apt/notice/{notice_id}/raw")
+def get_notice_raw(
+    notice_id: str,
+    url: str = Query(default="", description="id 캐시 매칭 실패 시 직접 전달할 공고 URL"),
+    max_chars: int = Query(
+        default=NOTICE_MAX_CHARS_DEFAULT,
+        ge=1000,
+        le=TIER_LIMITS["paid"],
+        description="응답 텍스트 상한 (free 30000 cap, paid 80000 cap)",
+    ),
+    tier: str = Query(default="free", description="요청 티어 — free | paid (paid는 인증 필요)"),
+    force_refresh: bool = Query(default=False, description="캐시 무시하고 재수집"),
+    authorization: str | None = None,
+):
+    """모집공고 본문 텍스트 추출 — LLM 요약 입력용.
+
+    - id로 캐시에서 url 조회 (A안), 실패 시 ?url= 폴백 (C안)
+    - 호스트는 화이트리스트 검증 (applyhome.co.kr / apply.lh.or.kr / i-sh.co.kr / gh.or.kr)
+    - 무료 30K, 유료 80K (Phase 1은 무료 강제)
+    - 7일 캐시, force_refresh=true로 무효화
+    """
+    effective_tier = _resolve_tier(authorization)
+    cap = TIER_LIMITS[effective_tier]
+    effective_max_chars = min(max_chars, cap)
+    tier_capped = max_chars > cap
+
+    if effective_tier == "free":
+        count, limit = _notice_raw_check_limit()
+        if count > limit:
+            raise HTTPException(
+                status_code=429,
+                detail=f"Daily notice_raw limit exceeded ({limit}). Upgrade to paid tier.",
+            )
+
+    resolved_url = _resolve_url_from_cache(notice_id) or url
+    if not resolved_url:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                f"id '{notice_id}' not in announcements cache. "
+                "Provide ?url=<applyhome_url|lh_url> as fallback."
+            ),
+        )
+
+    if not is_supported_host(resolved_url):
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"unsupported host. Phase 1 supports applyhome.co.kr, apply.lh.or.kr, "
+                f"i-sh.co.kr, gh.or.kr only. Got: {resolved_url}"
+            ),
+        )
+
+    if force_refresh:
+        notice_raw_invalidate(notice_id)
+
+    try:
+        result = extract_notice_raw(
+            notice_id=notice_id,
+            url=resolved_url,
+            max_chars=effective_max_chars,
+            force_refresh=force_refresh,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=502, detail=f"notice_raw extract failed: {e}")
+
+    result["tier"] = effective_tier
+    result["effective_max_chars"] = effective_max_chars
+    result["tier_capped"] = tier_capped
+    return result
+
+
+@app.get("/v1/apt/notice/cache-status")
+def notice_raw_cache_status_endpoint():
+    """디버그용 — notice_raw 캐시 상태."""
+    with _notice_raw_lock:
+        rate = {
+            "date": _notice_raw_counter["date"],
+            "count": _notice_raw_counter["count"],
+            "limit_free": NOTICE_RAW_DAILY_LIMIT_FREE,
+        }
+    return {
+        "cache": notice_raw_cache_status(),
+        "rate_limit": rate,
+        "tier_limits": TIER_LIMITS,
     }

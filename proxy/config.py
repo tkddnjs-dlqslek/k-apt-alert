@@ -23,3 +23,11 @@ PBL_PVT_RENT_MDL_API_URL = f"{_BASE}/getPblPvtRentLttotPblancMdl"
 OPT_MDL_API_URL = f"{_BASE}/getOPTLttotPblancMdl"
 
 LH_NOTICE_API_URL = "http://apis.data.go.kr/B552555/lhNoticeInfo1/getNoticeInfo1"
+
+# Notice raw extraction (Phase 1 of notice-interpreter)
+NOTICE_RAW_TTL = 7 * 24 * 3600  # 7일 — 모집공고문은 사실상 변경 없음, 정정공고는 force_refresh로 우회
+NOTICE_RAW_DAILY_LIMIT_FREE = 1000
+NOTICE_RAW_HTTP_TIMEOUT = 15
+TIER_LIMITS = {"free": 30000, "paid": 80000}
+NOTICE_MAX_CHARS_DEFAULT = 30000
+NOTICE_SUPPORTED_HOSTS = ("applyhome.co.kr", "apply.lh.or.kr", "i-sh.co.kr", "gh.or.kr")
