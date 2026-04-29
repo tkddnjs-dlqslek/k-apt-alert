@@ -68,23 +68,22 @@ jobs:
               f.write(f"```\n{summary}\n```\n")
           PYEOF
 
-      - name: Slack alert (80% 초과 시에만)
+      - name: Gmail alert (80% 초과 시에만)
         if: steps.usage.outputs.status == 'warn'
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-        run: |
-          if [ -z "$SLACK_WEBHOOK" ]; then
-            echo "SLACK_WEBHOOK 미설정 — Slack 알림 생략"
-            exit 0
-          fi
-          curl -sS -X POST "$SLACK_WEBHOOK" \
-            -H "Content-Type: application/json" \
-            -d "$(python3 -c "
-          import json, sys
-          msg = '''${{ steps.usage.outputs.summary }}'''
-          payload = {
-              'text': '⚠️ *k-apt-alert API 사용량 80% 초과*\n' + msg +
-                      '\n\n한도 소진 전 조치 필요: Render 업그레이드 또는 <https://k-apt-alert-proxy.onrender.com/v1/apt/cache|캐시 상태 확인>'
-          }
-          print(json.dumps(payload))
-          ")"
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.GMAIL_USER }}
+          password: ${{ secrets.GMAIL_APP_PASSWORD }}
+          to: ${{ secrets.GMAIL_USER }}
+          subject: "⚠️ k-apt-alert API 사용량 80% 초과"
+          body: |
+            k-apt-alert 프록시 API 사용량이 80%를 초과했습니다.
+
+            ${{ steps.usage.outputs.summary }}
+
+            조치 방법:
+            - Render 업그레이드 ($7/월) 또는
+            - 캐시 TTL 연장 (officetell/lh/remndr/opt 600s → 1800s)
+            - 상세 확인: https://k-apt-alert-proxy.onrender.com/v1/apt/cache
