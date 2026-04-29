@@ -36,6 +36,8 @@ metadata:
 | "특별공급", "신혼부부·다자녀 자격" | 특별공급 판정만 |
 | "청약이 뭐야", "초보", "가이드", "설명해줘" | 청약 입문 가이드 |
 | "0건 나왔어, 인접 지역" | 인접 지역 확장 제안 |
+| "이 공고 분석해줘", "공고 해석해줘", "자격 요건 알려줘" | **모집공고 해석자** — 원문 추출 + LLM 요약 |
+| "이 공고 신청 가능해?", "내 자격 확인", "매칭 확인" | `/v1/apt/match` 적합도 판정 |
 
 ### 3. 프록시 호출 규칙 (필수)
 
@@ -78,6 +80,20 @@ metadata:
 - LLM이 `notified.json`을 읽고 `exclude_ids`를 채우는 작업은 **불필요** (dedup이 자동 처리)
 - 강제 재발송 필요 시 `dedup=false` 추가
 - 한계: Render free tier 재시작 시 dedup 윈도우는 초기화됨 (in-memory)
+
+**공고 원문 해석 (`/v1/apt/notice/{id}/raw`)**
+- 사용자가 특정 공고의 자격·일정·가격 **상세 분석을 명시 요청할 때만** 호출
+- `id`로 캐시에서 URL 자동 조회 (캐시 miss 시 `?url=<applyhome_url|lh_url>` 폴백)
+- 7일 캐시 자동 적용; 재수집 필요 시 `?force_refresh=true`
+- 지원 호스트: `applyhome.co.kr` / `apply.lh.or.kr` / `i-sh.co.kr` / `gh.or.kr`
+- 호출 예시: `curl -s --max-time 30 "https://k-apt-alert-proxy.onrender.com/v1/apt/notice/2026000123/raw"`
+- 응답의 `text`·`sections` 필드를 LLM 컨텍스트에 포함해 분석; `truncated: true`이면 원문 링크 안내 필수
+
+**공고 적합도 판정 (`/v1/apt/match`)**
+- 카테고리·지역·세대수 기준 필터 적합도 계산 (가점 계산이 아님)
+- POST body 예시: `{"profile": {"preferred_categories": ["APT"], "preferred_regions": ["서울","경기"], "min_units": 300}, "announcements": [{"id": "...", "house_category": "APT", "region": "서울", "total_units": "641"}]}`
+- 응답: `{"matches": [{"id": "...", "category_match": true, "region_match": true, "min_units_ok": true, "needs_account": true, "fit_level": "high"}], "count": N}`
+- `fit_level`: `"high"` (3/3 충족) · `"medium"` (2/3) · `"low"` (1/3 이하)
 
 **최소 호출 원칙**
 - 공고 조회는 필요한 `category`와 `region`만 지정해서 **단일 호출**
@@ -569,6 +585,79 @@ chmod 600 ~/.config/k-skill/*.json 2>/dev/null || true
 
 ---
 
+## 모집공고 해석자
+
+**적용 시점**: 사용자가 특정 공고를 지목하며 "이 공고 분석해줘", "자격 요건 알려줘", "공고 해석해줘", "이 공고 신청 가능해?" 등을 **명시 요청**할 때. 기본 공고 목록 조회에는 이 워크플로우를 실행하지 않는다.
+
+### 워크플로우
+
+```
+1. 공고 ID 확인
+   - 테이블의 id 필드 또는 사용자가 언급한 공고명/ID 사용
+   - id 모를 경우: 먼저 /v1/apt/announcements로 조회해서 id 확보
+
+2. 원문 텍스트 추출
+   curl -s --max-time 30 \
+     "https://k-apt-alert-proxy.onrender.com/v1/apt/notice/{id}/raw"
+   # 캐시 miss 시 url 폴백:
+   curl -s --max-time 30 \
+     "https://k-apt-alert-proxy.onrender.com/v1/apt/notice/{id}/raw?url=https://www.applyhome.co.kr/..."
+
+3. 응답 구조
+   {
+     "id": "2026000123",
+     "title": "래미안 원펜타스 입주자모집공고",
+     "text": "...(최대 30,000자)...",
+     "sections": {
+       "자격": "...",
+       "공급일정": "...",
+       "공급금액": "...",
+       "유의사항": "..."
+     },
+     "truncated": false,
+     "char_count": 12345
+   }
+
+4. LLM 분석
+   - 자격 요건: sections["자격"] 위주
+   - 일정 확인: sections["공급일정"]
+   - 가격대: sections["공급금액"]
+   - 유의사항: sections["유의사항"]
+   - sections가 비어있으면 text 전체에서 관련 부분 발췌
+```
+
+### 해석 출력 규칙
+
+- `truncated: true`이면 반드시 → "공고 원문이 길어 일부만 추출됐습니다. 전체는 응답의 `url` 필드 링크에서 확인하세요."
+- 캐시 miss(`id` 조회 실패) 시 → 사용자에게 `url` 직접 전달 요청
+- 지원 호스트 외 URL → "해당 사이트는 원문 추출을 지원하지 않습니다. 원문 링크를 직접 확인해주세요."
+- 해석 마지막에 반드시: `ℹ️ 자동 추출 텍스트 기반 요약입니다. 정확한 내용은 원문에서 확인하세요.`
+
+### 해석 출력 예시
+
+```
+📄 [래미안 원펜타스] 공고 분석
+
+📌 자격 요건
+  - 무주택세대구성원 (세대원 전원 무주택)
+  - 청약통장 가입 2년 이상 / 납입 24회 이상
+  - 서울 2년 이상 거주자 우선
+
+📅 공급일정
+  - 특별공급: 2026-04-15 / 일반 1순위: 2026-04-16
+  - 당첨자 발표: 2026-04-25 / 계약: 2026-05-09 ~ 2026-05-11
+
+💰 공급금액
+  - 84m² 기준 약 12억 (분양가상한제 적용)
+
+⚠️ 유의사항
+  - 거주의무기간 3년 / 전매 제한 5년
+
+ℹ️ 자동 추출 텍스트 기반 요약입니다. 정확한 내용은 [청약홈 원문 →](url)에서 확인하세요.
+```
+
+---
+
 ## 즐겨찾기 공고 관리
 
 관심 공고를 로컬에 저장하여 변동 추적·중복 조회 방지에 활용한다.
@@ -604,6 +693,8 @@ chmod 600 ~/.config/k-skill/*.json 2>/dev/null || true
 ---
 
 ## 중복 알림 방지
+
+> **v2.7 이후**: `/v1/apt/notify`의 서버 측 7일 dedup (`dedup=true` 기본)이 자동으로 중복 발송을 차단합니다. 아래 로컬 `notified.json` 관리는 선택 사항이며, Render 서버 재시작 시 서버 dedup 기록이 초기화될 수 있으므로 중요 알림은 병행 관리를 권장합니다.
 
 같은 공고를 여러 번 발송하지 않도록 로컬에서 발송 이력을 관리한다.
 
@@ -692,6 +783,7 @@ jobs:
 | `category` | 카테고리 필터 (기본: all, 8종: apt/officetell/lh/remndr/pbl_pvt_rent/opt/sh/gh) |
 | `region` | 지역 필터 (쉼표 구분) |
 | `district` | 세부 지역 필터 (쉼표 구분) |
+| `months_back` | 조회 기간 (개월, 기본: 2, 최대: 12) — 최근 N개월 이내 공고만 |
 | `active_only` | 접수 중인 공고만 (기본: true) |
 | `min_units` | 최소 세대수 (대단지만 필터, 기본 0) |
 | `constructor_contains` | 시공사 키워드 필터 (쉼표 구분) |
@@ -1077,8 +1169,9 @@ OS 확인 후 macOS/Linux는 `crontab` 한 줄, Windows는 PowerShell `Register-
 | 4 | min_units | 0 | 최소 세대수 (대단지만, 예: 500) |
 | 5 | constructor_contains | (전체) | 시공사 키워드 (삼성·현대·GS 등) |
 | 6 | active_only | true | 접수 중인 공고만 |
-| 7 | reminder | (없음) | d3·d1·winners·contract |
-| 8 | exclude_ids | (없음) | 중복 방지용 제외 공고 ID |
+| 7 | months_back | 2 | 조회 기간 (개월, 최대 12) |
+| 8 | reminder | (없음) | d3·d1·winners·contract |
+| 9 | exclude_ids | (없음) | 중복 방지용 제외 공고 ID |
 
 원하는 조건을 말씀해주세요.
 • 예: "서울·경기 500세대 이상 D-3"
