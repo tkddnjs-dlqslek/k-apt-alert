@@ -234,3 +234,102 @@ def test_match_empty_profile_matches_all():
     assert result["region_match"] is True
     assert result["min_units_ok"] is True
     assert result["fit_level"] == "high"
+
+
+# ─── is_eligible_first_priority ───────────────────────────────────────
+
+def _ann_fp(**kw):
+    return {"speculative_zone": "N", "region": "경기", **kw}
+
+def _profile_fp(**kw):
+    base = {
+        "subscription_account": {"deposit_count": 12},
+        "no_house": True,
+        "previous_win": "없음",
+    }
+    base.update(kw)
+    return base
+
+
+def test_1st_priority_metro_ok():
+    result = scoring.is_eligible_first_priority(_profile_fp(), _ann_fp(region="서울"))
+    assert result["eligible"] is True
+    assert result["required_count"] == 12
+    assert result["zone"] == "수도권"
+
+def test_1st_priority_metro_fail_count():
+    p = _profile_fp(subscription_account={"deposit_count": 6})
+    result = scoring.is_eligible_first_priority(p, _ann_fp(region="서울"))
+    assert result["eligible"] is False
+    assert "12회" in result["reason"]
+
+def test_1st_priority_speculative_24():
+    p = _profile_fp(subscription_account={"deposit_count": 24})
+    result = scoring.is_eligible_first_priority(p, _ann_fp(speculative_zone="Y"))
+    assert result["eligible"] is True
+    assert result["required_count"] == 24
+    assert "투기과열지구" in result["zone"]
+
+def test_1st_priority_speculative_fail_12():
+    p = _profile_fp(subscription_account={"deposit_count": 12})
+    result = scoring.is_eligible_first_priority(p, _ann_fp(speculative_zone="Y"))
+    assert result["eligible"] is False
+    assert "24회" in result["reason"]
+
+def test_1st_priority_others_6():
+    p = _profile_fp(subscription_account={"deposit_count": 6})
+    result = scoring.is_eligible_first_priority(p, _ann_fp(region="부산"))
+    assert result["eligible"] is True
+    assert result["required_count"] == 6
+
+def test_1st_priority_prev_win_blocks():
+    p = _profile_fp(previous_win="5년이내")
+    result = scoring.is_eligible_first_priority(p, _ann_fp())
+    assert result["eligible"] is False
+    assert "당첨 이력" in result["reason"]
+
+def test_1st_priority_speculative_with_house_blocks():
+    p = _profile_fp(no_house=False, subscription_account={"deposit_count": 24})
+    result = scoring.is_eligible_first_priority(p, _ann_fp(speculative_zone="Y"))
+    assert result["eligible"] is False
+    assert "주택 보유" in result["reason"]
+
+def test_1st_priority_always_has_warnings():
+    result = scoring.is_eligible_first_priority(_profile_fp(), _ann_fp())
+    assert len(result["warnings"]) >= 1
+
+
+# ─── estimate_competition ─────────────────────────────────────────────
+
+def test_competition_seoul_speculative_small():
+    ann = {"region": "서울", "speculative_zone": "Y", "size": "소형"}
+    result = scoring.estimate_competition(ann)
+    assert result["avg_rate"] == 160
+    assert result["avg_cutoff_score"] == 70
+    assert result["source"] == "statistical_estimate"
+
+def test_competition_gyeonggi_general_medium():
+    ann = {"region": "경기", "speculative_zone": "N", "size": "중형"}
+    result = scoring.estimate_competition(ann)
+    assert result["avg_rate"] == 16
+
+def test_competition_other_small():
+    ann = {"region": "부산", "speculative_zone": "", "size": "소형"}
+    result = scoring.estimate_competition(ann)
+    assert result["avg_rate"] == 9
+
+def test_competition_large_no_cutoff():
+    ann = {"region": "서울", "speculative_zone": "N", "size": "대형"}
+    result = scoring.estimate_competition(ann)
+    assert result["avg_cutoff_score"] is None
+    assert "추첨제" in result["note"]
+
+def test_competition_empty_size_defaults_medium():
+    ann = {"region": "서울", "speculative_zone": "N", "size": ""}
+    result = scoring.estimate_competition(ann)
+    assert result["avg_rate"] == scoring._COMPETITION_STATS["서울_N_중형"][0]
+
+def test_competition_has_disclaimer():
+    result = scoring.estimate_competition({"region": "서울"})
+    assert "disclaimer" in result
+    assert len(result["disclaimer"]) > 0

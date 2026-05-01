@@ -14,6 +14,7 @@ from threading import Lock
 
 import requests
 from fastapi import FastAPI, Query, HTTPException
+from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import (
@@ -653,7 +654,19 @@ def score_profile(payload: dict):
         ok, reason = scoring.is_eligible_special(profile, s)
         eligibility[s] = {"eligible": ok, "reason": reason}
 
-    return {"scores": scores, "specials": eligibility}
+    # 공고 리스트가 함께 오면 각 공고별 1순위 판정도 포함
+    anns = payload.get("announcements", [])
+    priority_checks = None
+    if isinstance(anns, list) and anns:
+        priority_checks = [
+            {"id": a.get("id"), **scoring.is_eligible_first_priority(profile, a)}
+            for a in anns
+        ]
+
+    result = {"scores": scores, "specials": eligibility}
+    if priority_checks is not None:
+        result["priority_checks"] = priority_checks
+    return result
 
 
 @app.post("/v1/apt/match")
@@ -718,6 +731,155 @@ def cache_status():
         "schedule_enrichment": enrich_cache_status(),
         "dedup": notified_store.stats(),
     }
+
+
+@app.get("/v1/apt/announcements/{ann_id}/ics")
+def export_calendar_ics(ann_id: str):
+    """공고 청약 일정을 iCalendar (.ics) 파일로 반환.
+
+    캐시에서 공고를 찾아 접수 기간 + 추정 당첨발표/계약 일정을 담은 ICS 생성.
+    구글 캘린더, 아이폰 캘린더, 아웃룩 등에서 바로 임포트 가능.
+    """
+    ann = _resolve_ann_from_cache(ann_id)
+    if not ann:
+        raise HTTPException(
+            status_code=404,
+            detail=f"공고 {ann_id}이 캐시에 없습니다. 먼저 /v1/apt/announcements로 조회 후 재시도하세요.",
+        )
+
+    ics_text = _build_ics(ann)
+    return Response(
+        content=ics_text.encode("utf-8"),
+        media_type="text/calendar; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{ann_id}.ics"'},
+    )
+
+
+def _build_ics(ann: dict) -> str:
+    """공고 딕셔너리 → ICS 문자열 (라이브러리 의존 없이 직접 생성)."""
+    from datetime import datetime, timedelta
+
+    def _clean(s: str) -> str:
+        return s.replace(",", r"\,").replace(";", r"\;").replace("\n", r"\n")
+
+    def _parse_date(s: str) -> str | None:
+        """YYYYMMDD 또는 YYYY-MM-DD → YYYYMMDD. 실패 시 None."""
+        if not s:
+            return None
+        s = s.strip().replace("-", "")
+        if len(s) >= 8 and s[:8].isdigit():
+            return s[:8]
+        return None
+
+    now_utc = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+    uid_base = f"{ann.get('id', 'unknown')}@k-apt-alert"
+    name = _clean(ann.get("name", "청약 공고"))
+    url = ann.get("url", "")
+    period = ann.get("period", "")
+    rcept_end_raw = ann.get("rcept_end", "")
+
+    # 접수 기간 파싱
+    start_dt = end_dt = None
+    if "~" in period:
+        parts = period.split("~")
+        start_dt = _parse_date(parts[0].strip())
+        end_dt = _parse_date(parts[1].strip())
+    if not end_dt:
+        end_dt = _parse_date(rcept_end_raw)
+    if not start_dt and end_dt:
+        start_dt = end_dt
+
+    events = []
+
+    if start_dt and end_dt:
+        # iCal DTEND는 exclusive → 마지막날 +1
+        end_excl = (datetime.strptime(end_dt, "%Y%m%d") + timedelta(days=1)).strftime("%Y%m%d")
+        desc = _clean(f"청약 접수 기간: {period}\nURL: {url}")
+        events.append(
+            f"BEGIN:VEVENT\r\n"
+            f"UID:{uid_base}-rcept\r\n"
+            f"DTSTAMP:{now_utc}\r\n"
+            f"DTSTART;VALUE=DATE:{start_dt}\r\n"
+            f"DTEND;VALUE=DATE:{end_excl}\r\n"
+            f"SUMMARY:청약접수: {name}\r\n"
+            f"DESCRIPTION:{desc}\r\n"
+            f"END:VEVENT"
+        )
+
+        # 추정 당첨자 발표 (접수 마감 후 7~10일)
+        winner_dt = (datetime.strptime(end_dt, "%Y%m%d") + timedelta(days=8)).strftime("%Y%m%d")
+        winner_end = (datetime.strptime(end_dt, "%Y%m%d") + timedelta(days=9)).strftime("%Y%m%d")
+        events.append(
+            f"BEGIN:VEVENT\r\n"
+            f"UID:{uid_base}-winner\r\n"
+            f"DTSTAMP:{now_utc}\r\n"
+            f"DTSTART;VALUE=DATE:{winner_dt}\r\n"
+            f"DTEND;VALUE=DATE:{winner_end}\r\n"
+            f"SUMMARY:[추정]당첨발표: {name}\r\n"
+            f"DESCRIPTION:추정 당첨자 발표일 (마감 후 7-10일 기준). 실제 날짜는 공고문 확인.\r\n"
+            f"END:VEVENT"
+        )
+
+        # 추정 계약 (당첨 발표 후 약 2주)
+        contract_dt = (datetime.strptime(end_dt, "%Y%m%d") + timedelta(days=21)).strftime("%Y%m%d")
+        contract_end = (datetime.strptime(end_dt, "%Y%m%d") + timedelta(days=25)).strftime("%Y%m%d")
+        events.append(
+            f"BEGIN:VEVENT\r\n"
+            f"UID:{uid_base}-contract\r\n"
+            f"DTSTAMP:{now_utc}\r\n"
+            f"DTSTART;VALUE=DATE:{contract_dt}\r\n"
+            f"DTEND;VALUE=DATE:{contract_end}\r\n"
+            f"SUMMARY:[추정]계약: {name}\r\n"
+            f"DESCRIPTION:추정 계약 기간 (당첨 발표 후 약 1-2주 기준). 실제 날짜는 공고문 확인.\r\n"
+            f"END:VEVENT"
+        )
+
+    cal_lines = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//k-apt-alert//청약알리미//KO",
+        "CALSCALE:GREGORIAN",
+        "METHOD:PUBLISH",
+        *events,
+        "END:VCALENDAR",
+    ]
+    return "\r\n".join(cal_lines)
+
+
+@app.get("/v1/apt/announcements/{ann_id}/competition")
+def get_competition_estimate(ann_id: str):
+    """공고의 경쟁률·커트라인 통계 기반 추정값 반환.
+
+    현재 접수 중인 공고는 실시간 경쟁률 API가 존재하지 않음 (청약홈 미공개).
+    2024-2025년 청약 결과 통계를 기반으로 지역·평형·규제지역 조합별 추정치 제공.
+    접수 마감된 공고는 캐시에서 사라질 수 있으므로 조기 조회 권장.
+    """
+    ann = _resolve_ann_from_cache(ann_id)
+    if not ann:
+        raise HTTPException(
+            status_code=404,
+            detail=f"공고 {ann_id}이 캐시에 없습니다. 먼저 /v1/apt/announcements로 조회 후 재시도하세요.",
+        )
+
+    estimate = scoring.estimate_competition(ann)
+    return {
+        "id": ann_id,
+        "name": ann.get("name"),
+        "region": ann.get("region"),
+        "size": ann.get("size"),
+        "speculative_zone": ann.get("speculative_zone"),
+        **estimate,
+    }
+
+
+def _resolve_ann_from_cache(ann_id: str) -> dict | None:
+    """캐시 전체 스캔으로 ann_id 일치 공고 반환."""
+    with _cache_lock:
+        for entry in _cache.values():
+            for item in entry.get("items", []):
+                if item.get("id") == ann_id:
+                    return item
+    return None
 
 
 @app.get("/v1/apt/categories")

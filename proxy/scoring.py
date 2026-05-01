@@ -177,6 +177,151 @@ def is_eligible_special(profile: dict, special_type: str) -> tuple[bool, str]:
     return False, f"미지원 특공 타입: {special_type}"
 
 
+# ─── 1순위 자격 판정 ────────────────────────────────────────
+METRO_REGIONS = {"서울", "경기", "인천"}
+
+# 지역별 납입횟수 요건 (2024년 기준)
+# 투기과열지구: 24회 / 수도권(청약과열제외): 12회 / 기타: 6회
+def _required_deposit_count(speculative_zone: str, region: str) -> tuple[int, str]:
+    """(필요납입횟수, 지역구분명) 반환."""
+    sz = str(speculative_zone or "").strip().upper()
+    if sz in ("Y", "1", "TRUE"):
+        return 24, "투기과열지구"
+    if region in METRO_REGIONS:
+        return 12, "수도권"
+    return 6, "기타 지역"
+
+
+def is_eligible_first_priority(profile: dict, ann: dict) -> dict:
+    """1순위 청약 자격 판정.
+
+    Returns:
+        {
+          "eligible": bool,
+          "reason": str,
+          "required_count": int — 해당 지역·구역 납입 요건,
+          "user_count": int — 프로필 납입 횟수,
+          "zone": str — 지역 구분,
+          "warnings": list[str] — 자동 확인 불가 항목 경고,
+        }
+    """
+    acct = profile.get("subscription_account", {})
+    user_count = int(acct.get("deposit_count", 0))
+    speculative_zone = ann.get("speculative_zone", "")
+    region = ann.get("region", "")
+    required_count, zone_label = _required_deposit_count(speculative_zone, region)
+
+    prev_win = profile.get("previous_win", "없음")
+    housing_count = int(profile.get("housing_count", 0))
+    no_house = bool(profile.get("no_house", True))
+
+    fails: list[str] = []
+    warnings: list[str] = []
+
+    # 납입횟수 체크
+    if user_count < required_count:
+        fails.append(f"납입 {user_count}회 — {required_count}회 이상 필요")
+
+    # 5년 이내 당첨 이력
+    if prev_win == "5년이내":
+        fails.append("5년 이내 당첨 이력 — 재당첨 제한 기간 중")
+
+    # 투기과열지구 무주택 요건
+    sz = str(speculative_zone or "").strip().upper()
+    if sz in ("Y", "1", "TRUE") and not no_house:
+        fails.append("주택 보유 — 투기과열지구 1순위는 무주택 필수")
+
+    # 자동 확인 불가 항목 경고
+    warnings.append("거주지역 요건(해당 지역 거주기간)은 공고문에서 확인 필요")
+    warnings.append("세대구성원 전원 무주택 여부는 공고문 기준으로 자가 확인 필요")
+
+    if fails:
+        return {
+            "eligible": False,
+            "reason": " / ".join(fails),
+            "required_count": required_count,
+            "user_count": user_count,
+            "zone": zone_label,
+            "warnings": warnings,
+        }
+    return {
+        "eligible": True,
+        "reason": f"{zone_label} 1순위 충족 (납입 {user_count}회 ≥ {required_count}회)",
+        "required_count": required_count,
+        "user_count": user_count,
+        "zone": zone_label,
+        "warnings": warnings,
+    }
+
+
+# ─── 경쟁률 통계 추정 ─────────────────────────────────────────
+# 2024-2025년 청약홈 결과 기반 경험적 참고치 (단위: 경쟁률, 평균당첨가점)
+_COMPETITION_STATS: dict[str, tuple[int, int | None]] = {
+    # (지역_투기과열여부_평형) → (평균경쟁률:1, 평균당첨가점)
+    "서울_Y_소형": (160, 70), "서울_Y_중형": (90, 63), "서울_Y_대형": (30, None),
+    "서울_N_소형": (85, 59), "서울_N_중형": (45, 53), "서울_N_대형": (18, None),
+    "경기_Y_소형": (65, 56), "경기_Y_중형": (38, 49), "경기_Y_대형": (12, None),
+    "경기_N_소형": (28, 43), "경기_N_중형": (16, 36), "경기_N_대형": (7, None),
+    "인천_N_소형": (18, 36), "인천_N_중형": (9, 28), "인천_N_대형": (5, None),
+    "기타_N_소형": (9, 26), "기타_N_중형": (5, 19), "기타_N_대형": (3, None),
+}
+
+_SIZE_BUCKET = {"소형": "소형", "중형": "중형", "대형": "대형"}
+
+
+def _size_to_bucket(size_str: str) -> str:
+    """size 필드('소형/중형', '중형' 등) → 단일 버킷. 복합이면 첫 번째."""
+    if not size_str:
+        return "중형"
+    first = size_str.split("/")[0].strip()
+    return _SIZE_BUCKET.get(first, "중형")
+
+
+def estimate_competition(ann: dict) -> dict:
+    """공고 정보 기반 경쟁률·커트라인 통계 추정.
+
+    Returns:
+        {
+          "avg_rate": int — 평균 경쟁률 (N:1),
+          "avg_cutoff_score": int | None — 평균 당첨 가점 (가점제 해당 시),
+          "note": str — 추정 근거 및 주의사항,
+          "source": "statistical_estimate",
+        }
+    """
+    region = ann.get("region", "")
+    speculative_zone = str(ann.get("speculative_zone", "") or "").strip().upper()
+    sz_flag = "Y" if speculative_zone in ("Y", "1", "TRUE") else "N"
+    size_bucket = _size_to_bucket(ann.get("size", ""))
+
+    if region in METRO_REGIONS:
+        region_key = region if region in ("서울", "경기", "인천") else "경기"
+    else:
+        region_key = "기타"
+
+    key = f"{region_key}_{sz_flag}_{size_bucket}"
+    stats = _COMPETITION_STATS.get(key, _COMPETITION_STATS.get(f"{region_key}_N_중형", (5, 20)))
+    avg_rate, avg_cutoff = stats
+
+    # 대형(85m²+)은 추첨제 위주 → 가점 무관
+    if size_bucket == "대형":
+        cutoff_note = "85m² 초과는 추첨제 비율 높아 가점 무관"
+    elif avg_cutoff:
+        cutoff_note = f"평균 당첨 가점 약 {avg_cutoff}점 (참고치)"
+    else:
+        cutoff_note = ""
+
+    return {
+        "avg_rate": avg_rate,
+        "avg_cutoff_score": avg_cutoff,
+        "note": (
+            f"{region} {size_bucket} ({sz_flag == 'Y' and '투기과열지구' or '일반지역'}) "
+            f"기준 평균 {avg_rate}:1 수준. {cutoff_note}"
+        ),
+        "source": "statistical_estimate",
+        "disclaimer": "2024-2025년 청약홈 결과 기반 경험적 참고치. 실제 경쟁률은 공고별·시점별 크게 다름.",
+    }
+
+
 # ─── 카테고리 매칭 ──────────────────────────────────────────
 NO_ACCOUNT_REQUIRED = {"APT잔여세대", "임의공급", "오피스텔/도시형"}
 
