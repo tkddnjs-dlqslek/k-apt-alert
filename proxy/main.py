@@ -896,7 +896,6 @@ def get_competition_estimate(ann_id: str, history: bool = False):
             return {
                 **base,
                 "source": "regional_history",
-                "data_type": "통계 추정치",
                 "most_recent": {
                     "name": most_recent.get("name"),
                     "rcept_end": most_recent.get("rcept_end"),
@@ -908,8 +907,8 @@ def get_competition_estimate(ann_id: str, history: bool = False):
                 "history_count": len(past),
                 "history": sorted_past[:10],
                 "disclaimer": (
-                    f"[통계 추정치] {region} 최근 12개월 유사 공고 {len(past)}건 기준. "
-                    "과거 유사 단지 결과이며 실제 경쟁률은 공고별로 크게 다를 수 있습니다."
+                    f"{region} 최근 12개월 실제 청약 결과 {len(past)}건 기준. "
+                    "공고별 단지·입지 차이로 실제 경쟁률은 크게 다를 수 있습니다."
                 ),
             }
 
