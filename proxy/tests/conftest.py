@@ -31,3 +31,15 @@ def pytest_configure(config):
 
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
+
+
+import pytest  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def reset_dedup_store():
+    """각 테스트 전후 in-memory dedup store 초기화 — 테스트 간 오염 방지."""
+    import notified as _nd
+    _nd.reset()
+    yield
+    _nd.reset()

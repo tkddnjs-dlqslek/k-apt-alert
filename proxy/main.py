@@ -605,8 +605,10 @@ def notify(
             status_code=502,
             detail={"message": "All configured channels failed", "errors": channel_errors},
         )
+    total_sent = sum(sent_counts.values())
     return {
-        "sent": sent_counts,
+        "sent": total_sent,
+        "sent_detail": sent_counts,
         "channels": channels_sent,
         "blocked_by_dedup": blocked_summary or None,
         "errors": channel_errors or None,
