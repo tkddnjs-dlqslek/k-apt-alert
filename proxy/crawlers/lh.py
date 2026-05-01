@@ -3,8 +3,10 @@
 import logging
 from datetime import datetime, timedelta
 
-from config import DATA_GO_KR_API_KEY, LH_NOTICE_API_URL
-from crawlers.common import fetch_page, REGION_KEYWORDS
+import requests
+
+from config import DATA_GO_KR_API_KEY, LH_NOTICE_API_URL, API_REQUEST_TIMEOUT
+from crawlers.common import REGION_KEYWORDS
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +44,50 @@ _CITY_TO_REGION = {
 _BROAD_REGION_KEYWORDS = {"수도권", "전국", "전 지역", "전지역"}
 
 
+def _fetch_lh_page(page: int, num_rows: int = 50) -> tuple[list[dict], int] | None:
+    """LH Notice API 페이지 조회 — apis.data.go.kr 다형 응답 처리."""
+    params = {
+        "serviceKey": DATA_GO_KR_API_KEY,
+        "pageNo": str(page),
+        "numOfRows": str(num_rows),
+    }
+    try:
+        resp = requests.get(LH_NOTICE_API_URL, params=params, timeout=API_REQUEST_TIMEOUT)
+        resp.raise_for_status()
+        body = resp.json()
+    except Exception as e:
+        logger.warning(f"LH API request failed (page {page}): {e}")
+        return None
+
+    # 직접 리스트 반환 형식
+    if isinstance(body, list):
+        return body, len(body)
+
+    if not isinstance(body, dict):
+        logger.warning(f"LH unexpected response type: {type(body)}")
+        return None
+
+    # apis.data.go.kr 표준 중첩 형식 {"response": {"body": {"items": [...]}}}
+    if "response" in body:
+        rb = body["response"].get("body", {})
+        items = rb.get("items", [])
+        if isinstance(items, dict):
+            items = items.get("item", [])
+            if isinstance(items, dict):  # 단건이면 dict로 옴
+                items = [items]
+        total = int(rb.get("totalCount") or len(items) or 0)
+        return (items if isinstance(items, list) else []), total
+
+    # api.odcloud.kr 형식 {"data": [...], "totalCount": N}
+    if "data" in body:
+        items = body.get("data", [])
+        total = int(body.get("totalCount") or body.get("matchCount") or len(items))
+        return (items if isinstance(items, list) else []), total
+
+    logger.warning(f"LH unknown response keys: {list(body.keys())}")
+    return None
+
+
 def fetch(days_back: int = 30, active_only: bool = True) -> list[dict]:
     cutoff = (datetime.now() - timedelta(days=days_back)).strftime("%Y-%m-%d")
 
@@ -49,22 +95,18 @@ def fetch(days_back: int = 30, active_only: bool = True) -> list[dict]:
     page = 1
 
     while True:
-        params = {
-            "serviceKey": DATA_GO_KR_API_KEY,
-            "pageNo": str(page),
-            "numOfRows": "50",
-        }
-
-        body = fetch_page(LH_NOTICE_API_URL, params)
-        if body is None:
+        result = _fetch_lh_page(page)
+        if result is None:
             break
 
-        items = body.get("data", [])
+        items, total = result
         if not items:
             break
 
         has_old = False
         for item in items:
+            if not isinstance(item, dict):
+                continue
             reg_date = str(item.get("BBS_WOU_DTTM", ""))[:10]
             if active_only and reg_date < cutoff:
                 has_old = True
@@ -74,7 +116,6 @@ def fetch(days_back: int = 30, active_only: bool = True) -> list[dict]:
         if has_old:
             break
 
-        total = body.get("totalCount") or len(items)
         if page * 50 >= total:
             break
         page += 1
