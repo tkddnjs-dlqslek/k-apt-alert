@@ -310,11 +310,12 @@ def estimate_competition(ann: dict) -> dict:
     else:
         cutoff_note = ""
 
+    zone_label = "투기과열지구" if sz_flag == "Y" else "일반지역"
     return {
         "avg_rate": avg_rate,
         "avg_cutoff_score": avg_cutoff,
         "note": (
-            f"{region} {size_bucket} ({sz_flag == 'Y' and '투기과열지구' or '일반지역'}) "
+            f"[통계 추정치] {region} {size_bucket} ({zone_label}) "
             f"기준 평균 {avg_rate}:1 수준. {cutoff_note}"
         ),
         "source": "statistical_estimate",

@@ -883,20 +883,43 @@ def get_competition_estimate(ann_id: str, history: bool = False):
         region = ann.get("region", "")
         past = competition_crawler.fetch_regional_history(region, months_back=12)
         if past:
+            sorted_past = sorted(
+                past, key=lambda p: p.get("rcept_end", ""), reverse=True
+            )
+            most_recent = sorted_past[0]
+
             rates = [p["competition_rate"] for p in past if p.get("competition_rate")]
             cutoffs = [p["cutoff_avg"] for p in past if p.get("cutoff_avg")]
+            avg_rate = round(sum(rates) / len(rates), 1) if rates else None
+            avg_cutoff = round(sum(cutoffs) / len(cutoffs), 1) if cutoffs else None
+
             return {
                 **base,
                 "source": "regional_history",
-                "avg_rate": round(sum(rates) / len(rates), 1) if rates else None,
-                "avg_cutoff_score": round(sum(cutoffs) / len(cutoffs), 1) if cutoffs else None,
+                "data_type": "통계 추정치",
+                "most_recent": {
+                    "name": most_recent.get("name"),
+                    "rcept_end": most_recent.get("rcept_end"),
+                    "competition_rate": most_recent.get("competition_rate"),
+                    "cutoff_avg": most_recent.get("cutoff_avg"),
+                },
+                "avg_rate": avg_rate,
+                "avg_cutoff_score": avg_cutoff,
                 "history_count": len(past),
-                "history": past[:10],
-                "disclaimer": f"{region} 최근 12개월 유사 공고 {len(past)}건 평균. 실제 경쟁률은 공고별로 크게 다릅니다.",
+                "history": sorted_past[:10],
+                "disclaimer": (
+                    f"[통계 추정치] {region} 최근 12개월 유사 공고 {len(past)}건 기준. "
+                    "과거 유사 단지 결과이며 실제 경쟁률은 공고별로 크게 다를 수 있습니다."
+                ),
             }
 
     # 3순위: 통계 기반 추정 폴백
     estimate = scoring.estimate_competition(ann)
+    estimate["data_type"] = "통계 추정치"
+    estimate["disclaimer"] = (
+        "[통계 추정치] " + estimate.get("disclaimer", "")
+        + " 과거 유사 단지 기준 참고치이며 실제와 다를 수 있습니다."
+    )
     return {**base, **estimate}
 
 
