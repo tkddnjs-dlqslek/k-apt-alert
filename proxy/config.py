@@ -22,6 +22,9 @@ REMNDR_MDL_API_URL = f"{_BASE}/getRemndrLttotPblancMdl"
 PBL_PVT_RENT_MDL_API_URL = f"{_BASE}/getPblPvtRentLttotPblancMdl"
 OPT_MDL_API_URL = f"{_BASE}/getOPTLttotPblancMdl"
 
+# 청약 결과 API (당첨자 선정 결과 조회)
+APPLYHOME_RSFL_API_URL = f"{_BASE}/getAPTRsflInfo"
+
 LH_NOTICE_API_URL = "http://apis.data.go.kr/B552555/lhNoticeInfo1/getNoticeInfo1"
 
 # Notice raw extraction (Phase 1 of notice-interpreter)

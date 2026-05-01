@@ -24,6 +24,7 @@ from config import (
     TIER_LIMITS,
 )
 from crawlers import applyhome, officetell, lh, remndr, pbl_pvt_rent, opt, sh, gh
+from crawlers import competition as competition_crawler
 from crawlers.applyhome_page import enrich_schedules, cache_status as enrich_cache_status
 from crawlers.notice_raw import (
     extract_notice_raw,
@@ -847,12 +848,12 @@ def _build_ics(ann: dict) -> str:
 
 
 @app.get("/v1/apt/announcements/{ann_id}/competition")
-def get_competition_estimate(ann_id: str):
-    """공고의 경쟁률·커트라인 통계 기반 추정값 반환.
+def get_competition_estimate(ann_id: str, history: bool = False):
+    """공고의 경쟁률·커트라인 조회.
 
-    현재 접수 중인 공고는 실시간 경쟁률 API가 존재하지 않음 (청약홈 미공개).
-    2024-2025년 청약 결과 통계를 기반으로 지역·평형·규제지역 조합별 추정치 제공.
-    접수 마감된 공고는 캐시에서 사라질 수 있으므로 조기 조회 권장.
+    1순위: 청약홈 당첨자 발표 결과 HTML (접수 마감+결과 발표 공고)
+    2순위: 공공데이터포털 결과 API 기반 지역 과거 이력 (history=true)
+    3순위: 2024-2025년 통계 기반 추정치 (fallback)
     """
     ann = _resolve_ann_from_cache(ann_id)
     if not ann:
@@ -861,15 +862,42 @@ def get_competition_estimate(ann_id: str):
             detail=f"공고 {ann_id}이 캐시에 없습니다. 먼저 /v1/apt/announcements로 조회 후 재시도하세요.",
         )
 
-    estimate = scoring.estimate_competition(ann)
-    return {
+    # ann_id에서 pblanc_no 추출 (예: "apt_2026000123" → "2026000123")
+    pblanc_no = ann_id.split("_", 1)[-1] if "_" in ann_id else ann_id
+
+    base = {
         "id": ann_id,
         "name": ann.get("name"),
         "region": ann.get("region"),
         "size": ann.get("size"),
         "speculative_zone": ann.get("speculative_zone"),
-        **estimate,
     }
+
+    # 1순위: 청약홈 실제 결과 페이지
+    real = competition_crawler.fetch_result(pblanc_no)
+    if real:
+        return {**base, **real}
+
+    # 2순위: 지역 과거 이력 (history=true 요청 시)
+    if history:
+        region = ann.get("region", "")
+        past = competition_crawler.fetch_regional_history(region, months_back=12)
+        if past:
+            rates = [p["competition_rate"] for p in past if p.get("competition_rate")]
+            cutoffs = [p["cutoff_avg"] for p in past if p.get("cutoff_avg")]
+            return {
+                **base,
+                "source": "regional_history",
+                "avg_rate": round(sum(rates) / len(rates), 1) if rates else None,
+                "avg_cutoff_score": round(sum(cutoffs) / len(cutoffs), 1) if cutoffs else None,
+                "history_count": len(past),
+                "history": past[:10],
+                "disclaimer": f"{region} 최근 12개월 유사 공고 {len(past)}건 평균. 실제 경쟁률은 공고별로 크게 다릅니다.",
+            }
+
+    # 3순위: 통계 기반 추정 폴백
+    estimate = scoring.estimate_competition(ann)
+    return {**base, **estimate}
 
 
 def _resolve_ann_from_cache(ann_id: str) -> dict | None:
