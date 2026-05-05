@@ -1,6 +1,8 @@
 {
   "changes": [],
-  "updated_at": "2026-05-05T16:00:25Z",
+  "updated_at": "2026-05-05T16:33:29Z",
+  "first_diff_date": "2026-05-06",
+  "tracking_status": "bootstrap_no_diff_yet",
   "retention_days": 30,
   "tracked_fields": [
     "name",
