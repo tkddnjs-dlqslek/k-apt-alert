@@ -34,6 +34,7 @@ from crawlers.notice_raw import (
 )
 import scoring
 import notified as notified_store
+import changes as changes_store
 
 SENTRY_DSN = os.environ.get("SENTRY_DSN", "")
 if SENTRY_DSN:
@@ -930,6 +931,57 @@ def _resolve_ann_from_cache(ann_id: str) -> dict | None:
                 if item.get("id") == ann_id:
                     return item
     return None
+
+
+@app.get("/v1/apt/changes")
+def get_changes(
+    since: str = Query(default="", description="이 날짜 이후 변경만 (YYYY-MM-DD)"),
+    change_type: str = Query(default="", description="필터: new / updated / removed"),
+    limit: int = Query(default=50, ge=1, le=200),
+    force_refresh: bool = Query(default=False, description="raw URL 캐시 무시"),
+):
+    """공고 변동 이력 조회.
+
+    GitHub Actions가 매일 KST 08:00 갱신한 changes.json을 반환합니다.
+    `since`로 날짜 컷 / `change_type`으로 종류 필터링.
+
+    응답 예:
+        {
+          "changes": [
+            {"id": "...", "type": "new", "detected_at": "2026-05-06", "name": "...", ...},
+            {"id": "...", "type": "updated", "field_changes": {"period": {"before": "...", "after": "..."}}}
+          ],
+          "count": N,
+          "updated_at": "2026-05-06T23:00:00Z",
+          "retention_days": 30,
+          "status": "ok" | "not_yet_initialized"
+        }
+    """
+    if change_type and change_type not in ("new", "updated", "removed"):
+        raise HTTPException(
+            status_code=400,
+            detail="change_type must be one of: new, updated, removed",
+        )
+
+    try:
+        log = changes_store.get_log(force_refresh=force_refresh)
+    except requests.RequestException as e:
+        raise HTTPException(status_code=502, detail=f"changes.json fetch failed: {e}")
+
+    items = changes_store.filter_changes(log, since=since, change_type=change_type, limit=limit)
+    return {
+        "changes": items,
+        "count": len(items),
+        "updated_at": log.get("updated_at", ""),
+        "retention_days": log.get("retention_days", 30),
+        "status": log.get("_status", "ok"),
+    }
+
+
+@app.get("/v1/apt/changes/cache-status")
+def changes_cache_status():
+    """디버그용 — 변동 추적 캐시 상태."""
+    return changes_store.cache_status()
 
 
 @app.get("/v1/apt/categories")

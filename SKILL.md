@@ -41,6 +41,7 @@ metadata:
 | "1순위 돼?", "납입횟수 충분해?", "1순위 자격" | `/v1/apt/score` + `announcements` 배열 → `priority_checks` |
 | "캘린더에 추가해줘", "일정 저장", ".ics" | `GET /v1/apt/announcements/{id}/ics` → 다운로드 링크 안내 |
 | "경쟁률 어때?", "몇 대 일이야?", "예상 경쟁률" | `GET /v1/apt/announcements/{id}/competition` 통계 추정 |
+| "새로 뜬 공고", "변동 사항", "어제 대비", "최근 추가된" | `GET /v1/apt/changes` 변동 이력 조회 |
 
 ### 3. 프록시 호출 규칙 (필수)
 
@@ -129,9 +130,29 @@ metadata:
 - 응답 `source` 필드로 어느 단계가 응답했는지 식별:
   - `source: "applyhome"` — 실제 결과 (가장 정확)
   - `source: "regional_history"` — 같은 지역 실제 평균 (`history`, `avg_rate`, `avg_cutoff_score`, `most_recent`, `history_count`)
-  - `data_type: "통계 추정치"` — 폴백 추정 (`avg_rate`, `avg_cutoff_score`, `note`)
+  - `source: "statistical_estimate"` + `data_type: "통계 추정치"` — 폴백 추정 (`avg_rate`, `avg_cutoff_score`, `note`)
 - 출력 시 `disclaimer` 그대로 노출 (실제 vs 추정 여부 구분 명시)
 - 통계 추정 폴백 시 지역별 참고: 서울 투기과열 소형 160:1 / 서울 일반 소형 85:1 / 경기 일반 소형 28:1 / 기타 소형 9:1
+
+**공고 변동 추적 (`/v1/apt/changes`)**
+- "새로 뜬 공고", "어제 대비", "분양가 바뀐 거 있어?" 등에만 호출
+- GitHub Actions가 매일 KST 08:00 자동 갱신, **최근 30일 보관**
+- 쿼리 파라미터:
+  - `since=YYYY-MM-DD` — 이 날짜 이후 변경만
+  - `change_type=new|updated|removed` — 종류 필터
+  - `limit=N` (기본 50, 최대 200)
+- 호출 예시:
+  ```bash
+  # 최근 7일 신규 공고만
+  curl -s --max-time 15 "https://k-apt-alert-proxy.onrender.com/v1/apt/changes?since=2026-04-29&change_type=new"
+  # 어제 갱신 모두
+  curl -s --max-time 15 "https://k-apt-alert-proxy.onrender.com/v1/apt/changes?since=2026-05-05"
+  ```
+- 응답 `status: "not_yet_initialized"` → 추적이 막 시작됐고 아직 diff 없음 안내
+- 변경 항목 출력 형식:
+  - `new` — 어제 없던 공고. id·이름·지역·url 표시
+  - `updated` — `field_changes` 객체로 어떤 필드가 어떻게 바뀌었는지 (`{before, after}`)
+  - `removed` — 마감 또는 삭제된 공고
 
 **최소 호출 원칙**
 - 공고 조회는 필요한 `category`와 `region`만 지정해서 **단일 호출**

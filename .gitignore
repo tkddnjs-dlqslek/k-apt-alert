@@ -6,3 +6,5 @@ dist/
 build/
 .venv/
 venv/
+# track_changes.py 로컬 실행 산출물 (실제는 data 브랜치에만 보관)
+data/

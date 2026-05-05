@@ -1,0 +1,71 @@
+name: Daily announcement changes tracker
+
+on:
+  schedule:
+    - cron: "0 23 * * *"   # 매일 오전 8시 KST (23:00 UTC 전날)
+  workflow_dispatch:
+
+# 같은 종류 작업 큐 적체 방지
+concurrency:
+  group: changes-tracker
+  cancel-in-progress: true
+
+permissions:
+  contents: write   # data 브랜치 push 권한
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout (data branch, 없으면 main 기반 새로 생성)
+        uses: actions/checkout@v4
+        with:
+          ref: data
+          fetch-depth: 1
+        continue-on-error: true   # data 브랜치 없으면 실패 → 다음 step에서 만든다
+
+      - name: Bootstrap data branch if missing
+        run: |
+          if [ ! -d .git ]; then
+            git init
+            git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          fi
+          if ! git rev-parse --verify origin/data > /dev/null 2>&1; then
+            echo "data branch missing — creating fresh orphan branch"
+            git checkout --orphan data
+            git rm -rf . > /dev/null 2>&1 || true
+            mkdir -p data/snapshots
+            echo "# k-apt-alert tracker data" > README.md
+            git add README.md
+            git -c user.email="actions@github.com" -c user.name="GitHub Actions" \
+              commit -m "init: data branch 부트스트랩"
+            git push origin data
+          fi
+
+      - name: Checkout scripts from main
+        run: |
+          # data 브랜치에는 scripts가 없으므로 main에서 떠와서 임시로 사용
+          curl -sSL "https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/track_changes.py" \
+            -o /tmp/track_changes.py
+          test -s /tmp/track_changes.py || (echo "track_changes.py 다운로드 실패" && exit 1)
+
+      - name: Run change tracker
+        env:
+          PROXY_URL: https://k-apt-alert-proxy.onrender.com
+          DATA_DIR: data
+        run: |
+          python3 /tmp/track_changes.py
+
+      - name: Commit & push if changed
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git add data/
+          if git diff --cached --quiet; then
+            echo "변경 없음 — 커밋 생략"
+            exit 0
+          fi
+          DATE=$(date -u +%Y-%m-%d)
+          git commit -m "chore(data): $DATE 공고 변동 추적 갱신"
+          git push origin data
