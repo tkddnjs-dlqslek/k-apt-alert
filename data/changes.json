@@ -1,0 +1,24 @@
+{
+  "changes": [],
+  "updated_at": "2026-05-05T16:00:25Z",
+  "retention_days": 30,
+  "tracked_fields": [
+    "name",
+    "region",
+    "district",
+    "address",
+    "period",
+    "rcept_end",
+    "winner_date",
+    "contract_start",
+    "contract_end",
+    "total_units",
+    "house_type",
+    "constructor",
+    "url",
+    "speculative_zone",
+    "price_controlled",
+    "house_category",
+    "size"
+  ]
+}
