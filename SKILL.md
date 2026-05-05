@@ -115,12 +115,23 @@ metadata:
 - 안내 예시: `"캘린더에 추가하려면 이 링크를 브라우저에서 열거나 구글 캘린더 → 다른 캘린더 → URL로 구독하세요: https://k-apt-alert-proxy.onrender.com/v1/apt/announcements/{id}/ics"`
 - 단, **캐시에 공고가 있어야** 동작 (먼저 /v1/apt/announcements로 조회 후 호출)
 
-**경쟁률 통계 추정 (`/v1/apt/announcements/{id}/competition`)**
-- 실시간 경쟁률 API는 청약홈 미공개 → 2024-2025년 결과 기반 통계 추정값 반환
-- 응답 필드: `avg_rate` (평균 경쟁률 N:1), `avg_cutoff_score` (평균 당첨 가점), `note`, `disclaimer`
-- 호출 예시: `curl -s --max-time 15 "https://k-apt-alert-proxy.onrender.com/v1/apt/announcements/{id}/competition"`
-- ⚠️ 통계적 추정치임을 반드시 명시: "실제 경쟁률은 공고별·시점별 크게 다를 수 있습니다"
-- 지역별 참고 평균: 서울 투기과열 소형 160:1 / 서울 일반 소형 85:1 / 경기 일반 소형 28:1 / 기타 소형 9:1
+**경쟁률 조회 (`/v1/apt/announcements/{id}/competition`)** — 3단 폴백
+- 1순위 **실제 결과** — 청약홈 당첨자 발표 페이지 HTML 파싱 (이미 마감·발표된 공고만)
+- 2순위 **지역 과거 이력** — `?history=true` 추가 시, 공공데이터포털 결과 API 기반 같은 지역 최근 12개월 실제 경쟁률 평균
+- 3순위 **통계 추정치** — 위 둘 다 없으면 2024-2025 통계 기반 폴백
+- 호출 예시:
+  ```bash
+  # 기본 (실제 결과 → 통계 추정 폴백)
+  curl -s --max-time 15 "https://k-apt-alert-proxy.onrender.com/v1/apt/announcements/{id}/competition"
+  # 지역 이력 활용 (마감 전 공고에 권장)
+  curl -s --max-time 15 "https://k-apt-alert-proxy.onrender.com/v1/apt/announcements/{id}/competition?history=true"
+  ```
+- 응답 `source` 필드로 어느 단계가 응답했는지 식별:
+  - `source: "applyhome"` — 실제 결과 (가장 정확)
+  - `source: "regional_history"` — 같은 지역 실제 평균 (`history`, `avg_rate`, `avg_cutoff_score`, `most_recent`, `history_count`)
+  - `data_type: "통계 추정치"` — 폴백 추정 (`avg_rate`, `avg_cutoff_score`, `note`)
+- 출력 시 `disclaimer` 그대로 노출 (실제 vs 추정 여부 구분 명시)
+- 통계 추정 폴백 시 지역별 참고: 서울 투기과열 소형 160:1 / 서울 일반 소형 85:1 / 경기 일반 소형 28:1 / 기타 소형 9:1
 
 **최소 호출 원칙**
 - 공고 조회는 필요한 `category`와 `region`만 지정해서 **단일 호출**
