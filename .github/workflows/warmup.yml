@@ -7,15 +7,26 @@ on:
     - cron: "*/12 * * * *"
   workflow_dispatch:
 
+# Runner 못 잡고 대기 중인 이전 run은 새 run이 시작될 때 자동 취소
+# → 큐 적체 + 15분 timeout 방지
+concurrency:
+  group: warmup
+  cancel-in-progress: true
+
 jobs:
   warmup:
     runs-on: ubuntu-latest
+    # Runner 잡힌 뒤 5분 안에 못 끝나면 의미 없음 (다음 cron이 12분 뒤)
+    timeout-minutes: 5
     steps:
       - name: Ping /health (Render wake)
+        continue-on-error: true
         run: |
-          curl -sS --max-time 30 "https://k-apt-alert-proxy.onrender.com/health" || echo "health ping failed"
+          curl -sS --max-time 30 "https://k-apt-alert-proxy.onrender.com/health" \
+            || echo "health ping failed (ok)"
 
       - name: Prefetch all 8 categories (keep cache warm)
+        continue-on-error: true
         run: |
           # category=all은 ThreadPoolExecutor로 8개 카테고리 병렬 fetch
           # 이미 warm한 카테고리는 캐시 hit, 만료된 것만 재크롤링
