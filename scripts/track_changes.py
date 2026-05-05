@@ -111,8 +111,11 @@ def diff_snapshots(prev: dict[str, dict], curr: dict[str, dict]) -> list[dict]:
     return changes
 
 
-def merge_changes_log(new_changes: list[dict]) -> dict:
-    """기존 changes.json에 오늘 변경 추가, 30일 초과분 제거."""
+def merge_changes_log(new_changes: list[dict], bootstrap: bool = False) -> dict:
+    """기존 changes.json에 오늘 변경 추가, 30일 초과분 제거.
+
+    bootstrap=True 면 첫 실행이라 비교 대상이 없는 상태 → status 별도 표시.
+    """
     if CHANGES_FILE.exists():
         log = json.loads(CHANGES_FILE.read_text(encoding="utf-8"))
     else:
@@ -122,9 +125,16 @@ def merge_changes_log(new_changes: list[dict]) -> dict:
     kept = [c for c in log.get("changes", []) if c.get("detected_at", "") >= cutoff]
     merged = new_changes + kept  # 최신 순
 
+    today_iso = date.today().isoformat()
+    # bootstrap: 어제 snapshot 없어서 비교 못 한 상태
+    # ready: 정상 운영 중 — 비교 결과(빈 list여도)가 의미 있는 상태
+    status = "bootstrap_no_diff_yet" if bootstrap and not kept else "ready"
+
     return {
         "changes": merged,
         "updated_at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        "first_diff_date": (date.today() + timedelta(days=1)).isoformat() if status == "bootstrap_no_diff_yet" else None,
+        "tracking_status": status,
         "retention_days": RETENTION_DAYS,
         "tracked_fields": list(TRACKED_FIELDS),
     }
@@ -166,15 +176,15 @@ def main() -> int:
     prev = load_snapshot(yesterday)
     if prev is None:
         print(f"[track_changes] no snapshot for {yesterday} — bootstrap mode (no diff)")
-        # 빈 changes로 로그만 갱신
-        log = merge_changes_log([])
+        # 빈 changes로 로그만 갱신, status에 부트스트랩 명시
+        log = merge_changes_log([], bootstrap=True)
     else:
         curr = {a["id"]: a for a in anns if a.get("id")}
         new_changes = diff_snapshots(prev, curr)
         print(f"[track_changes] diff: {sum(1 for c in new_changes if c['type'] == 'new')} new, "
               f"{sum(1 for c in new_changes if c['type'] == 'updated')} updated, "
               f"{sum(1 for c in new_changes if c['type'] == 'removed')} removed")
-        log = merge_changes_log(new_changes)
+        log = merge_changes_log(new_changes, bootstrap=False)
 
     CHANGES_FILE.write_text(
         json.dumps(log, ensure_ascii=False, indent=2),

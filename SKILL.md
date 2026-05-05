@@ -148,7 +148,11 @@ metadata:
   # 어제 갱신 모두
   curl -s --max-time 15 "https://k-apt-alert-proxy.onrender.com/v1/apt/changes?since=2026-05-05"
   ```
-- 응답 `status: "not_yet_initialized"` → 추적이 막 시작됐고 아직 diff 없음 안내
+- 응답 `tracking_status` 분기:
+  - `"ready"` + count>0 → 정상. 변경 항목 출력
+  - `"ready"` + count=0 → 진짜 변동 없음 → "어제 대비 신규 공고 없습니다" 안내
+  - `"bootstrap_no_diff_yet"` → 추적 막 시작 → "📅 변동 추적이 막 시작됐어요. {first_diff_date}부터 변경사항이 표시됩니다" 안내
+  - `status: "not_yet_initialized"` → data 브랜치 자체가 없는 초기 상태
 - 변경 항목 출력 형식:
   - `new` — 어제 없던 공고. id·이름·지역·url 표시
   - `updated` — `field_changes` 객체로 어떤 필드가 어떻게 바뀌었는지 (`{before, after}`)

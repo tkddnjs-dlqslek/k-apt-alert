@@ -32,12 +32,22 @@ _cache: dict = {}
 _cache_lock = Lock()
 
 # 섹션 헤딩 패턴 — 청약홈/LH 공통적으로 자주 등장. 매칭되면 sections dict에 split.
+# 주의: "공급대상"은 자격 요건 텍스트가 아니라 주택형/세대수 표라서 "자격"과 분리한다.
+# "자격" 섹션은 사용자가 "내 신청 자격"을 물을 때 답변용이므로, 표가 아닌 텍스트만 잡는다.
 _SECTION_PATTERNS = [
-    ("자격", re.compile(r"(?:신청\s*자격|입주자\s*자격|자격\s*요건|공급\s*대상)")),
+    ("공급대상", re.compile(r"공급\s*대상")),
+    ("자격", re.compile(r"(?:신청\s*자격|입주자\s*자격|자격\s*요건|청약\s*자격)")),
     ("공급일정", re.compile(r"(?:공급\s*일정|모집\s*일정|청약\s*일정|접수\s*일정)")),
     ("공급금액", re.compile(r"(?:공급\s*(?:금액|가격)|분양\s*가|임대\s*보증금|공급\s*조건)")),
     ("유의사항", re.compile(r"(?:유의\s*사항|주의\s*사항|참고\s*사항|기타\s*사항)")),
 ]
+
+# 사이트 공통 제너릭 타이틀 — 이 값이면 fallback_title 사용
+_GENERIC_TITLES = {
+    "청약홈", "청약Home", "applyhome", "LH한국토지주택공사", "LH 한국토지주택공사",
+    "LH 청약플러스", "LH청약플러스", "SH서울주택도시공사", "SH 서울주택도시공사",
+    "GH경기주택도시공사", "GH 경기주택도시공사", "경기주택도시공사",
+}
 
 # 노이즈 패턴 — 본문 정규화 시 제거
 _WHITESPACE_RE = re.compile(r"[ \t]+")
@@ -95,15 +105,33 @@ def _detect_sections(text: str) -> dict:
     return sections
 
 
+def _is_generic_title(title: str) -> bool:
+    """페이지 <title>이 사이트 브랜드명 수준이라 공고명으로 못 쓸 때 True."""
+    if not title:
+        return True
+    norm = title.strip()
+    if norm in _GENERIC_TITLES:
+        return True
+    # "청약홈 - ..." 식으로 brand prefix만 있으면 generic 처리
+    return any(norm == g or norm.startswith(f"{g} -") or norm.startswith(f"{g}|") for g in _GENERIC_TITLES)
+
+
 def _extract_title(soup: BeautifulSoup, fallback: str = "") -> str:
-    """페이지 <title> 또는 첫 h1/h2를 공고명으로 사용."""
+    """공고명 추출 — h1/h2 우선, 그다음 <title>, generic이면 fallback."""
+    # 청약홈 등은 본문 안에 실제 공고명이 h1/h2/.title로 들어 있다
+    for sel in ("h1", "h2", ".title", ".tit", ".board_tit", ".board-tit", ".view_tit", ".view-tit"):
+        tag = soup.select_one(sel)
+        if tag:
+            txt = tag.get_text(strip=True)
+            if txt and not _is_generic_title(txt) and len(txt) > 3:
+                return txt[:200]
+
     title_tag = soup.find("title")
-    if title_tag and title_tag.text.strip():
-        return title_tag.text.strip()[:200]
-    for tag_name in ("h1", "h2"):
-        tag = soup.find(tag_name)
-        if tag and tag.text.strip():
-            return tag.text.strip()[:200]
+    if title_tag:
+        txt = title_tag.text.strip()
+        if txt and not _is_generic_title(txt):
+            return txt[:200]
+
     return fallback
 
 
@@ -113,10 +141,10 @@ def _truncate(text: str, max_chars: int) -> tuple[str, bool]:
     return text[:max_chars] + "\n\n[... truncated]", True
 
 
-def _extract_applyhome(html: str) -> dict:
+def _extract_applyhome(html: str, fallback_title: str = "") -> dict:
     """청약홈 SSR 페이지 추출. 본문 컨테이너 선호도: .cont > #pblancCont > body."""
     soup = BeautifulSoup(html, "html.parser")
-    title = _extract_title(soup)
+    title = _extract_title(soup, fallback=fallback_title)
 
     container = soup.select_one(".cont, #pblancCont, .pblanc_cont, .board-view, .view-cont")
     if not container:
@@ -126,10 +154,10 @@ def _extract_applyhome(html: str) -> dict:
     return {"title": title, "text": text}
 
 
-def _extract_lh(html: str) -> dict:
+def _extract_lh(html: str, fallback_title: str = "") -> dict:
     """LH apply.lh.or.kr 게시글 상세 페이지 추출."""
     soup = BeautifulSoup(html, "html.parser")
-    title = _extract_title(soup)
+    title = _extract_title(soup, fallback=fallback_title)
 
     container = soup.select_one(
         ".board-view, .view-content, .view-cont, #content, .bbs-view, .cont-area"
@@ -141,10 +169,10 @@ def _extract_lh(html: str) -> dict:
     return {"title": title, "text": text}
 
 
-def _extract_sh(html: str) -> dict:
+def _extract_sh(html: str, fallback_title: str = "") -> dict:
     """SH (i-sh.co.kr) 게시판 view.do 상세 페이지 추출."""
     soup = BeautifulSoup(html, "html.parser")
-    title = _extract_title(soup)
+    title = _extract_title(soup, fallback=fallback_title)
 
     container = soup.select_one(
         ".board_view, .board-view, .view_cont, .view-cont, .bbs_view, .bbs-view, "
@@ -157,10 +185,10 @@ def _extract_sh(html: str) -> dict:
     return {"title": title, "text": text}
 
 
-def _extract_gh(html: str) -> dict:
+def _extract_gh(html: str, fallback_title: str = "") -> dict:
     """GH (gh.or.kr) announcement-of-salerental001.do 상세 페이지 추출."""
     soup = BeautifulSoup(html, "html.parser")
-    title = _extract_title(soup)
+    title = _extract_title(soup, fallback=fallback_title)
 
     container = soup.select_one(
         ".board_view, .board-view, .view_content, .view-content, .bbs_view, .bbs-view, "
@@ -194,6 +222,7 @@ def extract_notice_raw(
     url: str,
     max_chars: int,
     force_refresh: bool = False,
+    fallback_title: str = "",
 ) -> dict:
     """단일 공고의 raw 텍스트 추출. 7일 캐시 + max_chars truncation.
 
@@ -241,7 +270,7 @@ def extract_notice_raw(
         raise ValueError(f"fetch failed: {e}")
 
     try:
-        extracted = extractor(resp.text)
+        extracted = extractor(resp.text, fallback_title=fallback_title)
     except Exception as e:
         raise ValueError(f"extract failed: {e}")
 

@@ -26,6 +26,7 @@ from config import (
 from crawlers import applyhome, officetell, lh, remndr, pbl_pvt_rent, opt, sh, gh
 from crawlers import competition as competition_crawler
 from crawlers.applyhome_page import enrich_schedules, cache_status as enrich_cache_status
+from crawlers.common import extract_district
 from crawlers.notice_raw import (
     extract_notice_raw,
     is_supported_host,
@@ -272,12 +273,19 @@ def _fetch_and_filter(category, active_only, months_back, region_filter, distric
     deduped = _dedup_announcements(announcements)
 
     # 지역·구군 필터 (enrichment 전 선처리로 fetch 수 최소화)
+    # district_filter가 지정된 경우, district가 비어있는 항목은 매칭 불가로 간주하여 제외
+    # — SH/GH 등 district 미설정 카테고리가 "송파구만" 요청에 전부 통과하던 문제 차단
     filtered = []
     for ann in deduped:
         if region_filter and ann.get("region") not in region_filter and ann.get("region") != "전국":
             continue
-        if district_filter and ann.get("district") and ann.get("district") not in district_filter:
-            continue
+        if district_filter:
+            ann_district = ann.get("district", "")
+            # 1차: address에서 구/군 추출 시도 (SH/GH는 district 비어 있어도 address에 정보)
+            if not ann_district:
+                ann_district = extract_district(ann.get("address", "")) or ""
+            if not ann_district or ann_district not in district_filter:
+                continue
         filtered.append(ann)
 
     # rcept_end 공란 공고에 대해 청약홈 HTML 파싱으로 일정 보강
@@ -974,6 +982,8 @@ def get_changes(
         "count": len(items),
         "updated_at": log.get("updated_at", ""),
         "retention_days": log.get("retention_days", 30),
+        "tracking_status": log.get("tracking_status", "ready"),
+        "first_diff_date": log.get("first_diff_date"),
         "status": log.get("_status", "ok"),
     }
 
@@ -1034,6 +1044,16 @@ def _resolve_url_from_cache(notice_id: str) -> str | None:
     return None
 
 
+def _resolve_ann_meta_from_cache(notice_id: str) -> tuple[str, str]:
+    """캐시에서 (url, name) 동시 반환. 없으면 ('', '')."""
+    with _cache_lock:
+        for entry in _cache.values():
+            for ann in entry.get("items", []):
+                if ann.get("id") == notice_id:
+                    return ann.get("url", "") or "", ann.get("name", "") or ""
+    return "", ""
+
+
 @app.get("/v1/apt/notice/{notice_id}/raw")
 def get_notice_raw(
     notice_id: str,
@@ -1068,7 +1088,8 @@ def get_notice_raw(
                 detail=f"Daily notice_raw limit exceeded ({limit}). Upgrade to paid tier.",
             )
 
-    resolved_url = _resolve_url_from_cache(notice_id) or url
+    cached_url, cached_name = _resolve_ann_meta_from_cache(notice_id)
+    resolved_url = cached_url or url
     if not resolved_url:
         raise HTTPException(
             status_code=404,
@@ -1096,6 +1117,7 @@ def get_notice_raw(
             url=resolved_url,
             max_chars=effective_max_chars,
             force_refresh=force_refresh,
+            fallback_title=cached_name,
         )
     except ValueError as e:
         raise HTTPException(status_code=502, detail=f"notice_raw extract failed: {e}")

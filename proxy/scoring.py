@@ -163,8 +163,8 @@ def is_eligible_special(profile: dict, special_type: str) -> tuple[bool, str]:
 
     if special_type == "노부모부양":
         if profile.get("dependent_parents_3y", False):
-            return True, "65세 이상 직계존속 3년 동거 충족 (자가신고)"
-        return False, "65세 이상 직계존속 3년 동거 미체크 (프로필 dependent_parents_3y)"
+            return True, "65세 이상 직계존속 3년 이상 동거 충족 (자가신고)"
+        return False, "65세 이상 직계존속 3년 이상 동거 요건 해당 안 됨 (해당되시면 프로필 갱신 필요)"
 
     if special_type == "청년":
         age = int(profile.get("age", 99))
