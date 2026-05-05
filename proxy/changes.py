@@ -26,9 +26,13 @@ _cache: dict = {"ts": 0.0, "data": None}
 _lock = Lock()
 
 
-def _fetch_remote() -> dict:
-    """raw.githubusercontent.com에서 changes.json 다운로드."""
-    resp = requests.get(RAW_URL, timeout=15)
+def _fetch_remote(cache_bust: bool = False) -> dict:
+    """raw.githubusercontent.com에서 changes.json 다운로드.
+
+    cache_bust=True면 URL에 timestamp 파라미터로 GitHub CDN 캐시 우회.
+    """
+    url = RAW_URL + (f"?_t={int(time.time())}" if cache_bust else "")
+    resp = requests.get(url, timeout=15, headers={"Cache-Control": "no-cache"})
     if resp.status_code == 404:
         return {
             "changes": [],
@@ -43,7 +47,7 @@ def _fetch_remote() -> dict:
 
 
 def get_log(force_refresh: bool = False) -> dict:
-    """캐시된 changes.json. force_refresh=True면 즉시 갱신."""
+    """캐시된 changes.json. force_refresh=True면 GitHub CDN까지 우회 후 갱신."""
     now = time.time()
     with _lock:
         if (
@@ -52,7 +56,8 @@ def get_log(force_refresh: bool = False) -> dict:
             and now - _cache["ts"] < CACHE_TTL
         ):
             return _cache["data"]
-    data = _fetch_remote()
+    # force_refresh일 때만 cache_bust — 평소는 GitHub CDN 활용으로 부하 줄임
+    data = _fetch_remote(cache_bust=force_refresh)
     with _lock:
         _cache["ts"] = now
         _cache["data"] = data
