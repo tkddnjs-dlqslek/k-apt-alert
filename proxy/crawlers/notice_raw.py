@@ -31,15 +31,27 @@ logger = logging.getLogger(__name__)
 _cache: dict = {}
 _cache_lock = Lock()
 
-# 섹션 헤딩 패턴 — 청약홈/LH 공통적으로 자주 등장. 매칭되면 sections dict에 split.
+# 섹션 헤딩 패턴 — 청약홈/LH/SH/GH 공통적으로 자주 등장. 매칭되면 sections dict에 split.
 # 주의: "공급대상"은 자격 요건 텍스트가 아니라 주택형/세대수 표라서 "자격"과 분리한다.
 # "자격" 섹션은 사용자가 "내 신청 자격"을 물을 때 답변용이므로, 표가 아닌 텍스트만 잡는다.
 _SECTION_PATTERNS = [
     ("공급대상", re.compile(r"공급\s*대상")),
-    ("자격", re.compile(r"(?:신청\s*자격|입주자\s*자격|자격\s*요건|청약\s*자격)")),
-    ("공급일정", re.compile(r"(?:공급\s*일정|모집\s*일정|청약\s*일정|접수\s*일정)")),
-    ("공급금액", re.compile(r"(?:공급\s*(?:금액|가격)|분양\s*가|임대\s*보증금|공급\s*조건)")),
-    ("유의사항", re.compile(r"(?:유의\s*사항|주의\s*사항|참고\s*사항|기타\s*사항)")),
+    ("자격", re.compile(
+        r"(?:신청\s*자격|입주자\s*자격|자격\s*요건|자격\s*조건|청약\s*자격|"
+        r"신청\s*자\s*격|1순위\s*자격|무주택\s*세대\s*구성원\s*확인|입주\s*자격)"
+    )),
+    ("공급일정", re.compile(
+        r"(?:공급\s*일정|모집\s*일정|청약\s*일정|접수\s*일정|청약\s*접수|"
+        r"당첨자\s*발표|일정\s*안내|입주자\s*모집\s*공고일)"
+    )),
+    ("공급금액", re.compile(
+        r"(?:공급\s*(?:금액|가격|가)|분양\s*가(?:격)?|임대\s*보증금|임대료|"
+        r"공급\s*조건|매매가|월\s*임대료)"
+    )),
+    ("유의사항", re.compile(
+        r"(?:유의\s*사항|주의\s*사항|참고\s*사항|기타\s*사항|안내\s*사항|"
+        r"알려\s*드립니다|꼭\s*확인|당부\s*말씀)"
+    )),
 ]
 
 # 사이트 공통 제너릭 타이틀 — 이 값이면 fallback_title 사용
@@ -105,34 +117,54 @@ def _detect_sections(text: str) -> dict:
     return sections
 
 
+# SH/LH/GH 페이지에 자주 나오는 카테고리·메뉴 단어 — 공고명으로 부적합
+_GENERIC_NAV_PATTERNS = re.compile(
+    r"^(주택임대|공공임대|분양|공지사항|보도자료|입주자\s*모집|공고|HOME|메뉴|로그인|"
+    r"청약일정|회원가입|마이페이지|장기전세|행복주택|매입임대|국민임대)$"
+)
+
+_MIN_TITLE_LEN = 10  # 의미 있는 공고명 최소 길이
+
+
 def _is_generic_title(title: str) -> bool:
-    """페이지 <title>이 사이트 브랜드명 수준이라 공고명으로 못 쓸 때 True."""
+    """페이지 <title>이 사이트 브랜드명 또는 메뉴 수준이라 공고명으로 못 쓸 때 True."""
     if not title:
         return True
     norm = title.strip()
     if norm in _GENERIC_TITLES:
         return True
+    if _GENERIC_NAV_PATTERNS.match(norm):
+        return True
     # "청약홈 - ..." 식으로 brand prefix만 있으면 generic 처리
-    return any(norm == g or norm.startswith(f"{g} -") or norm.startswith(f"{g}|") for g in _GENERIC_TITLES)
+    if any(norm == g or norm.startswith(f"{g} -") or norm.startswith(f"{g}|") for g in _GENERIC_TITLES):
+        return True
+    return False
 
 
 def _extract_title(soup: BeautifulSoup, fallback: str = "") -> str:
-    """공고명 추출 — h1/h2 우선, 그다음 <title>, generic이면 fallback."""
-    # 청약홈 등은 본문 안에 실제 공고명이 h1/h2/.title로 들어 있다
+    """공고명 추출 전략:
+    1) fallback이 충분한 길이로 주어졌다면 그것을 신뢰 (announcement.name이 공식 정보)
+    2) fallback 짧거나 없으면 본문 h1/h2/.title 중 generic 아닌 첫 후보
+    3) 마지막으로 <title> 검사 (대부분 사이트명)
+    """
+    if fallback and len(fallback.strip()) >= _MIN_TITLE_LEN:
+        # API가 준 공식 공고명을 우선 — 페이지 메뉴/카테고리명에 흔들리지 않음
+        return fallback.strip()[:200]
+
     for sel in ("h1", "h2", ".title", ".tit", ".board_tit", ".board-tit", ".view_tit", ".view-tit"):
         tag = soup.select_one(sel)
         if tag:
             txt = tag.get_text(strip=True)
-            if txt and not _is_generic_title(txt) and len(txt) > 3:
+            if txt and not _is_generic_title(txt) and len(txt) >= _MIN_TITLE_LEN:
                 return txt[:200]
 
     title_tag = soup.find("title")
     if title_tag:
         txt = title_tag.text.strip()
-        if txt and not _is_generic_title(txt):
+        if txt and not _is_generic_title(txt) and len(txt) >= _MIN_TITLE_LEN:
             return txt[:200]
 
-    return fallback
+    return fallback or ""
 
 
 def _truncate(text: str, max_chars: int) -> tuple[str, bool]:
