@@ -469,7 +469,15 @@ def _short_hook_label(webhook_url: str) -> str:
 
 
 def _send_slack(webhook_url: str, active: list[dict]) -> None:
-    """Slack webhook 발송. 실패 시 HTTPException."""
+    """Slack webhook 발송. 실패 시 HTTPException — 채널별 에러 분리 보고용.
+
+    URL 형식 검증을 먼저 해서 한 채널이 깨졌어도 다른 채널은 계속 발송되게 한다.
+    """
+    if not webhook_url or not (webhook_url.startswith("http://") or webhook_url.startswith("https://")):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Slack webhook URL 형식 오류 — https:// 시작 필요 (받은 길이={len(webhook_url) if webhook_url else 0})",
+        )
     payload = _build_slack_blocks(active)
     try:
         resp = requests.post(webhook_url, json=payload, timeout=10)
@@ -486,6 +494,9 @@ def _send_slack(webhook_url: str, active: list[dict]) -> None:
         raise HTTPException(status_code=502, detail=f"Slack delivery failed: HTTP {e.response.status_code} — {body}")
     except requests.Timeout:
         raise HTTPException(status_code=504, detail="Slack delivery timed out after 10s")
+    except requests.RequestException as e:
+        # InvalidURL, ConnectionError, MissingSchema 등 모두 여기로
+        raise HTTPException(status_code=502, detail=f"Slack delivery error: {type(e).__name__} — {str(e)[:200]}")
 
 
 def _send_telegram(token: str, chat_id: str, active: list[dict]) -> None:
