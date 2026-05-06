@@ -457,6 +457,17 @@ def _build_telegram_text(active: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def _short_hook_label(webhook_url: str) -> str:
+    """Slack webhook URL → 응답·로그용 짧은 라벨. 마지막 path segment 6자."""
+    if not webhook_url:
+        return "default"
+    try:
+        tail = webhook_url.rstrip("/").rsplit("/", 1)[-1]
+        return tail[-6:] if len(tail) >= 6 else tail
+    except Exception:
+        return "unknown"
+
+
 def _send_slack(webhook_url: str, active: list[dict]) -> None:
     """Slack webhook 발송. 실패 시 HTTPException."""
     payload = _build_slack_blocks(active)
@@ -502,7 +513,12 @@ def _send_telegram(token: str, chat_id: str, active: list[dict]) -> None:
 
 @app.post("/v1/apt/notify")
 def notify(
-    webhook_url: str = Query(default="", description="Slack Incoming Webhook URL (Slack 발송)"),
+    webhook_url: str = Query(default="", description="Slack Webhook URL (전체 fallback). 지역별 webhook_seoul 등이 따로 있으면 그 외 지역만 이 URL로"),
+    webhook_seoul: str = Query(default="", description="서울 공고 전용 Slack Webhook (옵션)"),
+    webhook_gyeonggi: str = Query(default="", description="경기 공고 전용 Slack Webhook (옵션)"),
+    webhook_incheon: str = Query(default="", description="인천 공고 전용 Slack Webhook (옵션)"),
+    webhook_busan: str = Query(default="", description="부산 공고 전용 Slack Webhook (옵션)"),
+    webhook_highlight: str = Query(default="", description="긴급 공고 전용 채널 — d_day≤1인 공고를 추가로 여기에도 발송"),
     telegram_token: str = Query(default="", description="Telegram Bot Token (텔레그램 발송)"),
     telegram_chat_id: str = Query(default="", description="Telegram Chat ID (텔레그램 발송)"),
     category: str = Query(default="all"),
@@ -518,20 +534,34 @@ def notify(
 ):
     """청약 공고 조회 후 Slack/Telegram 자동 발송.
 
-    - webhook_url 단독: Slack 발송
-    - telegram_token + telegram_chat_id 단독: Telegram 발송
-    - 둘 다 제공: 두 채널 모두 발송 (이중)
-    - 아무것도 없으면 400
+    Slack 채널 라우팅 (apt_alert 스타일):
+    - webhook_url: 전체 fallback (지역별 매핑 안 된 공고 이걸로)
+    - webhook_seoul/gyeonggi/incheon/busan: 해당 지역 공고만 라우팅
+    - webhook_highlight: d_day≤1 공고를 지역 채널에 추가로 한 번 더 발송
+
+    텔레그램은 단일 chat_id (라우팅 없음).
     """
     if not DATA_GO_KR_API_KEY:
         raise HTTPException(status_code=503, detail="Server API key not configured")
 
-    has_slack = bool(webhook_url)
+    # region별 webhook 매핑 (빈 값은 무시)
+    region_webhooks: dict[str, str] = {}
+    for region_name, hook in [
+        ("서울", webhook_seoul), ("경기", webhook_gyeonggi),
+        ("인천", webhook_incheon), ("부산", webhook_busan),
+    ]:
+        if hook:
+            region_webhooks[region_name] = hook
+
+    has_slack = bool(webhook_url) or bool(region_webhooks) or bool(webhook_highlight)
     has_telegram = bool(telegram_token and telegram_chat_id)
     if telegram_token and not telegram_chat_id:
         raise HTTPException(status_code=400, detail="telegram_chat_id is required when telegram_token is provided")
     if not has_slack and not has_telegram:
-        raise HTTPException(status_code=400, detail="Provide webhook_url (Slack) or telegram_token + telegram_chat_id")
+        raise HTTPException(
+            status_code=400,
+            detail="Provide webhook_url (Slack), region-specific webhooks, or telegram_token + telegram_chat_id",
+        )
 
     region_filter = {r.strip() for r in region.split(",") if r.strip()} if region.strip() else set()
     district_filter = {d.strip() for d in district.split(",") if d.strip()} if district.strip() else set()
@@ -556,36 +586,60 @@ def notify(
 
     active.sort(key=lambda x: x.get("d_day", 999))
 
-    # 서버 측 dedup — 채널별로 따로 적용 (Slack/Telegram 각각 고유한 발송 이력)
-    slack_active = active
-    telegram_active = active
+    # ─────────────────────────────────────────────────────────
+    # Slack 채널 라우팅 — region별 webhook 매핑 + highlight
+    # ─────────────────────────────────────────────────────────
+    # slack_groups[webhook_url] = list[ann] — 같은 webhook URL에 보낼 공고들
+    slack_groups: dict[str, list[dict]] = {}
+    if has_slack:
+        for ann in active:
+            ann_region = ann.get("region", "").strip()
+            target = region_webhooks.get(ann_region) or webhook_url
+            if target:
+                slack_groups.setdefault(target, []).append(ann)
+            # highlight: d_day≤1인 공고는 별도 채널에도 추가 발송 (지역 채널과 별개)
+            if webhook_highlight and ann.get("d_day", 99) <= 1:
+                slack_groups.setdefault(webhook_highlight, []).append(ann)
+
+    # 서버 측 dedup — 채널별로 따로 적용 (각 webhook URL은 고유 발송 이력)
     blocked_summary: dict = {}
-    if dedup:
-        if has_slack:
-            slack_active, blocked = notified_store.filter_already_notified(f"slack:{webhook_url}", active)
-            if blocked:
-                blocked_summary["slack"] = len(blocked)
-        if has_telegram:
-            telegram_active, blocked = notified_store.filter_already_notified(f"tg:{telegram_chat_id}", active)
-            if blocked:
-                blocked_summary["telegram"] = len(blocked)
+    dedup_filtered_groups: dict[str, list[dict]] = {}
+    if has_slack:
+        for hook, items in slack_groups.items():
+            if dedup:
+                kept, blocked = notified_store.filter_already_notified(f"slack:{hook}", items)
+                if blocked:
+                    blocked_summary[f"slack:{_short_hook_label(hook)}"] = len(blocked)
+                dedup_filtered_groups[hook] = kept
+            else:
+                dedup_filtered_groups[hook] = items
+
+    telegram_active = active
+    if has_telegram and dedup:
+        telegram_active, blocked = notified_store.filter_already_notified(f"tg:{telegram_chat_id}", active)
+        if blocked:
+            blocked_summary["telegram"] = len(blocked)
 
     channels_sent: list[str] = []
     channel_errors: dict = {}
     sent_counts: dict = {}
     try:
-        if has_slack:
-            if slack_active:
-                try:
-                    _send_slack(webhook_url, slack_active)
-                    channels_sent.append("slack")
-                    sent_counts["slack"] = len(slack_active)
-                    if dedup:
-                        notified_store.mark_notified(f"slack:{webhook_url}", slack_active)
-                except HTTPException as e:
-                    channel_errors["slack"] = e.detail
-            else:
-                channel_errors["slack"] = "all announcements already notified within 7-day window"
+        # Slack: 각 채널별 발송
+        for hook, items in dedup_filtered_groups.items():
+            label = f"slack:{_short_hook_label(hook)}"
+            if not items:
+                channel_errors[label] = "all announcements already notified within 7-day window"
+                continue
+            try:
+                _send_slack(hook, items)
+                channels_sent.append(label)
+                sent_counts[label] = len(items)
+                if dedup:
+                    notified_store.mark_notified(f"slack:{hook}", items)
+            except HTTPException as e:
+                channel_errors[label] = e.detail
+
+        # Telegram: 단일 채널
         if has_telegram:
             if telegram_active:
                 try:

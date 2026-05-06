@@ -840,7 +840,12 @@ jobs:
 **파라미터:**
 | 파라미터 | 설명 |
 |---------|------|
-| `webhook_url` | Slack Incoming Webhook URL (Slack 발송 시) |
+| `webhook_url` | Slack Webhook URL — 전체 fallback (지역별 미매핑 공고는 이걸로) |
+| `webhook_seoul` | 서울 공고 전용 Slack Webhook (옵션) |
+| `webhook_gyeonggi` | 경기 공고 전용 Slack Webhook (옵션) |
+| `webhook_incheon` | 인천 공고 전용 Slack Webhook (옵션) |
+| `webhook_busan` | 부산 공고 전용 Slack Webhook (옵션) |
+| `webhook_highlight` | 긴급(d_day≤1) 공고 별도 채널 — 지역 채널과 추가로 한 번 더 발송 |
 | `telegram_token` | Telegram Bot Token (Telegram 발송 시) |
 | `telegram_chat_id` | Telegram Chat ID (Telegram 발송 시, token과 세트) |
 | `category` | 카테고리 필터 (기본: all, 8종: apt/officetell/lh/remndr/pbl_pvt_rent/opt/sh/gh) |
@@ -853,10 +858,22 @@ jobs:
 | `exclude_ids` | 제외할 공고 ID (중복 알림 방지) |
 | `reminder` | 리마인더 타입: `d3` / `d1` / `winners` / `contract` |
 
-**채널 선택 (v2.6):**
-- `webhook_url` 단독 → Slack만
-- `telegram_token` + `telegram_chat_id` 단독 → Telegram만
-- 셋 다 제공 → **양쪽 채널 동시 발송**
+**채널 선택:**
+- `webhook_url` 단독 → 모든 공고가 한 채널로 (가장 간단)
+- `webhook_seoul`/`webhook_gyeonggi` 등 + `webhook_url` → 지역별 라우팅 + 외 지역은 fallback
+- `webhook_highlight` 추가 → d_day≤1 공고는 지역 채널 + highlight 채널 양쪽 발송
+- `telegram_token` + `telegram_chat_id` → Telegram (채널 라우팅 없이 단일 chat_id)
+- Slack과 Telegram 동시 제공 → 둘 다 발송
+
+**multi-channel 발송 응답 예시:**
+```json
+{
+  "sent": 7,
+  "channels": ["slack:ABC123", "slack:DEF456", "slack:HIGHLT", "telegram"],
+  "sent_counts": {"slack:ABC123": 3, "slack:DEF456": 2, "slack:HIGHLT": 1, "telegram": 1}
+}
+```
+응답의 `slack:XXXXXX` 라벨은 webhook URL의 마지막 6자로 식별 (전체 URL 노출 방지).
 - 아무것도 없으면 `400 Bad Request`
 
 응답 예:
