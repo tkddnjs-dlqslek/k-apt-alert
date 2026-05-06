@@ -1,0 +1,68 @@
+name: 청약 알림 (멀티채널 라우팅 — apt_alert 후속)
+
+# 광역 지역별 Slack 채널을 분리해서 받고 싶을 때 사용.
+# 단순 전체 발송이면 apt-notify.yml을 쓰세요.
+#
+# 셋업 순서:
+#   1. 새 repo 또는 기존 repo의 .github/workflows/ 아래에 이 파일 복사
+#   2. Secrets 등록 (Settings → Secrets and variables → Actions):
+#      - SLACK_WEBHOOK_SEOUL          (서울 공고 전용)
+#      - SLACK_WEBHOOK_GYEONGGI       (경기 공고 전용)
+#      - SLACK_WEBHOOK_INCHEON        (인천 공고 전용)
+#      - SLACK_WEBHOOK_BUSAN          (부산 공고 전용, 선택)
+#      - SLACK_WEBHOOK_OTHER          (위 외 모든 지역, 즉 fallback)
+#      - SLACK_WEBHOOK_HIGHLIGHT      (d_day≤1 긴급 공고 별도 채널)
+#      - TELEGRAM_TOKEN/TELEGRAM_CHAT_ID (선택, 있으면 함께 발송)
+#   3. 등록 안 한 secret은 그 채널 라우팅 자동 skip
+#   4. push → Actions 탭에서 첫 실행
+
+on:
+  schedule:
+    - cron: "0 22 * * *"   # KST 07:00 매일
+  workflow_dispatch:
+
+env:
+  PROXY_URL: https://k-apt-alert-proxy.onrender.com
+  CATEGORY: "all"
+  REGION: ""              # (전체) — 라우팅으로 채널이 알아서 분기되므로 비워둠
+  DISTRICT: ""
+  MIN_UNITS: "0"
+  CONSTRUCTOR: ""
+  REMINDER: ""
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build URL + call proxy (multi-channel)
+        run: |
+          Q="category=${{ env.CATEGORY }}&active_only=true"
+          [ -n "${{ env.REGION }}" ] && Q="${Q}&region=$(python3 -c "import urllib.parse; print(urllib.parse.quote('${{ env.REGION }}'))")"
+          [ -n "${{ env.DISTRICT }}" ] && Q="${Q}&district=$(python3 -c "import urllib.parse; print(urllib.parse.quote('${{ env.DISTRICT }}'))")"
+          [ "${{ env.MIN_UNITS }}" != "0" ] && Q="${Q}&min_units=${{ env.MIN_UNITS }}"
+          [ -n "${{ env.CONSTRUCTOR }}" ] && Q="${Q}&constructor_contains=$(python3 -c "import urllib.parse; print(urllib.parse.quote('${{ env.CONSTRUCTOR }}'))")"
+          [ -n "${{ env.REMINDER }}" ] && Q="${Q}&reminder=${{ env.REMINDER }}"
+
+          enc() { python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$1"; }
+
+          # 지역별 webhook (없으면 skip)
+          [ -n "${{ secrets.SLACK_WEBHOOK_SEOUL }}" ]     && Q="${Q}&webhook_seoul=$(enc "${{ secrets.SLACK_WEBHOOK_SEOUL }}")"
+          [ -n "${{ secrets.SLACK_WEBHOOK_GYEONGGI }}" ]  && Q="${Q}&webhook_gyeonggi=$(enc "${{ secrets.SLACK_WEBHOOK_GYEONGGI }}")"
+          [ -n "${{ secrets.SLACK_WEBHOOK_INCHEON }}" ]   && Q="${Q}&webhook_incheon=$(enc "${{ secrets.SLACK_WEBHOOK_INCHEON }}")"
+          [ -n "${{ secrets.SLACK_WEBHOOK_BUSAN }}" ]     && Q="${Q}&webhook_busan=$(enc "${{ secrets.SLACK_WEBHOOK_BUSAN }}")"
+          [ -n "${{ secrets.SLACK_WEBHOOK_HIGHLIGHT }}" ] && Q="${Q}&webhook_highlight=$(enc "${{ secrets.SLACK_WEBHOOK_HIGHLIGHT }}")"
+          [ -n "${{ secrets.SLACK_WEBHOOK_OTHER }}" ]     && Q="${Q}&webhook_url=$(enc "${{ secrets.SLACK_WEBHOOK_OTHER }}")"
+
+          # Telegram (선택)
+          if [ -n "${{ secrets.TELEGRAM_TOKEN }}" ] && [ -n "${{ secrets.TELEGRAM_CHAT_ID }}" ]; then
+            Q="${Q}&telegram_token=$(enc "${{ secrets.TELEGRAM_TOKEN }}")"
+            Q="${Q}&telegram_chat_id=$(enc "${{ secrets.TELEGRAM_CHAT_ID }}")"
+          fi
+
+          URL="${{ env.PROXY_URL }}/v1/apt/notify?${Q}"
+          echo "Calling proxy (secrets redacted)..."
+
+          response=$(curl -sS --max-time 180 -X POST "$URL")
+          echo "Response: $response"
+
+          echo "$response" | grep -q '"sent"' && exit 0 || exit 1
