@@ -772,9 +772,24 @@ chmod 600 ~/.config/k-skill/*.json 2>/dev/null || true
 
 3. 좌표·주변 시설 검색 (Apify 사용 가능 시)
    도구: compass/crawler-google-places
-   - 검색어: "{단지명} {주소}"
-   - 반경: 1km (역·학교·편의시설), 1.5km (대형마트·공원)
-   - 카테고리: subway_station, school, supermarket, hospital, park, cafe
+
+   **권장: 2-step 방식 (정확도 높음)**
+   - Step 3a — 단지 좌표 확보:
+     `searchStringsArray: ["{단지명}"]`, `maxCrawledPlacesPerSearch: 1`
+     → 응답의 `location.lat / location.lng` 추출
+   - Step 3b — 좌표 기준 주변 검색:
+     `searchStringsArray: ["{단지명} 주변 지하철역", "{단지명} 주변 초등학교", ...]`
+     → 각 카테고리당 3~5건
+     → 결과의 lat/lng로 단지 좌표와 Haversine 거리 계산 → 도보 시간 추정 (1분당 80m)
+
+   **간단: 1-step 자연어 검색 (빠름, 정확도 ↓)**
+   - `searchStringsArray: ["{주소} 주변 지하철역", "{주소} 주변 초등학교", ...]`
+   - 결과는 lat/lng만 와서 거리 정보 별도 계산 필요
+
+   **주의:**
+   - "지하철역" 검색에 "버스정류장"이 섞일 수 있음 → `categoryName` 필드로 후필터링
+   - 신축 단지는 Google Maps에 없을 수 있음 → 그럼 주소만으로 검색
+   - 응답 시간: 카테고리당 30~60초, 5개 카테고리면 2~5분 소요
 
 4. 지역 호재 (WebSearch)
    - "{지역명} 교통 호재 2026"
