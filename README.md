@@ -31,20 +31,92 @@
 
 ## 어떤 걸 할 수 있나
 
+> **신청만 빼고 다 해드립니다.** 청약 정보 발견부터 자격 판정·일정 관리·알림까지 전 과정 자동화.
+
+### 📢 공고 발견·필터링
 | 기능 | 설명 | 로그인 필요 |
 |------|------|-------------|
-| 최신 공고 조회 | APT·오피스텔·LH·잔여·공공임대·임의공급·**SH(서울)**·**GH(경기)** 8종 통합 | ❌ |
-| 지역·구/군 필터 | 서울·경기·인천 등 17개 광역 + 세부 구/군 | ❌ |
-| 프로필 기반 맞춤 추천 | 청약통장·무주택 여부·소득 구간 기준 자격 매칭 | ❌ (로컬 저장) |
-| 추정 가점 계산 | 무주택 기간 + 부양가족 + 통장 가입기간 → 84점 만점 | ❌ |
-| 특별공급 자격 판정 | 신혼부부·생애최초·다자녀·한부모·노부모 | ❌ |
-| 가점대별 전략 안내 | 20점 미만 → 오피스텔 권장, 60+ → 수도권 도전 등 | ❌ |
-| D-day 알림 | 마감 임박(D-3/D-1) / 당첨자 발표 / 계약 체결 | ❌ |
-| 즐겨찾기 공고 | 관심 공고 저장 + 상태 변동 추적 | ❌ |
-| 중복 알림 방지 | 7일 이내 발송 공고 자동 제외 | ❌ |
-| Slack·Telegram 발송 | Block Kit 포맷 + 긴급도 이모지 | Slack/Telegram 계정 |
-| 인접 지역 확장 | 매칭 0건이면 인접 도/광역 제안 (17개 매핑) | ❌ |
-| 세대수·시공사 필터 | 대단지·1군 브랜드 필터 | ❌ |
+| 8개 채널 통합 조회 | APT 일반·오피스텔·LH·잔여세대·공공지원민간임대·임의공급·**SH(서울)**·**GH(경기)** | ❌ |
+| 지역·구/군 필터 | 17개 광역 + 세부 자치구 (강남구·송파구 등) | ❌ |
+| 세대수·시공사 필터 | 대단지(500세대+)·1군 브랜드 키워드 | ❌ |
+| 조회 기간 조절 | 최근 1~12개월 (`months_back`) | ❌ |
+| 인접 지역 확장 | 매칭 0건이면 인접 도/광역 자동 제안 (17개 매핑) | ❌ |
+
+### 📊 자격·가점 판정 (결정론 계산)
+| 기능 | 설명 | 신규 |
+|------|------|------|
+| 가점 84점 만점 정확 계산 | 무주택(32) + 부양가족(35) + 통장(17) | |
+| 미성년 통장 한도 자동 차감 | 2024.7.1. 시행 5년 / 그 이전 2년 | |
+| **1순위 자격 판정** | 지역별 납입횟수 (투기과열 24회/수도권 12회/기타 6회) | ✨ |
+| 특별공급 5종 자격 | 신혼부부·생애최초·다자녀·노부모부양·청년 | |
+| 가점대별 전략 안내 | 20점 미만 → 오피스텔, 60+ → 수도권 도전 등 | |
+| **공고-프로필 적합도 매칭** | `/v1/apt/match` → high/medium/low 3단계 | ✨ |
+| 1주택자 갈아타기 안내 | 추첨제·잔여세대 경로 안내 | |
+| 소득 자격 정성 판정 | 가구원수 × 도시근로자 평균소득 기준 | |
+
+### 📄 공고 해석·매칭
+| 기능 | 설명 | 신규 |
+|------|------|------|
+| **모집공고 원문 자동 추출** | 청약홈·LH·SH·GH 4개 사이트 본문 파싱 | ✨ |
+| **섹션 자동 분리** | 자격·공급일정·공급금액·유의사항·공급대상 | ✨ |
+| **LLM 기반 자연어 해석** | 자격 요건·일정·가격을 사용자 프로필 맥락에 맞춰 요약 | ✨ |
+
+### 🎲 경쟁률 (3단 폴백)
+| 단계 | 데이터 출처 | 정확도 |
+|---|---|---|
+| 1순위 | 청약홈 실제 결과 페이지 (마감·발표 끝난 공고) | 가장 정확 |
+| 2순위 | 공공데이터포털 결과 API — 같은 지역 12개월 평균 | 참고 우수 |
+| 3순위 | 2024-2025 통계 추정치 (서울 투기과열 소형 160:1 등) | 폴백 |
+
+### 📅 일정 관리
+| 기능 | 설명 | 신규 |
+|------|------|------|
+| D-day 자동 계산·색상 분기 | 🔴 D-1 이하 / 🟡 D-2~3 / 🟢 D-4+ | |
+| **캘린더 ICS 다운로드** | 구글/아이폰/아웃룩 캘린더 즉시 임포트 | ✨ |
+| 4종 리마인더 | D-3 임박 / D-1 초긴급 / 당첨발표 임박 / 계약 임박 | |
+
+### 🔔 알림 발송
+| 기능 | 설명 | 신규 |
+|------|------|------|
+| Slack Block Kit | 헤더·divider·section·버튼 풀 포맷 | |
+| Telegram Bot | HTML parse_mode + 링크 미리보기 차단 | |
+| 양 채널 동시 발송 | 한쪽 실패해도 다른쪽 정상 전달 | |
+| 서버측 7일 자동 dedup | 같은 공고 중복 발송 차단 (`dedup=true` 기본) | |
+| Webhook/Token 자동 감지·저장 | 채팅창 붙여넣기로 secrets.env 자동 갱신 | |
+
+### 🆕 공고 변동 추적 (Phase 1)
+| 기능 | 설명 |
+|------|------|
+| 매일 KST 08:00 자동 diff | GitHub Actions가 어제 ↔ 오늘 비교 |
+| 신규/수정/삭제 분류 | `new` / `updated` (12개 추적 필드) / `removed` |
+| since·change_type 필터 | 원하는 기간·종류만 조회 |
+| 30일 이력 보관 | data 브랜치에 자동 누적, 자동 정리 |
+| 부트스트랩 vs 정상 상태 구분 | 처음 사용자가 헷갈리지 않게 안내 |
+
+### 👤 프로필·즐겨찾기
+| 기능 | 설명 |
+|------|------|
+| 12개 항목 대화형 setup | 출생연도·지역·가구·통장·소득·평형 등 |
+| 프로필 부분 업데이트 | "혼인신고일만 수정" 같은 자연어 요청 |
+| 프로필 갱신 알림 | 90일·365일 경과 시 자동 |
+| 즐겨찾기 공고 | 추가/제거/목록 + 변동 체크 |
+
+### 🔄 자동 스케줄 (4가지 옵션)
+| 옵션 | 설정 | 비고 |
+|------|------|------|
+| 즉시 1회 | `/korea-apt-alert 알림 보내줘` | 그 시점 1회만 |
+| `/loop` | `/loop 24h /korea-apt-alert ...` | 세션 열어둔 동안 |
+| **GitHub Actions** | `.yml` 1개 + Secrets 등록 | PC 꺼도 작동 ⭐ 권장 |
+| 로컬 cron / Task Scheduler | macOS·Linux·Windows | PC 켜둔 동안 |
+
+자연어 시간 입력(`"저녁 7시"`, `"주말만"`) → cron 자동 변환 지원.
+
+### 🛡️ 운영 자동화
+| 기능 | 주기 | 용도 |
+|------|------|------|
+| Render warmup | 12분마다 | 무료 티어 슬립 방지 |
+| API 사용량 80% Gmail 알림 | KST 09:00 매일 | 한도 초과 사전 경고 |
+| 변동 추적 diff | KST 08:00 매일 | 이력 자동 누적 |
 
 ## 처음 시작하는 순서
 
@@ -218,25 +290,50 @@ curl -X POST "https://k-apt-alert-proxy.onrender.com/v1/apt/notify?webhook_url=.
 - [`SKILL.md`](SKILL.md) — 전체 워크플로우, 프로필 스키마, 자격 매칭 로직, 가점 계산, Top 3 추천, D-day, 인접 지역 확장 등
 
 ### 프록시 서버 (운영자가 배포)
-- [`proxy/main.py`](proxy/main.py) — FastAPI 엔드포인트
-- [`proxy/crawlers/`](proxy/crawlers/) — 6종 공공데이터포털 API 크롤러
-- [`.github/workflows/warmup.yml`](.github/workflows/warmup.yml) — Render 슬립 방지 cron (12분 간격 — GitHub Actions free cron은 부하 시 5~30분 지연이 흔하므로 슬립 100% 방지는 아님)
-- [`.github/workflows/test.yml`](.github/workflows/test.yml) — mock 테스트 + E2E CI
+- [`proxy/main.py`](proxy/main.py) — FastAPI 엔드포인트 (15개 라우트)
+- [`proxy/crawlers/`](proxy/crawlers/) — 8종 공공데이터/HTML 크롤러 (apt·officetell·lh·remndr·pbl_pvt_rent·opt·sh·gh·notice_raw·competition)
+- [`proxy/scoring.py`](proxy/scoring.py) — 결정론 가점·1순위·특공·경쟁률 통계
+- [`proxy/notified.py`](proxy/notified.py) — 서버측 7일 in-memory dedup
+- [`proxy/changes.py`](proxy/changes.py) — 공고 변동 이력 캐시·필터링
 
-### 페르소나 E2E 테스트
-- [`test_personas.py`](test_personas.py) — 8명 시나리오 + mock 테스트 (무주택 기간, 통장 미성년 상한, LH 전국 공고, D-day 정렬)
+### 자동화 워크플로
+- [`.github/workflows/warmup.yml`](.github/workflows/warmup.yml) — Render 슬립 방지 + 캐시 prefetch (12분 cron, concurrency 적용)
+- [`.github/workflows/changes-tracker.yml`](.github/workflows/changes-tracker.yml) — 매일 KST 08:00 공고 diff → data 브랜치
+- [`.github/workflows/usage-check.yml`](.github/workflows/usage-check.yml) — 매일 KST 09:00 API 사용량 체크 + 80% 초과 시 Gmail
+- [`.github/workflows/test.yml`](.github/workflows/test.yml) — mock 테스트 + E2E CI
+- [`scripts/track_changes.py`](scripts/track_changes.py) — 일일 diff 스크립트
+
+### 테스트
+- `proxy/tests/` — pytest 53+ 케이스 (가점·1순위·경쟁률·notice_raw·main 헬퍼)
 
 ## 프록시 API
 
 **운영 중**: https://k-apt-alert-proxy.onrender.com
 
-| 엔드포인트 | 설명 |
-|-----------|------|
-| `GET /health` | 서버 상태 확인 (warmup용) |
-| `GET /v1/apt/categories` | 카테고리 6종 목록 |
-| `GET /v1/apt/announcements` | 청약 공고 조회 |
-| `POST /v1/apt/notify` | Slack Webhook 발송 |
-| `GET /v1/apt/cache` | 캐시·일일 호출 카운터 상태 (디버그) |
+### 사용자 대면 엔드포인트
+
+| 엔드포인트 | 메서드 | 설명 |
+|-----------|------|------|
+| `/v1/apt/announcements` | GET | 8개 카테고리 통합 공고 조회 (전체 필터 지원) |
+| `/v1/apt/score` | POST | 가점 + 1순위 자격 + 특별공급 자격 결정론 계산 |
+| `/v1/apt/match` | POST | 공고-프로필 카테고리·지역·세대수 적합도 |
+| `/v1/apt/notice/{id}/raw` | GET | 모집공고 원문 텍스트 추출 (LLM 해석용) |
+| `/v1/apt/announcements/{id}/competition` | GET | 경쟁률 3단 폴백 조회 (`?history=true`) |
+| `/v1/apt/announcements/{id}/ics` | GET | 청약 일정 ICS 캘린더 다운로드 |
+| `/v1/apt/changes` | GET | 공고 변동 이력 조회 (since/change_type/limit) |
+| `/v1/apt/notify` | POST | Slack/Telegram 동시 발송 (서버측 7일 dedup) |
+| `/v1/apt/categories` | GET | 카테고리 8종 목록 |
+
+### 디버그·운영 엔드포인트
+
+| 엔드포인트 | 메서드 | 설명 |
+|-----------|------|------|
+| `/health` | GET | 서버 상태·API 키 설정 여부 |
+| `/v1/apt/cache` | GET | 캐시·일일 호출 카운터·dedup 상태 |
+| `/v1/apt/dedup/stats` | GET | dedup store 추적 항목 수 |
+| `/v1/apt/dedup/reset` | POST | dedup store 전체 초기화 (운영자용) |
+| `/v1/apt/notice/cache-status` | GET | notice_raw 캐시 상태 |
+| `/v1/apt/changes/cache-status` | GET | changes 캐시 상태 |
 
 **쿼리 파라미터** (`/v1/apt/announcements`, `/v1/apt/notify` 공통):
 
