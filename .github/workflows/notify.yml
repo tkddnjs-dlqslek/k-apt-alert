@@ -1,0 +1,64 @@
+name: 일일 청약 알림 발송 (Slack 멀티채널 + Telegram)
+
+# k-apt-alert 본인 운영용 cron — 매일 KST 07:00에 자체 프록시를 호출해
+# 광역 지역별 Slack 채널 + Telegram으로 발송한다.
+#
+# 다른 사용자가 본인 알림 설정하려면 examples/user-automation/ 참고.
+#
+# 필요한 Secrets (k-apt-alert repo Settings → Secrets):
+#   SLACK_WEBHOOK_SEOUL          (서울 공고)
+#   SLACK_WEBHOOK_GYEONGGI       (경기 공고)
+#   SLACK_WEBHOOK_INCHEON        (인천 공고)
+#   SLACK_WEBHOOK_BUSAN          (부산 공고, 선택)
+#   SLACK_WEBHOOK_OTHER          (그 외 모든 지역, fallback)
+#   SLACK_WEBHOOK_HIGHLIGHT      (d_day≤1 긴급 공고 별도 채널)
+#   TELEGRAM_TOKEN, TELEGRAM_CHAT_ID  (Telegram, 선택)
+#
+# 등록 안 한 secret은 자동 skip — 부분 등록도 정상 동작.
+
+on:
+  schedule:
+    - cron: "0 22 * * *"   # KST 07:00 매일
+  workflow_dispatch:
+
+# 큐 적체 방지 — 이전 run이 아직 실행 중이면 새 run이 그걸 cancel
+concurrency:
+  group: daily-notify
+  cancel-in-progress: true
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Build URL + call proxy (multi-channel)
+        run: |
+          PROXY_URL="https://k-apt-alert-proxy.onrender.com"
+
+          # 기본 필터 — 본인 조건에 맞게 수정
+          Q="category=all&active_only=true"
+
+          enc() { python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$1"; }
+
+          # 지역별 webhook (없으면 skip)
+          [ -n "${{ secrets.SLACK_WEBHOOK_SEOUL }}" ]     && Q="${Q}&webhook_seoul=$(enc "${{ secrets.SLACK_WEBHOOK_SEOUL }}")"
+          [ -n "${{ secrets.SLACK_WEBHOOK_GYEONGGI }}" ]  && Q="${Q}&webhook_gyeonggi=$(enc "${{ secrets.SLACK_WEBHOOK_GYEONGGI }}")"
+          [ -n "${{ secrets.SLACK_WEBHOOK_INCHEON }}" ]   && Q="${Q}&webhook_incheon=$(enc "${{ secrets.SLACK_WEBHOOK_INCHEON }}")"
+          [ -n "${{ secrets.SLACK_WEBHOOK_BUSAN }}" ]     && Q="${Q}&webhook_busan=$(enc "${{ secrets.SLACK_WEBHOOK_BUSAN }}")"
+          [ -n "${{ secrets.SLACK_WEBHOOK_HIGHLIGHT }}" ] && Q="${Q}&webhook_highlight=$(enc "${{ secrets.SLACK_WEBHOOK_HIGHLIGHT }}")"
+          [ -n "${{ secrets.SLACK_WEBHOOK_OTHER }}" ]     && Q="${Q}&webhook_url=$(enc "${{ secrets.SLACK_WEBHOOK_OTHER }}")"
+
+          # Telegram (선택)
+          if [ -n "${{ secrets.TELEGRAM_TOKEN }}" ] && [ -n "${{ secrets.TELEGRAM_CHAT_ID }}" ]; then
+            Q="${Q}&telegram_token=$(enc "${{ secrets.TELEGRAM_TOKEN }}")"
+            Q="${Q}&telegram_chat_id=$(enc "${{ secrets.TELEGRAM_CHAT_ID }}")"
+          fi
+
+          URL="${PROXY_URL}/v1/apt/notify?${Q}"
+          echo "Calling proxy (secrets redacted)..."
+
+          response=$(curl -sS --max-time 180 -X POST "$URL")
+          echo "Response: $response"
+
+          # sent 필드 또는 blocked_by_dedup이 있으면 정상 (모두 dedup으로 차단된 케이스도 OK)
+          echo "$response" | grep -qE '"sent"|"blocked_by_dedup"' && exit 0 || exit 1
