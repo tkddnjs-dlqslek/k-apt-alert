@@ -741,8 +741,20 @@ chmod 600 ~/.config/k-skill/*.json 2>/dev/null || true
 6. 사용자 권한: "항상 허용" 또는 "권한 요청"
 7. Claude Desktop 재시작
 
-**Claude Code / Codex CLI**:
-- Apify MCP 서버를 직접 등록 (`~/.config/claude/mcp.json` 또는 `~/.config/codex/mcp.json`)
+**Claude Code**:
+1. Apify 가입 + API 토큰 발급 (https://console.apify.com/settings/integrations)
+2. 한 번만 실행:
+   ```bash
+   claude mcp add apify --scope user --transport sse \
+     "https://mcp.apify.com/sse?actors=compass/crawler-google-places" \
+     --header "Authorization: Bearer <YOUR_APIFY_TOKEN>"
+   ```
+3. 검증: `claude mcp list` → `apify: ... ✓ Connected` 보이면 끝
+4. Claude Code 재시작
+
+**Codex CLI**:
+- `~/.codex/config.toml`에 `[mcp_servers.apify]` 블록 추가 (TOML 형식, headers는 별도 섹션)
+- 자세한 형식은 Codex MCP 문서 참고
 - 또는 WebFetch + 카카오맵/네이버지도 검색으로 fallback
 
 설정 안 된 경우 → WebSearch와 LLM 일반 지식으로 추정 보고 (정확도 ↓, "추정" 명시 필수).
