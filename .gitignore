@@ -8,3 +8,9 @@ build/
 venv/
 # track_changes.py 로컬 실행 산출물 (실제는 data 브랜치에만 보관)
 data/
+# 로컬 E2E·페르소나·엣지 검증 러너 (커밋 안 함)
+persona_runner.py
+edge_runner.py
+skill_workflow_runner.py
+category_runner.py
+LINKEDIN_POST.md
