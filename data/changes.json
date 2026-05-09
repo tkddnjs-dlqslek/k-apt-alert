@@ -1,6 +1,14 @@
 {
   "changes": [
     {
+      "id": "opt_2026940088",
+      "type": "removed",
+      "detected_at": "2026-05-09",
+      "name": "송도 한내들 센트럴리버",
+      "region": "인천",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940088&pblancNo=2026940088"
+    },
+    {
       "id": "2026000132",
       "type": "new",
       "detected_at": "2026-05-08",
@@ -353,7 +361,7 @@
       "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000126&pblancNo=2026000126"
     }
   ],
-  "updated_at": "2026-05-08T23:58:35Z",
+  "updated_at": "2026-05-09T23:56:04Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
