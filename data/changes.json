@@ -1,6 +1,16 @@
 {
   "changes": [
     {
+      "id": "sh_304050",
+      "type": "new",
+      "detected_at": "2026-05-10",
+      "name": "NEW [청년형] 특화형 매입임대주택(금천구) 입주자 모집 공고(운영기관 : 한지붕 협동조합)",
+      "region": "서울",
+      "district": "금천구",
+      "house_category": "SH 공공주택",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=304050&multi_itm_seq=2"
+    },
+    {
       "id": "opt_2026940088",
       "type": "removed",
       "detected_at": "2026-05-09",
@@ -361,7 +371,7 @@
       "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000126&pblancNo=2026000126"
     }
   ],
-  "updated_at": "2026-05-09T23:56:04Z",
+  "updated_at": "2026-05-10T23:58:34Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
