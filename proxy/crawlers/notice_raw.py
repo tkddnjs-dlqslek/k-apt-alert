@@ -13,8 +13,11 @@ LLM이 사용자 프로필 컨텍스트로 요약·해석하기 위한 입력.
 
 import logging
 import re
+import subprocess
+import tempfile
 import time
 from io import BytesIO
+from pathlib import Path
 from threading import Lock
 from urllib.parse import urljoin, urlparse
 
@@ -49,6 +52,27 @@ logger = logging.getLogger(__name__)
 PDF_HTTP_TIMEOUT = 30
 PDF_MAX_SIZE_MB = 30
 PDF_MAX_PAGES = 50  # 추출 페이지 상한 (큰 PDF 메모리 보호)
+
+# kordoc CLI (HWP/HWPX) 호출 타임아웃
+HWP_CONVERT_TIMEOUT = 120
+
+# 첨부파일 매직 바이트 시그니처
+_MAGIC_PDF = b"%PDF"
+_MAGIC_HWP_CFB = b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"  # OLE2/CFB (HWP 5.0)
+_MAGIC_HWPX = b"PK\x03\x04"  # ZIP (HWPX or DOCX/XLSX)
+
+
+def _detect_attachment_type(data: bytes) -> str:
+    """첨부파일 매직 바이트로 종류 판정 (pdf / hwp / hwpx / unknown)."""
+    head = data[:8]
+    if head.startswith(_MAGIC_PDF):
+        return "pdf"
+    if head.startswith(_MAGIC_HWP_CFB):
+        return "hwp"
+    if head.startswith(_MAGIC_HWPX):
+        # HWPX·DOCX·XLSX·ZIP 공통 헤더. kordoc은 HWPX·DOCX·XLSX 모두 지원.
+        return "hwpx"
+    return "unknown"
 
 _cache: dict = {}
 _cache_lock = Lock()
@@ -170,46 +194,37 @@ _BROWSER_HEADERS = {
 }
 
 
-def _extract_pdf_text(url: str) -> tuple[str, int] | None:
-    """다운로드 URL → (텍스트, 페이지 수). PDF가 아니거나 실패 시 None.
-
-    Content-Type/Content-Disposition으로 PDF 여부 확인 후 pdfplumber 시도.
-    """
-    if not PDFPLUMBER_AVAILABLE:
-        return None
+def _download_attachment(url: str) -> bytes | None:
+    """첨부파일 다운로드 (cloudscraper 우선, fallback requests)."""
+    headers = {**_BROWSER_HEADERS, "Accept": "*/*"}
     try:
-        # PDF 다운로드: cloudscraper 우선 (봇 차단 우회), Accept는 PDF 허용
-        pdf_headers = {**_BROWSER_HEADERS, "Accept": "application/pdf,*/*"}
         if CLOUDSCRAPER_AVAILABLE and _SCRAPER is not None:
             try:
                 resp = _SCRAPER.get(url, timeout=PDF_HTTP_TIMEOUT,
-                                     headers={"Accept": "application/pdf,*/*"},
-                                     allow_redirects=True)
+                                     headers={"Accept": "*/*"}, allow_redirects=True)
             except Exception:
                 resp = requests.get(url, timeout=PDF_HTTP_TIMEOUT,
-                                     headers=pdf_headers, allow_redirects=True)
+                                     headers=headers, allow_redirects=True)
         else:
             resp = requests.get(url, timeout=PDF_HTTP_TIMEOUT,
-                                 headers=pdf_headers, allow_redirects=True)
+                                 headers=headers, allow_redirects=True)
         resp.raise_for_status()
-
-        # 사이즈 체크
         if len(resp.content) > PDF_MAX_SIZE_MB * 1024 * 1024:
-            logger.warning(f"[pdf] {url} too large ({len(resp.content)} bytes), skip")
+            logger.warning(f"[attach] {url} too large, skip")
             return None
+        return resp.content
+    except requests.RequestException as e:
+        logger.warning(f"[attach] {url} fetch failed: {e}")
+        return None
 
-        # PDF 여부 확인 — Content-Type 또는 매직 바이트
-        ct = resp.headers.get("Content-Type", "").lower()
-        cd = resp.headers.get("Content-Disposition", "").lower()
-        is_pdf_header = "pdf" in ct or ".pdf" in cd
-        is_pdf_magic = resp.content[:4] == b"%PDF"
-        if not (is_pdf_header or is_pdf_magic):
-            logger.info(f"[pdf] {url} not PDF (ct={ct}, cd={cd[:50]}), skip")
-            return None
 
-        # 텍스트 추출
+def _extract_pdf_bytes(data: bytes) -> tuple[str, int] | None:
+    """PDF bytes → (텍스트, 페이지 수). pdfplumber 사용."""
+    if not PDFPLUMBER_AVAILABLE:
+        return None
+    try:
         parts = []
-        with pdfplumber.open(BytesIO(resp.content)) as pdf:
+        with pdfplumber.open(BytesIO(data)) as pdf:
             page_count = len(pdf.pages)
             for i, page in enumerate(pdf.pages[:PDF_MAX_PAGES]):
                 txt = page.extract_text() or ""
@@ -217,15 +232,75 @@ def _extract_pdf_text(url: str) -> tuple[str, int] | None:
                     parts.append(f"\n--- [PDF page {i + 1}] ---\n{txt}")
         text = "\n".join(parts).strip()
         if not text:
-            logger.info(f"[pdf] {url} extracted 0 text (image-based?)")
             return None
         return text, page_count
-    except requests.RequestException as e:
-        logger.warning(f"[pdf] {url} fetch failed: {e}")
+    except Exception as e:
+        logger.warning(f"[pdf] extract failed: {e}")
+        return None
+
+
+def _extract_hwp_bytes(data: bytes, suffix: str = ".hwp") -> tuple[str, int] | None:
+    """HWP/HWPX bytes → (Markdown 텍스트, 1). kordoc CLI 호출."""
+    try:
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
+            tmp.write(data)
+            tmp_path = tmp.name
+        try:
+            result = subprocess.run(
+                ["kordoc", tmp_path],
+                capture_output=True,
+                timeout=HWP_CONVERT_TIMEOUT,
+            )
+            if result.returncode != 0:
+                stderr = result.stderr.decode("utf-8", errors="ignore")[:200]
+                logger.warning(f"[hwp] kordoc returncode={result.returncode}: {stderr}")
+                return None
+            text = result.stdout.decode("utf-8", errors="ignore").strip()
+            if not text:
+                logger.info("[hwp] kordoc extracted 0 text")
+                return None
+            return text, 1
+        finally:
+            try:
+                Path(tmp_path).unlink(missing_ok=True)
+            except Exception:
+                pass
+    except FileNotFoundError:
+        logger.warning("[hwp] kordoc CLI not installed — skip")
+        return None
+    except subprocess.TimeoutExpired:
+        logger.warning(f"[hwp] kordoc timeout after {HWP_CONVERT_TIMEOUT}s")
         return None
     except Exception as e:
-        logger.warning(f"[pdf] {url} extract failed: {e}")
+        logger.warning(f"[hwp] extract failed: {e}")
         return None
+
+
+def _extract_attachment_text(url: str) -> tuple[str, int, str] | None:
+    """다운로드 URL → (텍스트, 페이지 수, 유형). 유형: 'pdf' | 'hwp' | 'hwpx'.
+
+    매직 바이트로 자동 판별 → 적절한 추출기 호출.
+    """
+    data = _download_attachment(url)
+    if not data:
+        return None
+    kind = _detect_attachment_type(data)
+    if kind == "pdf":
+        result = _extract_pdf_bytes(data)
+        if result:
+            return result[0], result[1], "pdf"
+    elif kind == "hwp":
+        result = _extract_hwp_bytes(data, suffix=".hwp")
+        if result:
+            return result[0], result[1], "hwp"
+    elif kind == "hwpx":
+        # ZIP-based — HWPX·DOCX·XLSX 가능성. kordoc은 모두 지원.
+        result = _extract_hwp_bytes(data, suffix=".hwpx")
+        if result:
+            return result[0], result[1], "hwpx"
+    else:
+        logger.info(f"[attach] {url} unknown type (magic={data[:8]!r})")
+    return None
 
 # 노이즈 패턴 — 본문 정규화 시 제거
 _WHITESPACE_RE = re.compile(r"[ \t]+")
@@ -380,11 +455,11 @@ def _extract_sh(html: str, fallback_title: str = "", page_url: str = "") -> dict
         container = soup.body or soup
 
     html_text = _clean_text(BeautifulSoup(str(container), "html.parser"))
-    return _augment_with_pdf(soup, html_text, title, page_url)
+    return _augment_with_attachments(soup, html_text, title, page_url)
 
 
 def _extract_gh(html: str, fallback_title: str = "", page_url: str = "") -> dict:
-    """GH (gh.or.kr) announcement-of-salerental001.do 상세 페이지 + 첨부 PDF 통합 추출."""
+    """GH (gh.or.kr) announcement-of-salerental001.do 상세 페이지 + 첨부 HWP/PDF 통합 추출."""
     soup = BeautifulSoup(html, "html.parser")
     title = _extract_title(soup, fallback=fallback_title)
 
@@ -396,39 +471,45 @@ def _extract_gh(html: str, fallback_title: str = "", page_url: str = "") -> dict
         container = soup.body or soup
 
     html_text = _clean_text(BeautifulSoup(str(container), "html.parser"))
-    return _augment_with_pdf(soup, html_text, title, page_url)
+    return _augment_with_attachments(soup, html_text, title, page_url)
 
 
-def _augment_with_pdf(soup: BeautifulSoup, html_text: str, title: str, page_url: str) -> dict:
-    """GH/SH 페이지 본문에 첨부 PDF 텍스트를 합쳐 반환.
+def _augment_with_attachments(soup: BeautifulSoup, html_text: str, title: str, page_url: str) -> dict:
+    """GH/SH 페이지 본문에 첨부파일(PDF·HWP·HWPX) 텍스트를 합쳐 반환.
 
-    PDF가 없거나 추출 실패해도 HTML 본문은 그대로 반환 (graceful degradation).
+    첨부가 없거나 추출 실패해도 HTML 본문은 그대로 반환 (graceful degradation).
     """
-    pdf_urls = _find_pdf_links(soup, page_url) if page_url else []
-    pdf_text_parts = []
-    pdf_pages_total = 0
-    pdf_fetched = 0
+    urls = _find_pdf_links(soup, page_url) if page_url else []
+    parts = []
+    pages_total = 0
+    fetched = 0
+    kinds: list[str] = []
 
-    for pdf_url in pdf_urls:
-        result = _extract_pdf_text(pdf_url)
+    for url in urls:
+        result = _extract_attachment_text(url)
         if result:
-            text, pages = result
-            pdf_text_parts.append(text)
-            pdf_pages_total += pages
-            pdf_fetched += 1
+            text, pages, kind = result
+            label = "PDF" if kind == "pdf" else "HWP" if kind == "hwp" else "HWPX"
+            parts.append(f"\n=== 첨부 {label} 본문 ===\n{text}")
+            pages_total += pages
+            fetched += 1
+            kinds.append(kind)
 
-    if pdf_text_parts:
-        combined = html_text + "\n\n=== 첨부 PDF 본문 ===\n" + "\n\n".join(pdf_text_parts)
-    else:
-        combined = html_text
+    combined = html_text + ("\n\n" + "\n\n".join(parts) if parts else "")
 
     return {
         "title": title,
         "text": combined,
-        "has_pdf": pdf_fetched > 0,
-        "pdf_pages": pdf_pages_total,
-        "pdf_count": pdf_fetched,
+        "has_pdf": "pdf" in kinds,
+        "has_hwp": "hwp" in kinds or "hwpx" in kinds,
+        "attachment_kinds": kinds,
+        "pdf_pages": pages_total,
+        "pdf_count": fetched,
     }
+
+
+# Backwards-compat alias (deprecated)
+_augment_with_pdf = _augment_with_attachments
 
 
 _EXTRACTORS = (
@@ -518,6 +599,8 @@ def extract_notice_raw(
         "full_text": text,
         "sections": sections,
         "has_pdf": extracted.get("has_pdf", False),
+        "has_hwp": extracted.get("has_hwp", False),
+        "attachment_kinds": extracted.get("attachment_kinds", []),
         "pdf_pages": extracted.get("pdf_pages", 0),
         "pdf_count": extracted.get("pdf_count", 0),
     }
@@ -546,6 +629,8 @@ def _build_response(full_data: dict, max_chars: int, now: float) -> dict:
         "sections": full_data["sections"],
         "text": truncated_text,
         "has_pdf": full_data.get("has_pdf", False),
+        "has_hwp": full_data.get("has_hwp", False),
+        "attachment_kinds": full_data.get("attachment_kinds", []),
         "pdf_pages": full_data.get("pdf_pages", 0),
         "pdf_count": full_data.get("pdf_count", 0),
     }

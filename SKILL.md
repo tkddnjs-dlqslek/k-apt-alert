@@ -1227,12 +1227,18 @@ GH/SH 카테고리는 청약 접수기간이 PDF 안에 있습니다. announceme
 ```
 
 **사이트별 본문 추출 가능성:**
-| 사이트 | 본문 위치 | 자동 추출 |
-|---|---|---|
-| 청약홈 (applyhome) | HTML | ✅ 가능 |
-| LH | HTML | ✅ 가능 |
-| SH | HTML (페이지에 일정 포함) | ✅ 가능 |
-| GH | HWP 첨부 (페이지엔 안내만) | ❌ 불가 — URL 안내 fallback |
+| 사이트 | 본문 위치 | 자동 추출 | 추출기 |
+|---|---|---|---|
+| 청약홈 (applyhome) | HTML | ✅ 가능 | BeautifulSoup |
+| LH | HTML | ✅ 가능 | BeautifulSoup |
+| SH | HTML (페이지에 일정 포함) | ✅ 가능 | BeautifulSoup |
+| **GH** | HWP 첨부 | ✅ **가능 (kordoc CLI)** | BeautifulSoup + kordoc → Markdown |
+
+**응답 메타 필드:**
+- `has_pdf: true` — PDF 첨부 추출 성공 (pdfplumber)
+- `has_hwp: true` — HWP/HWPX 첨부 추출 성공 (kordoc)
+- `attachment_kinds: ["hwp"]` 또는 `["pdf"]` 등 — 처리된 첨부 종류
+- `pdf_count` / `pdf_pages` — 첨부 처리 통계
 
 **처리 규칙 — PDF 추출 후에도 어떤 경우든:**
 - **Top 추천 후보로 일단 보류** — PDF 본문 확인 전엔 매칭 점수만 높다고 Top에 올리지 말 것
