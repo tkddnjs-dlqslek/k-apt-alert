@@ -14,11 +14,18 @@ LLM이 사용자 프로필 컨텍스트로 요약·해석하기 위한 입력.
 import logging
 import re
 import time
+from io import BytesIO
 from threading import Lock
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
+
+try:
+    import pdfplumber
+    PDFPLUMBER_AVAILABLE = True
+except ImportError:
+    PDFPLUMBER_AVAILABLE = False
 
 from config import (
     NOTICE_RAW_HTTP_TIMEOUT,
@@ -27,6 +34,11 @@ from config import (
 )
 
 logger = logging.getLogger(__name__)
+
+# PDF 다운로드·파싱 타임아웃·상한
+PDF_HTTP_TIMEOUT = 30
+PDF_MAX_SIZE_MB = 30
+PDF_MAX_PAGES = 50  # 추출 페이지 상한 (큰 PDF 메모리 보호)
 
 _cache: dict = {}
 _cache_lock = Lock()
@@ -60,6 +72,80 @@ _GENERIC_TITLES = {
     "LH 청약플러스", "LH청약플러스", "SH서울주택도시공사", "SH 서울주택도시공사",
     "GH경기주택도시공사", "GH 경기주택도시공사", "경기주택도시공사",
 }
+
+
+def _find_pdf_links(soup: BeautifulSoup, base_url: str) -> list[str]:
+    """페이지에서 첨부된 PDF 다운로드 URL 추출.
+
+    GH/SH는 첨부파일이 <a href="...filedown.do?..."> 또는 직접 .pdf 링크로 노출됨.
+    """
+    candidates = []
+    for a in soup.find_all("a", href=True):
+        href = a["href"]
+        text = a.get_text(strip=True).lower()
+        href_lower = href.lower()
+        # 직접 .pdf 링크
+        if href_lower.endswith(".pdf"):
+            candidates.append(urljoin(base_url, href))
+            continue
+        # filedown·fileDownload·download 패턴 + 텍스트에 'pdf' or '공고' or '첨부'
+        if any(p in href_lower for p in ("filedown", "filedownload", "/download", "atchfile")):
+            if "pdf" in text or "공고" in text or "첨부" in text or "모집" in text:
+                candidates.append(urljoin(base_url, href))
+    # 중복 제거 (순서 보존)
+    seen = set()
+    unique = []
+    for url in candidates:
+        if url not in seen:
+            seen.add(url)
+            unique.append(url)
+    return unique[:3]  # 최대 3개까지만 (보통 1개)
+
+
+def _extract_pdf_text(url: str) -> tuple[str, int] | None:
+    """PDF URL → (텍스트, 페이지 수). 실패 시 None."""
+    if not PDFPLUMBER_AVAILABLE:
+        return None
+    try:
+        resp = requests.get(
+            url,
+            timeout=PDF_HTTP_TIMEOUT,
+            headers={"User-Agent": "Mozilla/5.0 k-apt-alert/3.0"},
+            stream=True,
+        )
+        resp.raise_for_status()
+
+        # Content-Length 사전 체크 (메모리 보호)
+        content_len = int(resp.headers.get("Content-Length", "0") or 0)
+        if content_len > PDF_MAX_SIZE_MB * 1024 * 1024:
+            logger.warning(f"[pdf] {url} too large ({content_len} bytes), skip")
+            return None
+
+        # 전체 다운로드 (스트리밍 시작했지만 결국 메모리에 올려야 pdfplumber 가능)
+        data = resp.content
+        if len(data) > PDF_MAX_SIZE_MB * 1024 * 1024:
+            logger.warning(f"[pdf] {url} actually too large after fetch")
+            return None
+
+        # 텍스트 추출
+        parts = []
+        with pdfplumber.open(BytesIO(data)) as pdf:
+            page_count = len(pdf.pages)
+            for i, page in enumerate(pdf.pages[:PDF_MAX_PAGES]):
+                txt = page.extract_text() or ""
+                if txt.strip():
+                    parts.append(f"\n--- [PDF page {i + 1}] ---\n{txt}")
+        text = "\n".join(parts).strip()
+        if not text:
+            logger.info(f"[pdf] {url} extracted 0 text (image-based?)")
+            return None
+        return text, page_count
+    except requests.RequestException as e:
+        logger.warning(f"[pdf] {url} fetch failed: {e}")
+        return None
+    except Exception as e:
+        logger.warning(f"[pdf] {url} extract failed: {e}")
+        return None
 
 # 노이즈 패턴 — 본문 정규화 시 제거
 _WHITESPACE_RE = re.compile(r"[ \t]+")
@@ -201,8 +287,8 @@ def _extract_lh(html: str, fallback_title: str = "") -> dict:
     return {"title": title, "text": text}
 
 
-def _extract_sh(html: str, fallback_title: str = "") -> dict:
-    """SH (i-sh.co.kr) 게시판 view.do 상세 페이지 추출."""
+def _extract_sh(html: str, fallback_title: str = "", page_url: str = "") -> dict:
+    """SH (i-sh.co.kr) 게시판 view.do 상세 페이지 + 첨부 PDF 통합 추출."""
     soup = BeautifulSoup(html, "html.parser")
     title = _extract_title(soup, fallback=fallback_title)
 
@@ -213,12 +299,12 @@ def _extract_sh(html: str, fallback_title: str = "") -> dict:
     if not container:
         container = soup.body or soup
 
-    text = _clean_text(BeautifulSoup(str(container), "html.parser"))
-    return {"title": title, "text": text}
+    html_text = _clean_text(BeautifulSoup(str(container), "html.parser"))
+    return _augment_with_pdf(soup, html_text, title, page_url)
 
 
-def _extract_gh(html: str, fallback_title: str = "") -> dict:
-    """GH (gh.or.kr) announcement-of-salerental001.do 상세 페이지 추출."""
+def _extract_gh(html: str, fallback_title: str = "", page_url: str = "") -> dict:
+    """GH (gh.or.kr) announcement-of-salerental001.do 상세 페이지 + 첨부 PDF 통합 추출."""
     soup = BeautifulSoup(html, "html.parser")
     title = _extract_title(soup, fallback=fallback_title)
 
@@ -229,8 +315,40 @@ def _extract_gh(html: str, fallback_title: str = "") -> dict:
     if not container:
         container = soup.body or soup
 
-    text = _clean_text(BeautifulSoup(str(container), "html.parser"))
-    return {"title": title, "text": text}
+    html_text = _clean_text(BeautifulSoup(str(container), "html.parser"))
+    return _augment_with_pdf(soup, html_text, title, page_url)
+
+
+def _augment_with_pdf(soup: BeautifulSoup, html_text: str, title: str, page_url: str) -> dict:
+    """GH/SH 페이지 본문에 첨부 PDF 텍스트를 합쳐 반환.
+
+    PDF가 없거나 추출 실패해도 HTML 본문은 그대로 반환 (graceful degradation).
+    """
+    pdf_urls = _find_pdf_links(soup, page_url) if page_url else []
+    pdf_text_parts = []
+    pdf_pages_total = 0
+    pdf_fetched = 0
+
+    for pdf_url in pdf_urls:
+        result = _extract_pdf_text(pdf_url)
+        if result:
+            text, pages = result
+            pdf_text_parts.append(text)
+            pdf_pages_total += pages
+            pdf_fetched += 1
+
+    if pdf_text_parts:
+        combined = html_text + "\n\n=== 첨부 PDF 본문 ===\n" + "\n\n".join(pdf_text_parts)
+    else:
+        combined = html_text
+
+    return {
+        "title": title,
+        "text": combined,
+        "has_pdf": pdf_fetched > 0,
+        "pdf_pages": pdf_pages_total,
+        "pdf_count": pdf_fetched,
+    }
 
 
 _EXTRACTORS = (
@@ -302,7 +420,11 @@ def extract_notice_raw(
         raise ValueError(f"fetch failed: {e}")
 
     try:
-        extracted = extractor(resp.text, fallback_title=fallback_title)
+        # GH/SH는 PDF 첨부 추출 위해 page_url도 전달, 나머지는 무시
+        if extractor in (_extract_gh, _extract_sh):
+            extracted = extractor(resp.text, fallback_title=fallback_title, page_url=url)
+        else:
+            extracted = extractor(resp.text, fallback_title=fallback_title)
     except Exception as e:
         raise ValueError(f"extract failed: {e}")
 
@@ -319,6 +441,9 @@ def extract_notice_raw(
         "title": extracted.get("title", ""),
         "full_text": text,
         "sections": sections,
+        "has_pdf": extracted.get("has_pdf", False),
+        "pdf_pages": extracted.get("pdf_pages", 0),
+        "pdf_count": extracted.get("pdf_count", 0),
     }
 
     with _cache_lock:
@@ -344,6 +469,9 @@ def _build_response(full_data: dict, max_chars: int, now: float) -> dict:
         "truncated": was_truncated,
         "sections": full_data["sections"],
         "text": truncated_text,
+        "has_pdf": full_data.get("has_pdf", False),
+        "pdf_pages": full_data.get("pdf_pages", 0),
+        "pdf_count": full_data.get("pdf_count", 0),
     }
 
 
