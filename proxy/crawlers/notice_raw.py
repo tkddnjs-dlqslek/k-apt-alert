@@ -27,6 +27,16 @@ try:
 except ImportError:
     PDFPLUMBER_AVAILABLE = False
 
+try:
+    import cloudscraper
+    _SCRAPER = cloudscraper.create_scraper(
+        browser={"browser": "chrome", "platform": "windows", "mobile": False}
+    )
+    CLOUDSCRAPER_AVAILABLE = True
+except ImportError:
+    _SCRAPER = None
+    CLOUDSCRAPER_AVAILABLE = False
+
 from config import (
     NOTICE_RAW_HTTP_TIMEOUT,
     NOTICE_RAW_TTL,
@@ -72,6 +82,32 @@ _GENERIC_TITLES = {
     "LH 청약플러스", "LH청약플러스", "SH서울주택도시공사", "SH 서울주택도시공사",
     "GH경기주택도시공사", "GH 경기주택도시공사", "경기주택도시공사",
 }
+
+
+def _smart_fetch(url: str, timeout: int = 30) -> requests.Response:
+    """봇 차단 우회를 위해 cloudscraper 우선 시도, 실패·미설치 시 requests fallback.
+
+    GH 같은 사이트가 Render IP에서 1.3KB 빈 페이지만 반환하는 케이스 대응.
+    응답이 너무 작으면 (<5KB) 차단으로 간주하고 다른 방법으로 재시도.
+    """
+    # Try 1: cloudscraper if available
+    if CLOUDSCRAPER_AVAILABLE and _SCRAPER is not None:
+        try:
+            resp = _SCRAPER.get(url, timeout=timeout, headers={
+                "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+            })
+            if resp.status_code == 200 and len(resp.content) > 5000:
+                logger.info(f"[fetch] cloudscraper OK ({len(resp.content)} bytes) {url[:80]}")
+                return resp
+            logger.info(f"[fetch] cloudscraper response small ({len(resp.content)}b), try requests")
+        except Exception as e:
+            logger.info(f"[fetch] cloudscraper failed: {e}, try requests")
+
+    # Try 2: regular requests with browser headers
+    resp = requests.get(url, timeout=timeout, headers=_BROWSER_HEADERS)
+    if resp.status_code == 200 and len(resp.content) < 5000:
+        logger.warning(f"[fetch] suspiciously small response ({len(resp.content)}b) — bot block?")
+    return resp
 
 
 def _find_pdf_links(soup: BeautifulSoup, base_url: str) -> list[str]:
@@ -142,14 +178,19 @@ def _extract_pdf_text(url: str) -> tuple[str, int] | None:
     if not PDFPLUMBER_AVAILABLE:
         return None
     try:
-        # PDF 다운로드는 Accept 헤더만 다르게
+        # PDF 다운로드: cloudscraper 우선 (봇 차단 우회), Accept는 PDF 허용
         pdf_headers = {**_BROWSER_HEADERS, "Accept": "application/pdf,*/*"}
-        resp = requests.get(
-            url,
-            timeout=PDF_HTTP_TIMEOUT,
-            headers=pdf_headers,
-            allow_redirects=True,
-        )
+        if CLOUDSCRAPER_AVAILABLE and _SCRAPER is not None:
+            try:
+                resp = _SCRAPER.get(url, timeout=PDF_HTTP_TIMEOUT,
+                                     headers={"Accept": "application/pdf,*/*"},
+                                     allow_redirects=True)
+            except Exception:
+                resp = requests.get(url, timeout=PDF_HTTP_TIMEOUT,
+                                     headers=pdf_headers, allow_redirects=True)
+        else:
+            resp = requests.get(url, timeout=PDF_HTTP_TIMEOUT,
+                                 headers=pdf_headers, allow_redirects=True)
         resp.raise_for_status()
 
         # 사이즈 체크
@@ -449,11 +490,7 @@ def extract_notice_raw(
                 return _build_response(entry["data"], max_chars, now)
 
     try:
-        resp = requests.get(
-            url,
-            timeout=NOTICE_RAW_HTTP_TIMEOUT,
-            headers=_BROWSER_HEADERS,
-        )
+        resp = _smart_fetch(url, timeout=NOTICE_RAW_HTTP_TIMEOUT)
         resp.raise_for_status()
     except requests.RequestException as e:
         raise ValueError(f"fetch failed: {e}")
