@@ -120,6 +120,19 @@ _BROWSER_UA = (
     "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"
 )
 
+_BROWSER_HEADERS = {
+    "User-Agent": _BROWSER_UA,
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Connection": "keep-alive",
+    "Upgrade-Insecure-Requests": "1",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+}
+
 
 def _extract_pdf_text(url: str) -> tuple[str, int] | None:
     """다운로드 URL → (텍스트, 페이지 수). PDF가 아니거나 실패 시 None.
@@ -129,10 +142,12 @@ def _extract_pdf_text(url: str) -> tuple[str, int] | None:
     if not PDFPLUMBER_AVAILABLE:
         return None
     try:
+        # PDF 다운로드는 Accept 헤더만 다르게
+        pdf_headers = {**_BROWSER_HEADERS, "Accept": "application/pdf,*/*"}
         resp = requests.get(
             url,
             timeout=PDF_HTTP_TIMEOUT,
-            headers={"User-Agent": _BROWSER_UA},
+            headers=pdf_headers,
             allow_redirects=True,
         )
         resp.raise_for_status()
@@ -437,7 +452,7 @@ def extract_notice_raw(
         resp = requests.get(
             url,
             timeout=NOTICE_RAW_HTTP_TIMEOUT,
-            headers={"User-Agent": _BROWSER_UA},
+            headers=_BROWSER_HEADERS,
         )
         resp.raise_for_status()
     except requests.RequestException as e:
