@@ -114,7 +114,11 @@ app.add_middleware(
 
 
 def _add_d_day(ann: dict) -> dict:
-    """rcept_end 기반 D-day 계산."""
+    """rcept_end 기반 D-day 계산.
+
+    schedule_source == "unavailable"이면 일정 모르므로 명시적으로 라벨 표시
+    → LLM·사용자가 추천에서 별도 처리하도록 신호 제공.
+    """
     rcept_end = ann.get("rcept_end", "")
     if rcept_end and len(rcept_end) >= 8:
         try:
@@ -131,7 +135,11 @@ def _add_d_day(ann: dict) -> dict:
                 ann["d_day_label"] = f"D-{delta}"
         except ValueError:
             ann["d_day"] = None
-            ann["d_day_label"] = ""
+            ann["d_day_label"] = "⚠️ 일정 미확인"
+    elif ann.get("schedule_source") == "unavailable":
+        # GH/SH 등 일정 정보 부재 — 추천·정렬에서 별도 처리 필요
+        ann["d_day"] = None
+        ann["d_day_label"] = "⚠️ 일정 미확인 (원문 확인 필요)"
     else:
         ann["d_day"] = None
         ann["d_day_label"] = ""
@@ -210,7 +218,9 @@ def _is_active(ann) -> bool:
 
     1) rcept_end 있으면 → 오늘 이후만 True
     2) rcept_end 없고 schedule_source == "unavailable" (SH/GH 등 HTML 크롤러)
-       → notice_date 기준 30일 이내면 True (접수 기간 확정 불가 → 최근 공고는 보존)
+       → notice_date 기준 14일 이내면 True
+       (GH/SH 실제 접수기간 보통 10~14일이라 30일은 너무 길었음 — 이미 마감된 공고가
+        통과하던 문제. d_day_label에도 '일정 미확인'으로 표시해 LLM·사용자에게 경고.)
     """
     rcept_end = str(ann.get("rcept_end", ""))
     if rcept_end and len(rcept_end) >= 8:
@@ -227,7 +237,7 @@ def _is_active(ann) -> bool:
             try:
                 fmt = "%Y-%m-%d" if "-" in notice_date else "%Y%m%d"
                 nd = datetime.strptime(notice_date[:10], fmt).date()
-                return (datetime.now().date() - nd).days <= 30
+                return (datetime.now().date() - nd).days <= 14
             except ValueError:
                 return False
 

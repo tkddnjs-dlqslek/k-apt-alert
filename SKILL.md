@@ -1207,6 +1207,21 @@ curl -s --max-time 180 "https://k-apt-alert-proxy.onrender.com/v1/apt/announceme
 - `"html_scraped"` — 청약홈 공고 상세 페이지 HTML 파싱으로 보강 (오피스텔·잔여세대 등 API 누락분)
 - `"unavailable"` — 두 경로 모두 실패, 일정 미확인 (원문 URL 직접 확인 필요)
 
+**`schedule_source: "unavailable"` 공고 처리 규칙 (중요):**
+GH/SH 카테고리는 청약 접수기간이 PDF 안에 묻혀있어 일정 추출이 불가합니다. 이런 공고는 d_day_label이 `"⚠️ 일정 미확인 (원문 확인 필요)"`로 표시되며 다음 규칙을 따른다:
+
+- **Top 추천에서 제외** — 적합도 높아도 일정 검증 불가라 마감됐을 가능성 있음
+- **별도 섹션 출력** — "📋 일정 미확인 공고 (직접 확인 필요)" 그룹으로 분리, URL 클릭 안내 필수
+- **D-day 색상 표시 금지** — 🟢🟡🔴 대신 ⚠️만 사용
+- **알림 발송 시** — reminder=d3/d1 필터에서 자동 제외됨 (d_day가 None)
+- **사용자 안내 문구 예시**:
+  ```
+  📋 일정 미확인 공고 (직접 확인 필요) — N건
+   ※ GH/SH 공고는 접수기간이 PDF 안에 있어 자동 추출 불가
+   1. [공고명] · [지역] · 등록 X일 전 · [원문 →](url)
+   ⚠️ 이미 마감됐을 수 있으니 클릭해서 확인하세요.
+  ```
+
 **관련 필드 (html_scraped 시 추가 제공):**
 - `notice_date` — 모집공고일
 - `winner_date` — 당첨자 발표일 (reminder=winners 기반)
