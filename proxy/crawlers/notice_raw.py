@@ -75,23 +75,36 @@ _GENERIC_TITLES = {
 
 
 def _find_pdf_links(soup: BeautifulSoup, base_url: str) -> list[str]:
-    """페이지에서 첨부된 PDF 다운로드 URL 추출.
+    """페이지에서 첨부 다운로드 URL 추출 (PDF·HWP 무관, 일단 후보로).
 
-    GH/SH는 첨부파일이 <a href="...filedown.do?..."> 또는 직접 .pdf 링크로 노출됨.
+    사이트별 패턴:
+    - 직접 .pdf 링크
+    - GH: `?mode=download&articleNo=X&attachNo=Y` (텍스트 "다운로드")
+    - SH: `filedown.do?...` 또는 `atchFileDownload`
+    - 일반: `/download`, `filedownload`, `attach`
+
+    실제 PDF 여부는 _extract_pdf_text()의 Content-Type 검사 + pdfplumber 시도로 확정.
     """
     candidates = []
     for a in soup.find_all("a", href=True):
         href = a["href"]
-        text = a.get_text(strip=True).lower()
+        text = a.get_text(strip=True)
         href_lower = href.lower()
-        # 직접 .pdf 링크
-        if href_lower.endswith(".pdf"):
+
+        # 1. 직접 .pdf 링크
+        if href_lower.endswith(".pdf") or ".pdf?" in href_lower:
             candidates.append(urljoin(base_url, href))
             continue
-        # filedown·fileDownload·download 패턴 + 텍스트에 'pdf' or '공고' or '첨부'
-        if any(p in href_lower for p in ("filedown", "filedownload", "/download", "atchfile")):
-            if "pdf" in text or "공고" in text or "첨부" in text or "모집" in text:
-                candidates.append(urljoin(base_url, href))
+
+        # 2. 다운로드 패턴 매칭 (URL)
+        download_patterns = (
+            "filedown", "filedownload", "atchfile", "attach", "download",
+            "mode=download", "fileno", "atchnno",
+        )
+        if any(p in href_lower for p in download_patterns):
+            # URL에 명백한 다운로드 신호 있으면 텍스트 무관 통과
+            candidates.append(urljoin(base_url, href))
+
     # 중복 제거 (순서 보존)
     seen = set()
     unique = []
@@ -99,37 +112,48 @@ def _find_pdf_links(soup: BeautifulSoup, base_url: str) -> list[str]:
         if url not in seen:
             seen.add(url)
             unique.append(url)
-    return unique[:3]  # 최대 3개까지만 (보통 1개)
+    return unique[:5]  # 최대 5개까지만
+
+
+_BROWSER_UA = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+)
 
 
 def _extract_pdf_text(url: str) -> tuple[str, int] | None:
-    """PDF URL → (텍스트, 페이지 수). 실패 시 None."""
+    """다운로드 URL → (텍스트, 페이지 수). PDF가 아니거나 실패 시 None.
+
+    Content-Type/Content-Disposition으로 PDF 여부 확인 후 pdfplumber 시도.
+    """
     if not PDFPLUMBER_AVAILABLE:
         return None
     try:
         resp = requests.get(
             url,
             timeout=PDF_HTTP_TIMEOUT,
-            headers={"User-Agent": "Mozilla/5.0 k-apt-alert/3.0"},
-            stream=True,
+            headers={"User-Agent": _BROWSER_UA},
+            allow_redirects=True,
         )
         resp.raise_for_status()
 
-        # Content-Length 사전 체크 (메모리 보호)
-        content_len = int(resp.headers.get("Content-Length", "0") or 0)
-        if content_len > PDF_MAX_SIZE_MB * 1024 * 1024:
-            logger.warning(f"[pdf] {url} too large ({content_len} bytes), skip")
+        # 사이즈 체크
+        if len(resp.content) > PDF_MAX_SIZE_MB * 1024 * 1024:
+            logger.warning(f"[pdf] {url} too large ({len(resp.content)} bytes), skip")
             return None
 
-        # 전체 다운로드 (스트리밍 시작했지만 결국 메모리에 올려야 pdfplumber 가능)
-        data = resp.content
-        if len(data) > PDF_MAX_SIZE_MB * 1024 * 1024:
-            logger.warning(f"[pdf] {url} actually too large after fetch")
+        # PDF 여부 확인 — Content-Type 또는 매직 바이트
+        ct = resp.headers.get("Content-Type", "").lower()
+        cd = resp.headers.get("Content-Disposition", "").lower()
+        is_pdf_header = "pdf" in ct or ".pdf" in cd
+        is_pdf_magic = resp.content[:4] == b"%PDF"
+        if not (is_pdf_header or is_pdf_magic):
+            logger.info(f"[pdf] {url} not PDF (ct={ct}, cd={cd[:50]}), skip")
             return None
 
         # 텍스트 추출
         parts = []
-        with pdfplumber.open(BytesIO(data)) as pdf:
+        with pdfplumber.open(BytesIO(resp.content)) as pdf:
             page_count = len(pdf.pages)
             for i, page in enumerate(pdf.pages[:PDF_MAX_PAGES]):
                 txt = page.extract_text() or ""
@@ -413,7 +437,7 @@ def extract_notice_raw(
         resp = requests.get(
             url,
             timeout=NOTICE_RAW_HTTP_TIMEOUT,
-            headers={"User-Agent": "Mozilla/5.0 k-apt-alert/3.0 (notice-interpreter)"},
+            headers={"User-Agent": _BROWSER_UA},
         )
         resp.raise_for_status()
     except requests.RequestException as e:
