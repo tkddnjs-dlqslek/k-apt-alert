@@ -1,14 +1,9 @@
-FROM python:3.12-slim
+# Python 3.12 + Node.js 20 통합 base 이미지 (community, 100M+ pulls)
+# 이전: python:3.12-slim + NodeSource 수동 설치 → Render free tier 빌드 OOM/timeout
+FROM nikolaik/python-nodejs:python3.12-nodejs20-slim
 
-# Node.js 20 (kordoc HWP/HWPX parser)
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends curl ca-certificates && \
-    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
-    apt-get install -y --no-install-recommends nodejs && \
-    npm install -g kordoc && \
-    apt-get purge -y curl && \
-    apt-get autoremove -y && \
-    rm -rf /var/lib/apt/lists/*
+# kordoc CLI 글로벌 설치 — HWP·HWPX·PDF·XLSX·DOCX → Markdown
+RUN npm install -g --omit=dev kordoc && npm cache clean --force
 
 WORKDIR /app
 
