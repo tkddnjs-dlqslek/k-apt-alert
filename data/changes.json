@@ -1,6 +1,88 @@
 {
   "changes": [
     {
+      "id": "oft_2026950050",
+      "type": "new",
+      "detected_at": "2026-05-13",
+      "name": "영통역 우미 린",
+      "region": "경기",
+      "district": "영통구",
+      "house_category": "오피스텔/도시형",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950050&pblancNo=2026950050&houseSecd=02"
+    },
+    {
+      "id": "rem_2026910109",
+      "type": "new",
+      "detected_at": "2026-05-13",
+      "name": "르네오션 고성 퍼스트뷰",
+      "region": "강원",
+      "district": "고성군",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910109&pblancNo=2026910109"
+    },
+    {
+      "id": "opt_2026940095",
+      "type": "new",
+      "detected_at": "2026-05-13",
+      "name": "왕길역 아테라(4차)",
+      "region": "인천",
+      "district": "서구",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940095&pblancNo=2026940095"
+    },
+    {
+      "id": "ppr_2026850028",
+      "type": "new",
+      "detected_at": "2026-05-13",
+      "name": "부경경마공원역 대방 디에트르 더리버(AP1BL)",
+      "region": "부산",
+      "district": "강서구",
+      "house_category": "공공지원민간임대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026850028&pblancNo=2026850028&houseSecd=03"
+    },
+    {
+      "id": "oft_2026950044",
+      "type": "new",
+      "detected_at": "2026-05-13",
+      "name": "수원역 아너스빌 플라츠",
+      "region": "경기",
+      "district": "팔달구",
+      "house_category": "오피스텔/도시형",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950044&pblancNo=2026950044&houseSecd=02"
+    },
+    {
+      "id": "opt_2026940090",
+      "type": "removed",
+      "detected_at": "2026-05-13",
+      "name": "힐스테이트 용인마크밸리(8차)",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940090&pblancNo=2026940090"
+    },
+    {
+      "id": "rem_2026910105",
+      "type": "removed",
+      "detected_at": "2026-05-13",
+      "name": "엄궁역 트라비스 하늘채",
+      "region": "부산",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910105&pblancNo=2026910105"
+    },
+    {
+      "id": "sh_303858",
+      "type": "removed",
+      "detected_at": "2026-05-13",
+      "name": "2026년 마곡 도전숙 입주자 모집 공고",
+      "region": "서울",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=303858&multi_itm_seq=2"
+    },
+    {
+      "id": "oft_2026950045",
+      "type": "removed",
+      "detected_at": "2026-05-13",
+      "name": "해링턴 스퀘어 과천",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950045&pblancNo=2026950045&houseSecd=02"
+    },
+    {
       "id": "sh_304050",
       "type": "new",
       "detected_at": "2026-05-10",
@@ -371,7 +453,7 @@
       "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000126&pblancNo=2026000126"
     }
   ],
-  "updated_at": "2026-05-12T00:04:38Z",
+  "updated_at": "2026-05-13T00:06:36Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
