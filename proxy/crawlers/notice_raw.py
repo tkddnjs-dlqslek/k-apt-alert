@@ -177,7 +177,9 @@ def _find_pdf_links(soup: BeautifulSoup, base_url: str) -> list[str]:
         if url not in seen:
             seen.add(url)
             unique.append(url)
-    return unique[:5]  # 최대 5개까지만
+    # 최대 3개까지만 — 일정·자격은 보통 첫 PDF/HWP에 다 있음.
+    # Render free tier 512MB에서 첨부 5개 연속 파싱 시 OOM(502) 위험.
+    return unique[:3]
 
 
 _BROWSER_UA = (
