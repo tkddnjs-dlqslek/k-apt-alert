@@ -1282,6 +1282,17 @@ GH/SH 카테고리는 청약 접수기간이 PDF 안에 있습니다. announceme
 - `has_hwp: true` — HWP/HWPX 첨부 추출 성공 (kordoc)
 - `attachment_kinds: ["hwp"]` 또는 `["pdf"]` 등 — 처리된 첨부 종류
 - `pdf_count` / `pdf_pages` — 첨부 처리 통계
+- `raw_html_length` — fetch한 원본 HTML 바이트 (진단용, 정상 ≥ 5,000)
+- `looks_blocked: true` — 페이지가 5KB 미만 = 봇 차단·세션 만료 신호
+- `attachment_fetch_failed: true` — text에 "첨부파일"·".pdf"·".hwp" 언급 있는데 추출 0건 → silent fail
+
+**진단 신호 출력 규칙 (중요):**
+- `looks_blocked` 또는 `attachment_fetch_failed`가 true면 LLM은 반드시:
+  ```
+  ⚠️ 이 공고의 원문 HTML이 정상 로드되지 못해 첨부파일을 자동 추출하지 못했습니다.
+  사이트가 일시적으로 차단 중일 수 있으니 [원문 →](url)에서 직접 확인하세요.
+  ```
+- 자격·일정·금액 추정을 절대 하지 말고 URL 안내만 (잘못된 정보 방지)
 
 **처리 규칙 — PDF 추출 후에도 어떤 경우든:**
 - **Top 추천 후보로 일단 보류** — PDF 본문 확인 전엔 매칭 점수만 높다고 Top에 올리지 말 것

@@ -108,30 +108,72 @@ _GENERIC_TITLES = {
 }
 
 
-def _smart_fetch(url: str, timeout: int = 30) -> requests.Response:
-    """봇 차단 우회를 위해 cloudscraper 우선 시도, 실패·미설치 시 requests fallback.
+_MIN_HTML_BYTES = 5000  # 이 미만이면 봇 차단·세션 만료로 간주
 
-    GH 같은 사이트가 Render IP에서 1.3KB 빈 페이지만 반환하는 케이스 대응.
-    응답이 너무 작으면 (<5KB) 차단으로 간주하고 다른 방법으로 재시도.
+
+def _fresh_scraper():
+    """매 호출마다 새 cloudscraper 인스턴스 — 세션 만료·쿠키 stale 회피."""
+    if not CLOUDSCRAPER_AVAILABLE:
+        return None
+    try:
+        return cloudscraper.create_scraper(
+            browser={"browser": "chrome", "platform": "windows", "mobile": False}
+        )
+    except Exception:
+        return None
+
+
+def _smart_fetch(url: str, timeout: int = 30) -> requests.Response:
+    """봇 차단 우회 — 3단 시도. 마지막에 받은 응답을 반환 (작아도).
+
+    1. cloudscraper (module-level singleton) — 빠른 재사용 경로
+    2. cloudscraper (fresh instance) — singleton 세션 만료 시 갱신
+    3. requests + 풀세트 브라우저 헤더 — 최종 fallback
+
+    응답 크기가 _MIN_HTML_BYTES 미만이면 다음 단계로. 모두 작으면 마지막 응답.
     """
-    # Try 1: cloudscraper if available
+    last_resp = None
+
+    # Try 1: cloudscraper singleton
     if CLOUDSCRAPER_AVAILABLE and _SCRAPER is not None:
         try:
             resp = _SCRAPER.get(url, timeout=timeout, headers={
                 "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
             })
-            if resp.status_code == 200 and len(resp.content) > 5000:
-                logger.info(f"[fetch] cloudscraper OK ({len(resp.content)} bytes) {url[:80]}")
+            last_resp = resp
+            if resp.status_code == 200 and len(resp.content) >= _MIN_HTML_BYTES:
+                logger.info(f"[fetch] singleton OK ({len(resp.content)}b) {url[:80]}")
                 return resp
-            logger.info(f"[fetch] cloudscraper response small ({len(resp.content)}b), try requests")
+            logger.info(f"[fetch] singleton small ({len(resp.content)}b), try fresh scraper")
         except Exception as e:
-            logger.info(f"[fetch] cloudscraper failed: {e}, try requests")
+            logger.info(f"[fetch] singleton failed: {e}")
 
-    # Try 2: regular requests with browser headers
-    resp = requests.get(url, timeout=timeout, headers=_BROWSER_HEADERS)
-    if resp.status_code == 200 and len(resp.content) < 5000:
-        logger.warning(f"[fetch] suspiciously small response ({len(resp.content)}b) — bot block?")
-    return resp
+    # Try 2: fresh cloudscraper instance
+    fresh = _fresh_scraper()
+    if fresh is not None:
+        try:
+            resp = fresh.get(url, timeout=timeout, headers={
+                "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+            })
+            last_resp = resp
+            if resp.status_code == 200 and len(resp.content) >= _MIN_HTML_BYTES:
+                logger.info(f"[fetch] fresh scraper OK ({len(resp.content)}b) {url[:80]}")
+                return resp
+            logger.info(f"[fetch] fresh scraper small ({len(resp.content)}b), try requests")
+        except Exception as e:
+            logger.info(f"[fetch] fresh scraper failed: {e}")
+
+    # Try 3: regular requests
+    try:
+        resp = requests.get(url, timeout=timeout, headers=_BROWSER_HEADERS)
+        last_resp = resp
+        if resp.status_code == 200 and len(resp.content) < _MIN_HTML_BYTES:
+            logger.warning(f"[fetch] all attempts small (final {len(resp.content)}b) — bot block confirmed")
+    except Exception:
+        if last_resp is None:
+            raise
+
+    return last_resp
 
 
 def _find_pdf_links(soup: BeautifulSoup, base_url: str) -> list[str]:
@@ -576,6 +618,8 @@ def extract_notice_raw(
     except requests.RequestException as e:
         raise ValueError(f"fetch failed: {e}")
 
+    raw_html_length = len(resp.content)
+
     try:
         # GH/SH는 PDF 첨부 추출 위해 page_url도 전달, 나머지는 무시
         if extractor in (_extract_gh, _extract_sh):
@@ -591,6 +635,15 @@ def extract_notice_raw(
 
     sections = _detect_sections(text)
 
+    # 진단: HTML 크기 작으면 봇 차단 가능성. text에서 "첨부파일" 단어 있는데 추출 0이면 fetch 실패.
+    looks_blocked = raw_html_length < _MIN_HTML_BYTES
+    has_attachment_hint = any(k in text for k in (".pdf", ".hwp", ".hwpx", "첨부파일"))
+    attachment_fetch_failed = bool(
+        has_attachment_hint
+        and not extracted.get("has_pdf")
+        and not extracted.get("has_hwp")
+    )
+
     full_data = {
         "id": notice_id,
         "url": url,
@@ -603,6 +656,9 @@ def extract_notice_raw(
         "attachment_kinds": extracted.get("attachment_kinds", []),
         "pdf_pages": extracted.get("pdf_pages", 0),
         "pdf_count": extracted.get("pdf_count", 0),
+        "raw_html_length": raw_html_length,
+        "looks_blocked": looks_blocked,
+        "attachment_fetch_failed": attachment_fetch_failed,
     }
 
     with _cache_lock:
@@ -633,6 +689,9 @@ def _build_response(full_data: dict, max_chars: int, now: float) -> dict:
         "attachment_kinds": full_data.get("attachment_kinds", []),
         "pdf_pages": full_data.get("pdf_pages", 0),
         "pdf_count": full_data.get("pdf_count", 0),
+        "raw_html_length": full_data.get("raw_html_length", 0),
+        "looks_blocked": full_data.get("looks_blocked", False),
+        "attachment_fetch_failed": full_data.get("attachment_fetch_failed", False),
     }
 
 
