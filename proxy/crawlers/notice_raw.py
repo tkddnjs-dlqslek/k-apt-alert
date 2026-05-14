@@ -262,6 +262,18 @@ def _download_attachment_to_file(url: str) -> str | None:
                                  headers=headers, allow_redirects=True, stream=True)
         resp.raise_for_status()
 
+        # 핵심: 스트리밍 시작 전에 Content-Length로 크기 사전 차단.
+        # 89MB PDF를 40MB까지 받다 abort해도 그 다운로드 자체가 Render free tier에 부담 → 502.
+        # 헤더만 보고 큰 파일은 1바이트도 안 받고 즉시 skip.
+        declared = int(resp.headers.get("Content-Length", "0") or "0")
+        if declared > max_bytes:
+            logger.info(
+                f"[attach] {url} declared {declared // 1024 // 1024}MB "
+                f"> {PDF_MAX_SIZE_MB}MB — skip without download"
+            )
+            resp.close()
+            return None
+
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
             tmp_path = tmp.name
             downloaded = 0
@@ -270,7 +282,8 @@ def _download_attachment_to_file(url: str) -> str | None:
                     continue
                 downloaded += len(chunk)
                 if downloaded > max_bytes:
-                    logger.warning(f"[attach] {url} exceeds {PDF_MAX_SIZE_MB}MB, abort")
+                    # Content-Length 없는 서버 대비 — 받다가 초과해도 중단
+                    logger.warning(f"[attach] {url} exceeds {PDF_MAX_SIZE_MB}MB mid-stream, abort")
                     tmp.close()
                     Path(tmp_path).unlink(missing_ok=True)
                     return None
