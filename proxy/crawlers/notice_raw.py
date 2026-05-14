@@ -12,6 +12,7 @@ LLM이 사용자 프로필 컨텍스트로 요약·해석하기 위한 입력.
 """
 
 import logging
+import os
 import re
 import subprocess
 import tempfile
@@ -101,6 +102,28 @@ _GENERIC_TITLES = {
 
 
 _MIN_HTML_BYTES = 5000  # 이 미만이면 봇 차단으로 간주 (looks_blocked 신호)
+
+# data 브랜치 사전 워밍 캐시 — warm_notices.py(GitHub Actions)가 GH/SH notice raw를
+# 미리 추출해 data/notices/{id}.json 으로 저장. proxy 인메모리 캐시 miss 시 여기서 읽음
+# → Render 재시작에도 영속, 사용자 조회 시 PDF/HWP 파싱 대기 없이 즉시 응답.
+_DATA_REPO = os.environ.get("CHANGES_GITHUB_REPO", "tkddnjs-dlqslek/k-apt-alert")
+_DATA_BRANCH = os.environ.get("CHANGES_GITHUB_BRANCH", "data")
+
+
+def _load_from_data_branch(notice_id: str) -> dict | None:
+    """data 브랜치 notices/{id}.json 에서 사전 워밍된 추출 결과 로드. 없으면 None."""
+    raw_url = (
+        f"https://raw.githubusercontent.com/{_DATA_REPO}/{_DATA_BRANCH}"
+        f"/data/notices/{notice_id}.json"
+    )
+    try:
+        resp = requests.get(raw_url, timeout=10)
+        if resp.status_code != 200:
+            return None
+        return resp.json()
+    except Exception as e:
+        logger.info(f"[notice_raw] data-branch load skip {notice_id}: {e}")
+        return None
 
 
 def _smart_fetch(url: str, timeout: int = 30) -> requests.Response:
@@ -581,6 +604,7 @@ def extract_notice_raw(
     now = time.time()
 
     if not force_refresh:
+        # 1순위: 인메모리 캐시
         with _cache_lock:
             entry = _cache.get(notice_id)
             if entry and now - entry["ts"] < NOTICE_RAW_TTL:
@@ -588,6 +612,33 @@ def extract_notice_raw(
                     f"[notice_raw] cache hit {notice_id} (age {int(now - entry['ts'])}s)"
                 )
                 return _build_response(entry["data"], max_chars, now)
+
+        # 2순위: data 브랜치 사전 워밍 캐시 (Render 재시작에도 영속)
+        warmed = _load_from_data_branch(notice_id)
+        if warmed and warmed.get("text"):
+            logger.info(f"[notice_raw] data-branch cache hit {notice_id}")
+            full_data = {
+                "id": notice_id,
+                "url": warmed.get("url", url),
+                "source": warmed.get("source", "html"),
+                "title": warmed.get("title", ""),
+                "full_text": warmed.get("text", ""),
+                "sections": warmed.get("sections", {}),
+                "has_pdf": warmed.get("has_pdf", False),
+                "has_hwp": warmed.get("has_hwp", False),
+                "attachment_kinds": warmed.get("attachment_kinds", []),
+                "pdf_pages": warmed.get("pdf_pages", 0),
+                "pdf_count": warmed.get("pdf_count", 0),
+                "attachment_urls_found": warmed.get("attachment_urls_found", 0),
+                "attachment_urls_sample": warmed.get("attachment_urls_sample", []),
+                "raw_html_length": warmed.get("raw_html_length", 0),
+                "looks_blocked": warmed.get("looks_blocked", False),
+                "attachment_fetch_failed": warmed.get("attachment_fetch_failed", False),
+            }
+            # 인메모리에도 채워 다음 호출은 더 빠르게
+            with _cache_lock:
+                _cache[notice_id] = {"ts": now, "data": full_data}
+            return _build_response(full_data, max_chars, now)
 
     try:
         resp = _smart_fetch(url, timeout=NOTICE_RAW_HTTP_TIMEOUT)

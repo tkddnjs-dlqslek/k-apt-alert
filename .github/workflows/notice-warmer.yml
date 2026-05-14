@@ -1,0 +1,58 @@
+name: Daily notice raw warmer (GH/SH PDF/HWP 사전 추출)
+
+on:
+  schedule:
+    - cron: "30 23 * * *"   # KST 08:30 — changes-tracker(08:00) 직후
+  workflow_dispatch:
+
+concurrency:
+  group: notice-warmer
+  cancel-in-progress: true
+
+permissions:
+  contents: write   # data 브랜치 push 권한
+
+jobs:
+  warm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25   # GH/SH 공고 × 2~5분 — 넉넉히
+    steps:
+      - name: Checkout data branch
+        uses: actions/checkout@v4
+        with:
+          ref: data
+          fetch-depth: 1
+        continue-on-error: true   # data 브랜치 없으면 changes-tracker가 먼저 만들어야 함
+
+      - name: Ensure data branch exists
+        run: |
+          if [ ! -d .git ] || ! git rev-parse --verify origin/data > /dev/null 2>&1; then
+            echo "data 브랜치 없음 — changes-tracker가 먼저 실행돼야 함. 스킵."
+            exit 0
+          fi
+
+      - name: Checkout warmer script from main
+        run: |
+          curl -sSL "https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/warm_notices.py" \
+            -o /tmp/warm_notices.py
+          test -s /tmp/warm_notices.py || (echo "warm_notices.py 다운로드 실패" && exit 1)
+
+      - name: Run notice warmer
+        env:
+          PROXY_URL: https://k-apt-alert-proxy.onrender.com
+          DATA_DIR: data
+        run: |
+          python3 /tmp/warm_notices.py
+
+      - name: Commit & push if changed
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git add data/notices/ 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "변경 없음 — 커밋 생략"
+            exit 0
+          fi
+          DATE=$(date -u +%Y-%m-%d)
+          git commit -m "chore(data): $DATE GH/SH notice raw 캐시 워밍"
+          git push origin data
