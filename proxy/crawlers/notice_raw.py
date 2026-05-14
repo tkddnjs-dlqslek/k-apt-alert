@@ -24,10 +24,10 @@ import requests
 from bs4 import BeautifulSoup
 
 try:
-    import pdfplumber
-    PDFPLUMBER_AVAILABLE = True
+    from pypdf import PdfReader
+    PYPDF_AVAILABLE = True
 except ImportError:
-    PDFPLUMBER_AVAILABLE = False
+    PYPDF_AVAILABLE = False
 
 try:
     import cloudscraper
@@ -49,10 +49,11 @@ logger = logging.getLogger(__name__)
 
 # PDF 다운로드·파싱 타임아웃·상한
 # 청약 공고 PDF는 도면·이미지 많아 80~90MB 흔함 → 상한 100MB.
-# 메모리 보호는 "전체를 메모리에 안 올리고 임시 파일로 스트리밍" 방식으로 처리.
+# pdfplumber(표 추출) 대신 pypdf(텍스트만) — Render free tier 512MB에서 89MB PDF 처리 가능.
+# 일정·자격은 PDF 앞부분에 집중되므로 앞 20p만 추출.
 PDF_HTTP_TIMEOUT = 90  # 큰 파일(80MB+) 다운로드 여유
 PDF_MAX_SIZE_MB = 100
-PDF_MAX_PAGES = 50  # 추출 페이지 상한 (큰 PDF 파싱 시간·메모리 보호)
+PDF_MAX_PAGES = 20  # 추출 페이지 상한 (앞부분에 일정·자격 집중, 메모리·시간 보호)
 
 # kordoc CLI (HWP/HWPX) 호출 타임아웃
 HWP_CONVERT_TIMEOUT = 120
@@ -288,17 +289,24 @@ def _download_attachment_to_file(url: str) -> str | None:
 
 
 def _extract_pdf_file(path: str) -> tuple[str, int] | None:
-    """PDF 파일 경로 → (텍스트, 페이지 수). pdfplumber가 파일에서 직접 읽음 (메모리 절약)."""
-    if not PDFPLUMBER_AVAILABLE:
+    """PDF 파일 경로 → (텍스트, 페이지 수). pypdf로 텍스트만 추출 (가벼움).
+
+    pdfplumber 대비: 표 구조 추출은 포기하지만 89MB PDF도 Render에서 처리 가능.
+    pypdf는 페이지 lazy load라 앞 20p만 읽으면 메모리 적게 씀.
+    """
+    if not PYPDF_AVAILABLE:
         return None
     try:
+        reader = PdfReader(path)
+        page_count = len(reader.pages)
         parts = []
-        with pdfplumber.open(path) as pdf:
-            page_count = len(pdf.pages)
-            for i, page in enumerate(pdf.pages[:PDF_MAX_PAGES]):
-                txt = page.extract_text() or ""
-                if txt.strip():
-                    parts.append(f"\n--- [PDF page {i + 1}] ---\n{txt}")
+        for i in range(min(page_count, PDF_MAX_PAGES)):
+            try:
+                txt = reader.pages[i].extract_text() or ""
+            except Exception:
+                txt = ""
+            if txt.strip():
+                parts.append(f"\n--- [PDF page {i + 1}] ---\n{txt}")
         text = "\n".join(parts).strip()
         if not text:
             return None
