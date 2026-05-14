@@ -29,16 +29,6 @@ try:
 except ImportError:
     PYPDF_AVAILABLE = False
 
-try:
-    import cloudscraper
-    _SCRAPER = cloudscraper.create_scraper(
-        browser={"browser": "chrome", "platform": "windows", "mobile": False}
-    )
-    CLOUDSCRAPER_AVAILABLE = True
-except ImportError:
-    _SCRAPER = None
-    CLOUDSCRAPER_AVAILABLE = False
-
 from config import (
     NOTICE_RAW_HTTP_TIMEOUT,
     NOTICE_RAW_TTL,
@@ -110,72 +100,20 @@ _GENERIC_TITLES = {
 }
 
 
-_MIN_HTML_BYTES = 5000  # 이 미만이면 봇 차단·세션 만료로 간주
-
-
-def _fresh_scraper():
-    """매 호출마다 새 cloudscraper 인스턴스 — 세션 만료·쿠키 stale 회피."""
-    if not CLOUDSCRAPER_AVAILABLE:
-        return None
-    try:
-        return cloudscraper.create_scraper(
-            browser={"browser": "chrome", "platform": "windows", "mobile": False}
-        )
-    except Exception:
-        return None
+_MIN_HTML_BYTES = 5000  # 이 미만이면 봇 차단으로 간주 (looks_blocked 신호)
 
 
 def _smart_fetch(url: str, timeout: int = 30) -> requests.Response:
-    """봇 차단 우회 — 3단 시도. 마지막에 받은 응답을 반환 (작아도).
+    """풀세트 브라우저 헤더로 페이지 fetch.
 
-    1. cloudscraper (module-level singleton) — 빠른 재사용 경로
-    2. cloudscraper (fresh instance) — singleton 세션 만료 시 갱신
-    3. requests + 풀세트 브라우저 헤더 — 최종 fallback
-
-    응답 크기가 _MIN_HTML_BYTES 미만이면 다음 단계로. 모두 작으면 마지막 응답.
+    cloudscraper는 challenge 처리하며 Render free tier에서 502(OOM/timeout) 유발 →
+    제거. GH 같은 강한 봇 차단은 어차피 cloudscraper로도 못 뚫었음.
+    응답이 작으면(looks_blocked) 호출부가 명시적으로 사용자에게 원문 안내.
     """
-    last_resp = None
-
-    # Try 1: cloudscraper singleton
-    if CLOUDSCRAPER_AVAILABLE and _SCRAPER is not None:
-        try:
-            resp = _SCRAPER.get(url, timeout=timeout, headers={
-                "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
-            })
-            last_resp = resp
-            if resp.status_code == 200 and len(resp.content) >= _MIN_HTML_BYTES:
-                logger.info(f"[fetch] singleton OK ({len(resp.content)}b) {url[:80]}")
-                return resp
-            logger.info(f"[fetch] singleton small ({len(resp.content)}b), try fresh scraper")
-        except Exception as e:
-            logger.info(f"[fetch] singleton failed: {e}")
-
-    # Try 2: fresh cloudscraper instance
-    fresh = _fresh_scraper()
-    if fresh is not None:
-        try:
-            resp = fresh.get(url, timeout=timeout, headers={
-                "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
-            })
-            last_resp = resp
-            if resp.status_code == 200 and len(resp.content) >= _MIN_HTML_BYTES:
-                logger.info(f"[fetch] fresh scraper OK ({len(resp.content)}b) {url[:80]}")
-                return resp
-            logger.info(f"[fetch] fresh scraper small ({len(resp.content)}b), try requests")
-        except Exception as e:
-            logger.info(f"[fetch] fresh scraper failed: {e}")
-
-    # Try 3: regular requests
-    try:
-        resp = requests.get(url, timeout=timeout, headers=_BROWSER_HEADERS)
-        last_resp = resp
-        if resp.status_code == 200 and len(resp.content) < _MIN_HTML_BYTES:
-            logger.warning(f"[fetch] all attempts small (final {len(resp.content)}b) — bot block confirmed")
-    except Exception:
-        if last_resp is None:
-            raise
-
-    return last_resp
+    resp = requests.get(url, timeout=timeout, headers=_BROWSER_HEADERS)
+    if resp.status_code == 200 and len(resp.content) < _MIN_HTML_BYTES:
+        logger.warning(f"[fetch] small response ({len(resp.content)}b) — likely bot block: {url[:80]}")
+    return resp
 
 
 def _find_pdf_links(soup: BeautifulSoup, base_url: str) -> list[str]:
@@ -248,18 +186,8 @@ def _download_attachment_to_file(url: str) -> str | None:
     max_bytes = PDF_MAX_SIZE_MB * 1024 * 1024
     tmp_path = None
     try:
-        # cloudscraper 우선
-        resp = None
-        if CLOUDSCRAPER_AVAILABLE and _SCRAPER is not None:
-            try:
-                resp = _SCRAPER.get(url, timeout=PDF_HTTP_TIMEOUT,
-                                     headers={"Accept": "*/*"},
-                                     allow_redirects=True, stream=True)
-            except Exception:
-                resp = None
-        if resp is None:
-            resp = requests.get(url, timeout=PDF_HTTP_TIMEOUT,
-                                 headers=headers, allow_redirects=True, stream=True)
+        resp = requests.get(url, timeout=PDF_HTTP_TIMEOUT,
+                             headers=headers, allow_redirects=True, stream=True)
         resp.raise_for_status()
 
         # 핵심: 스트리밍 시작 전에 Content-Length로 크기 사전 차단.
