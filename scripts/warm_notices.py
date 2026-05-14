@@ -54,20 +54,32 @@ def warm_one(notice_id: str, notice_url: str) -> dict | None:
     """단일 공고 notice raw 호출 → 추출 결과 반환. 실패 시 None.
 
     url을 ?url= 로 직접 전달 → proxy 캐시 miss여도 동작 (404 회피).
+    502(Render OOM) 시 30초 쉬고 1회 재시도 — 첨부 무거운 공고가 누적 메모리로
+    간헐 502 → 메모리 GC 후 재시도하면 대개 성공.
     """
     qs = urllib.parse.urlencode({"url": notice_url, "force_refresh": "true"})
     url = f"{PROXY}/v1/apt/notice/{notice_id}/raw?{qs}"
-    req = urllib.request.Request(url, headers={"User-Agent": "notice-warmer/1.0"})
-    try:
-        with urllib.request.urlopen(req, timeout=NOTICE_TIMEOUT) as r:
-            data = json.loads(r.read().decode("utf-8"))
-        if "detail" in data:
-            print(f"[warm] {notice_id}: proxy error — {str(data['detail'])[:80]}")
+
+    for attempt in range(2):
+        req = urllib.request.Request(url, headers={"User-Agent": "notice-warmer/1.0"})
+        try:
+            with urllib.request.urlopen(req, timeout=NOTICE_TIMEOUT) as r:
+                data = json.loads(r.read().decode("utf-8"))
+            if "detail" in data:
+                print(f"[warm] {notice_id}: proxy error — {str(data['detail'])[:80]}")
+                return None
+            return data
+        except urllib.error.HTTPError as e:
+            if e.code == 502 and attempt == 0:
+                print(f"[warm] {notice_id}: 502 (Render OOM) — 30초 후 재시도")
+                time.sleep(30)
+                continue
+            print(f"[warm] {notice_id}: 호출 실패 — HTTP {e.code}")
             return None
-        return data
-    except Exception as e:
-        print(f"[warm] {notice_id}: 호출 실패 — {e}")
-        return None
+        except Exception as e:
+            print(f"[warm] {notice_id}: 호출 실패 — {e}")
+            return None
+    return None
 
 
 def save_notice(notice_id: str, data: dict) -> None:
