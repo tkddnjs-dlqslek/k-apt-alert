@@ -48,12 +48,12 @@ from config import (
 logger = logging.getLogger(__name__)
 
 # PDF 다운로드·파싱 타임아웃·상한
-# 청약 공고 PDF는 도면·이미지 많아 80~90MB 흔함 → 상한 100MB.
-# pdfplumber(표 추출) 대신 pypdf(텍스트만) — Render free tier 512MB에서 89MB PDF 처리 가능.
-# 일정·자격은 PDF 앞부분에 집중되므로 앞 20p만 추출.
-PDF_HTTP_TIMEOUT = 90  # 큰 파일(80MB+) 다운로드 여유
-PDF_MAX_SIZE_MB = 100
-PDF_MAX_PAGES = 20  # 추출 페이지 상한 (앞부분에 일정·자격 집중, 메모리·시간 보호)
+# Render free tier 512MB RAM 제약 — 89MB PDF는 다운로드+pypdf 파싱 시 502(OOM/timeout).
+# 상한 40MB: 대부분 청약 공고 PDF 커버, 초대형(도면 多)은 attachment_fetch_failed로 명시 안내.
+# 일정·자격은 PDF 앞부분 집중 → 앞 20p만 추출.
+PDF_HTTP_TIMEOUT = 60
+PDF_MAX_SIZE_MB = 40
+PDF_MAX_PAGES = 20
 
 # kordoc CLI (HWP/HWPX) 호출 타임아웃
 HWP_CONVERT_TIMEOUT = 120
