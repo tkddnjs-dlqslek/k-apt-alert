@@ -427,8 +427,12 @@ def _truncate(text: str, max_chars: int) -> tuple[str, bool]:
     return text[:max_chars] + "\n\n[... truncated]", True
 
 
-def _extract_applyhome(html: str, fallback_title: str = "") -> dict:
-    """청약홈 SSR 페이지 추출. 본문 컨테이너 선호도: .cont > #pblancCont > body."""
+def _extract_applyhome(html: str, fallback_title: str = "", page_url: str = "") -> dict:
+    """청약홈 SSR 페이지 + 첨부(PDF 등) 통합 추출.
+
+    일반 APT 공고는 HTML 본문에 정보가 있지만, 임의공급(opt) 등 일부는
+    본문이 짧고 PDF 첨부 위주 → _augment_with_attachments로 첨부도 추출.
+    """
     soup = BeautifulSoup(html, "html.parser")
     title = _extract_title(soup, fallback=fallback_title)
 
@@ -437,11 +441,11 @@ def _extract_applyhome(html: str, fallback_title: str = "") -> dict:
         container = soup.body or soup
 
     text = _clean_text(BeautifulSoup(str(container), "html.parser"))
-    return {"title": title, "text": text}
+    return _augment_with_attachments(soup, text, title, page_url)
 
 
-def _extract_lh(html: str, fallback_title: str = "") -> dict:
-    """LH apply.lh.or.kr 게시글 상세 페이지 추출."""
+def _extract_lh(html: str, fallback_title: str = "", page_url: str = "") -> dict:
+    """LH apply.lh.or.kr 게시글 상세 페이지 + 첨부 통합 추출."""
     soup = BeautifulSoup(html, "html.parser")
     title = _extract_title(soup, fallback=fallback_title)
 
@@ -452,7 +456,7 @@ def _extract_lh(html: str, fallback_title: str = "") -> dict:
         container = soup.body or soup
 
     text = _clean_text(BeautifulSoup(str(container), "html.parser"))
-    return {"title": title, "text": text}
+    return _augment_with_attachments(soup, text, title, page_url)
 
 
 def _extract_sh(html: str, fallback_title: str = "", page_url: str = "") -> dict:
@@ -594,11 +598,8 @@ def extract_notice_raw(
     raw_html_length = len(resp.content)
 
     try:
-        # GH/SH는 PDF 첨부 추출 위해 page_url도 전달, 나머지는 무시
-        if extractor in (_extract_gh, _extract_sh):
-            extracted = extractor(resp.text, fallback_title=fallback_title, page_url=url)
-        else:
-            extracted = extractor(resp.text, fallback_title=fallback_title)
+        # 모든 extractor가 page_url 받아 첨부(PDF/HWP) 추출 — applyhome opt 등 PDF 위주 공고 대응
+        extracted = extractor(resp.text, fallback_title=fallback_title, page_url=url)
     except Exception as e:
         raise ValueError(f"extract failed: {e}")
 
