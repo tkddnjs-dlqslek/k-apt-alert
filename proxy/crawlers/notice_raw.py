@@ -547,6 +547,8 @@ def _augment_with_attachments(soup: BeautifulSoup, html_text: str, title: str, p
         "attachment_kinds": kinds,
         "pdf_pages": pages_total,
         "pdf_count": fetched,
+        "attachment_urls_found": len(urls),
+        "attachment_urls_sample": urls[:3],  # 디버그: 어떤 URL을 후보로 잡았는지
     }
 
 
@@ -656,6 +658,8 @@ def extract_notice_raw(
         "attachment_kinds": extracted.get("attachment_kinds", []),
         "pdf_pages": extracted.get("pdf_pages", 0),
         "pdf_count": extracted.get("pdf_count", 0),
+        "attachment_urls_found": extracted.get("attachment_urls_found", 0),
+        "attachment_urls_sample": extracted.get("attachment_urls_sample", []),
         "raw_html_length": raw_html_length,
         "looks_blocked": looks_blocked,
         "attachment_fetch_failed": attachment_fetch_failed,
@@ -692,6 +696,8 @@ def _build_response(full_data: dict, max_chars: int, now: float) -> dict:
         "raw_html_length": full_data.get("raw_html_length", 0),
         "looks_blocked": full_data.get("looks_blocked", False),
         "attachment_fetch_failed": full_data.get("attachment_fetch_failed", False),
+        "attachment_urls_found": full_data.get("attachment_urls_found", 0),
+        "attachment_urls_sample": full_data.get("attachment_urls_sample", []),
     }
 
 
