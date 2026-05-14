@@ -16,7 +16,6 @@ import re
 import subprocess
 import tempfile
 import time
-from io import BytesIO
 from pathlib import Path
 from threading import Lock
 from urllib.parse import urljoin, urlparse
@@ -49,9 +48,11 @@ from config import (
 logger = logging.getLogger(__name__)
 
 # PDF 다운로드·파싱 타임아웃·상한
-PDF_HTTP_TIMEOUT = 30
-PDF_MAX_SIZE_MB = 30
-PDF_MAX_PAGES = 50  # 추출 페이지 상한 (큰 PDF 메모리 보호)
+# 청약 공고 PDF는 도면·이미지 많아 80~90MB 흔함 → 상한 100MB.
+# 메모리 보호는 "전체를 메모리에 안 올리고 임시 파일로 스트리밍" 방식으로 처리.
+PDF_HTTP_TIMEOUT = 90  # 큰 파일(80MB+) 다운로드 여유
+PDF_MAX_SIZE_MB = 100
+PDF_MAX_PAGES = 50  # 추출 페이지 상한 (큰 PDF 파싱 시간·메모리 보호)
 
 # kordoc CLI (HWP/HWPX) 호출 타임아웃
 HWP_CONVERT_TIMEOUT = 120
@@ -185,7 +186,7 @@ def _find_pdf_links(soup: BeautifulSoup, base_url: str) -> list[str]:
     - SH: `filedown.do?...` 또는 `atchFileDownload`
     - 일반: `/download`, `filedownload`, `attach`
 
-    실제 PDF 여부는 _extract_pdf_text()의 Content-Type 검사 + pdfplumber 시도로 확정.
+    실제 PDF/HWP 여부는 _extract_attachment_text()의 매직 바이트 판별로 확정.
     """
     candidates = []
     for a in soup.find_all("a", href=True):
@@ -236,37 +237,63 @@ _BROWSER_HEADERS = {
 }
 
 
-def _download_attachment(url: str) -> bytes | None:
-    """첨부파일 다운로드 (cloudscraper 우선, fallback requests)."""
+def _download_attachment_to_file(url: str) -> str | None:
+    """첨부파일을 스트리밍으로 임시 파일에 저장. 경로 반환, 실패 시 None.
+
+    89MB+ PDF를 메모리에 통째로 안 올리려고 청크 단위 스트리밍.
+    PDF_MAX_SIZE_MB 초과 시 즉시 중단·삭제.
+    """
     headers = {**_BROWSER_HEADERS, "Accept": "*/*"}
+    max_bytes = PDF_MAX_SIZE_MB * 1024 * 1024
+    tmp_path = None
     try:
+        # cloudscraper 우선
+        resp = None
         if CLOUDSCRAPER_AVAILABLE and _SCRAPER is not None:
             try:
                 resp = _SCRAPER.get(url, timeout=PDF_HTTP_TIMEOUT,
-                                     headers={"Accept": "*/*"}, allow_redirects=True)
+                                     headers={"Accept": "*/*"},
+                                     allow_redirects=True, stream=True)
             except Exception:
-                resp = requests.get(url, timeout=PDF_HTTP_TIMEOUT,
-                                     headers=headers, allow_redirects=True)
-        else:
+                resp = None
+        if resp is None:
             resp = requests.get(url, timeout=PDF_HTTP_TIMEOUT,
-                                 headers=headers, allow_redirects=True)
+                                 headers=headers, allow_redirects=True, stream=True)
         resp.raise_for_status()
-        if len(resp.content) > PDF_MAX_SIZE_MB * 1024 * 1024:
-            logger.warning(f"[attach] {url} too large, skip")
-            return None
-        return resp.content
+
+        with tempfile.NamedTemporaryFile(delete=False) as tmp:
+            tmp_path = tmp.name
+            downloaded = 0
+            for chunk in resp.iter_content(chunk_size=64 * 1024):
+                if not chunk:
+                    continue
+                downloaded += len(chunk)
+                if downloaded > max_bytes:
+                    logger.warning(f"[attach] {url} exceeds {PDF_MAX_SIZE_MB}MB, abort")
+                    tmp.close()
+                    Path(tmp_path).unlink(missing_ok=True)
+                    return None
+                tmp.write(chunk)
+        return tmp_path
     except requests.RequestException as e:
         logger.warning(f"[attach] {url} fetch failed: {e}")
+        if tmp_path:
+            Path(tmp_path).unlink(missing_ok=True)
+        return None
+    except Exception as e:
+        logger.warning(f"[attach] {url} download error: {e}")
+        if tmp_path:
+            Path(tmp_path).unlink(missing_ok=True)
         return None
 
 
-def _extract_pdf_bytes(data: bytes) -> tuple[str, int] | None:
-    """PDF bytes → (텍스트, 페이지 수). pdfplumber 사용."""
+def _extract_pdf_file(path: str) -> tuple[str, int] | None:
+    """PDF 파일 경로 → (텍스트, 페이지 수). pdfplumber가 파일에서 직접 읽음 (메모리 절약)."""
     if not PDFPLUMBER_AVAILABLE:
         return None
     try:
         parts = []
-        with pdfplumber.open(BytesIO(data)) as pdf:
+        with pdfplumber.open(path) as pdf:
             page_count = len(pdf.pages)
             for i, page in enumerate(pdf.pages[:PDF_MAX_PAGES]):
                 txt = page.extract_text() or ""
@@ -281,32 +308,23 @@ def _extract_pdf_bytes(data: bytes) -> tuple[str, int] | None:
         return None
 
 
-def _extract_hwp_bytes(data: bytes, suffix: str = ".hwp") -> tuple[str, int] | None:
-    """HWP/HWPX bytes → (Markdown 텍스트, 1). kordoc CLI 호출."""
+def _extract_hwp_file(path: str) -> tuple[str, int] | None:
+    """HWP/HWPX 파일 경로 → (Markdown 텍스트, 1). kordoc CLI 호출."""
     try:
-        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
-            tmp.write(data)
-            tmp_path = tmp.name
-        try:
-            result = subprocess.run(
-                ["kordoc", tmp_path],
-                capture_output=True,
-                timeout=HWP_CONVERT_TIMEOUT,
-            )
-            if result.returncode != 0:
-                stderr = result.stderr.decode("utf-8", errors="ignore")[:200]
-                logger.warning(f"[hwp] kordoc returncode={result.returncode}: {stderr}")
-                return None
-            text = result.stdout.decode("utf-8", errors="ignore").strip()
-            if not text:
-                logger.info("[hwp] kordoc extracted 0 text")
-                return None
-            return text, 1
-        finally:
-            try:
-                Path(tmp_path).unlink(missing_ok=True)
-            except Exception:
-                pass
+        result = subprocess.run(
+            ["kordoc", path],
+            capture_output=True,
+            timeout=HWP_CONVERT_TIMEOUT,
+        )
+        if result.returncode != 0:
+            stderr = result.stderr.decode("utf-8", errors="ignore")[:200]
+            logger.warning(f"[hwp] kordoc returncode={result.returncode}: {stderr}")
+            return None
+        text = result.stdout.decode("utf-8", errors="ignore").strip()
+        if not text:
+            logger.info("[hwp] kordoc extracted 0 text")
+            return None
+        return text, 1
     except FileNotFoundError:
         logger.warning("[hwp] kordoc CLI not installed — skip")
         return None
@@ -321,28 +339,32 @@ def _extract_hwp_bytes(data: bytes, suffix: str = ".hwp") -> tuple[str, int] | N
 def _extract_attachment_text(url: str) -> tuple[str, int, str] | None:
     """다운로드 URL → (텍스트, 페이지 수, 유형). 유형: 'pdf' | 'hwp' | 'hwpx'.
 
-    매직 바이트로 자동 판별 → 적절한 추출기 호출.
+    스트리밍 다운로드 → 임시 파일 → 매직 바이트 판별 → 적절한 추출기.
     """
-    data = _download_attachment(url)
-    if not data:
+    path = _download_attachment_to_file(url)
+    if not path:
         return None
-    kind = _detect_attachment_type(data)
-    if kind == "pdf":
-        result = _extract_pdf_bytes(data)
-        if result:
-            return result[0], result[1], "pdf"
-    elif kind == "hwp":
-        result = _extract_hwp_bytes(data, suffix=".hwp")
-        if result:
-            return result[0], result[1], "hwp"
-    elif kind == "hwpx":
-        # ZIP-based — HWPX·DOCX·XLSX 가능성. kordoc은 모두 지원.
-        result = _extract_hwp_bytes(data, suffix=".hwpx")
-        if result:
-            return result[0], result[1], "hwpx"
-    else:
-        logger.info(f"[attach] {url} unknown type (magic={data[:8]!r})")
-    return None
+    try:
+        with open(path, "rb") as f:
+            head = f.read(8)
+        kind = _detect_attachment_type(head)
+        if kind == "pdf":
+            result = _extract_pdf_file(path)
+            if result:
+                return result[0], result[1], "pdf"
+        elif kind == "hwp":
+            result = _extract_hwp_file(path)
+            if result:
+                return result[0], result[1], "hwp"
+        elif kind == "hwpx":
+            result = _extract_hwp_file(path)
+            if result:
+                return result[0], result[1], "hwpx"
+        else:
+            logger.info(f"[attach] {url} unknown type (magic={head!r})")
+        return None
+    finally:
+        Path(path).unlink(missing_ok=True)
 
 # 노이즈 패턴 — 본문 정규화 시 제거
 _WHITESPACE_RE = re.compile(r"[ \t]+")
