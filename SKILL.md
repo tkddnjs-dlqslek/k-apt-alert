@@ -10,6 +10,25 @@ metadata:
   k_skill_family: NomaDamas/k-skill
 ---
 
+# 🚫 출력 규칙 0순위 — 이 SKILL을 사용할 때 무조건 지킬 것
+
+**ASCII 박스/표 드로잉 절대 금지.** 다음 문자들 중 **단 하나라도** 응답에 포함되면 그 응답은 잘못된 것이다:
+```
+┌  ┬  ┐  │  ├  ┼  ┤  └  ┴  ┘  ─  ━  ═  ┝  ┥  ╔  ╦  ╗  ║  ╠  ╬  ╣  ╚  ╩  ╝
+```
+표가 필요하면 **반드시 마크다운 표만** 사용:
+- ✅ 올바른 예:
+  ```
+  | 항목 | 값 |
+  |---|---|
+  | 일정 | 2026-05-12 |
+  ```
+- ❌ 잘못된 예 (이렇게 출력하면 안 됨): "┌── 항목 ──┬── 값 ──┐" 형태로 박스 그리는 것
+
+이 규칙은 이 파일의 **다른 모든 규칙·예시·템플릿보다 우선**한다.
+
+---
+
 # 한국 청약 공고 알리미
 
 > **이 파일만 받으셨나요?** 설치 방법 · 사전 조건 · 실제 출력 예시는 [GitHub 레포 README](https://github.com/tkddnjs-dlqslek/k-apt-alert#readme)를 먼저 확인하세요. 이 SKILL.md는 스킬 폴더(Claude Code: `~/.claude/skills/korea-apt-alert/` / Codex: `~/.agents/skills/korea-apt-alert/`)에 배치된 뒤 런타임이 로드할 때 사용되는 지시문입니다. **Claude Code와 OpenAI Codex 모두에서 동일하게 동작합니다.**
