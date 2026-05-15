@@ -1,6 +1,264 @@
 {
   "changes": [
     {
+      "id": "oft_2026950042",
+      "type": "new",
+      "detected_at": "2026-05-15",
+      "name": "더샵 송도그란테르 G5-5블록 오피스텔",
+      "region": "인천",
+      "district": "연수구",
+      "house_category": "오피스텔/도시형",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950042&pblancNo=2026950042&houseSecd=02"
+    },
+    {
+      "id": "2026000187",
+      "type": "new",
+      "detected_at": "2026-05-15",
+      "name": "엘리프 역곡",
+      "region": "경기",
+      "district": "소사구",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000187&pblancNo=2026000187"
+    },
+    {
+      "id": "opt_2026940099",
+      "type": "new",
+      "detected_at": "2026-05-15",
+      "name": "용인 플랫폼시티 라온프라이빗 아르디에(2차)",
+      "region": "경기",
+      "district": "기흥구",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940099&pblancNo=2026940099"
+    },
+    {
+      "id": "oft_2026950043",
+      "type": "new",
+      "detected_at": "2026-05-15",
+      "name": "더샵 송도그란테르 G5-6블록 오피스텔",
+      "region": "인천",
+      "district": "연수구",
+      "house_category": "오피스텔/도시형",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950043&pblancNo=2026950043&houseSecd=02"
+    },
+    {
+      "id": "opt_2026940098",
+      "type": "new",
+      "detected_at": "2026-05-15",
+      "name": "리아츠 더 인천(19차)",
+      "region": "인천",
+      "district": "동구",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940098&pblancNo=2026940098"
+    },
+    {
+      "id": "oft_2026950048",
+      "type": "new",
+      "detected_at": "2026-05-15",
+      "name": "한양 더챔버파크로지아",
+      "region": "경기",
+      "district": "하남시",
+      "house_category": "오피스텔/도시형",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950048&pblancNo=2026950048&houseSecd=02"
+    },
+    {
+      "id": "sh_304271",
+      "type": "new",
+      "detected_at": "2026-05-15",
+      "name": "2026년 위국헌신청년주택(부상제대군인 청년 매입임대주택) 입주자 모집공고(2026. 5. 15.)",
+      "region": "서울",
+      "district": "",
+      "house_category": "SH 공공주택",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=304271&multi_itm_seq=2"
+    },
+    {
+      "id": "rem_2026910112",
+      "type": "new",
+      "detected_at": "2026-05-15",
+      "name": "중앙하이츠 갈산역 센트럴",
+      "region": "인천",
+      "district": "부평구",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910112&pblancNo=2026910112"
+    },
+    {
+      "id": "ppr_2026850026",
+      "type": "new",
+      "detected_at": "2026-05-15",
+      "name": "의왕청계역 시티프라디움 디하모니",
+      "region": "경기",
+      "district": "의왕시",
+      "house_category": "공공지원민간임대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026850026&pblancNo=2026850026&houseSecd=03"
+    },
+    {
+      "id": "oft_2026950040",
+      "type": "new",
+      "detected_at": "2026-05-15",
+      "name": "더샵 송도그란테르 G5-3블록 오피스텔",
+      "region": "인천",
+      "district": "연수구",
+      "house_category": "오피스텔/도시형",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950040&pblancNo=2026950040&houseSecd=02"
+    },
+    {
+      "id": "2026000188",
+      "type": "new",
+      "detected_at": "2026-05-15",
+      "name": "해운대 마티안 디 에디션",
+      "region": "부산",
+      "district": "해운대구",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000188&pblancNo=2026000188"
+    },
+    {
+      "id": "2026000162",
+      "type": "new",
+      "detected_at": "2026-05-15",
+      "name": "검암역자이르네",
+      "region": "인천",
+      "district": "서구",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000162&pblancNo=2026000162"
+    },
+    {
+      "id": "oft_2026950041",
+      "type": "new",
+      "detected_at": "2026-05-15",
+      "name": "더샵 송도그란테르 G5-4블록 오피스텔",
+      "region": "인천",
+      "district": "연수구",
+      "house_category": "오피스텔/도시형",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950041&pblancNo=2026950041&houseSecd=02"
+    },
+    {
+      "id": "2026000120",
+      "type": "new",
+      "detected_at": "2026-05-15",
+      "name": "써밋 더힐",
+      "region": "서울",
+      "district": "동작구",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000120&pblancNo=2026000120"
+    },
+    {
+      "id": "2026000138",
+      "type": "new",
+      "detected_at": "2026-05-15",
+      "name": "힐스테이트 시흥더클래스",
+      "region": "경기",
+      "district": "시흥시",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000138&pblancNo=2026000138"
+    },
+    {
+      "id": "opt_2026940100",
+      "type": "new",
+      "detected_at": "2026-05-15",
+      "name": "용인 푸르지오 클루센트(2차)",
+      "region": "경기",
+      "district": "처인구",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940100&pblancNo=2026940100"
+    },
+    {
+      "id": "2026000217",
+      "type": "new",
+      "detected_at": "2026-05-15",
+      "name": "동래사적공원 오네뜨",
+      "region": "부산",
+      "district": "동래구",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000217&pblancNo=2026000217"
+    },
+    {
+      "id": "sh_304050",
+      "type": "removed",
+      "detected_at": "2026-05-15",
+      "name": "[청년형] 특화형 매입임대주택(금천구) 입주자 모집 공고(운영기관 : 한지붕 협동조합)",
+      "region": "서울",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=304050&multi_itm_seq=2"
+    },
+    {
+      "id": "2026000169",
+      "type": "removed",
+      "detected_at": "2026-05-15",
+      "name": "더샵 송도그란테르 G5-11블록",
+      "region": "인천",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000169&pblancNo=2026000169"
+    },
+    {
+      "id": "2026000168",
+      "type": "removed",
+      "detected_at": "2026-05-15",
+      "name": "더샵 송도그란테르 G5-6블록",
+      "region": "인천",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000168&pblancNo=2026000168"
+    },
+    {
+      "id": "2026000172",
+      "type": "removed",
+      "detected_at": "2026-05-15",
+      "name": "두산위브 트리니뷰 구명역",
+      "region": "부산",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000172&pblancNo=2026000172"
+    },
+    {
+      "id": "sh_304106",
+      "type": "removed",
+      "detected_at": "2026-05-15",
+      "name": "2026년 1차 희망하우징(공공기숙사) 잔여세대 입주자 모집공고(2026. 5. 11.)",
+      "region": "서울",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=304106&multi_itm_seq=2"
+    },
+    {
+      "id": "2026000167",
+      "type": "removed",
+      "detected_at": "2026-05-15",
+      "name": "더샵 송도그란테르 G5-5블록",
+      "region": "인천",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000167&pblancNo=2026000167"
+    },
+    {
+      "id": "2026000166",
+      "type": "removed",
+      "detected_at": "2026-05-15",
+      "name": "더샵 송도그란테르 G5-4블록",
+      "region": "인천",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000166&pblancNo=2026000166"
+    },
+    {
+      "id": "gh_64835",
+      "type": "removed",
+      "detected_at": "2026-05-15",
+      "name": "안양 에버포레 자연&e편한세상(A2BL) 분양주택(국민주택) 입주자 모집공고",
+      "region": "경기",
+      "url": "https://www.gh.or.kr/gh/announcement-of-salerental001.do?mode=view&articleNo=64835"
+    },
+    {
+      "id": "oft_2026950037",
+      "type": "removed",
+      "detected_at": "2026-05-15",
+      "name": "파크라움 여의도",
+      "region": "서울",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950037&pblancNo=2026950037&houseSecd=02"
+    },
+    {
+      "id": "ppr_2026850025",
+      "type": "removed",
+      "detected_at": "2026-05-15",
+      "name": "서면 지원 더뷰 드림아파트(공공지원민간임대)",
+      "region": "부산",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026850025&pblancNo=2026850025&houseSecd=03"
+    },
+    {
+      "id": "2026000132",
+      "type": "removed",
+      "detected_at": "2026-05-15",
+      "name": "청주 한양립스 더 벨루체",
+      "region": "충북",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000132&pblancNo=2026000132"
+    },
+    {
       "id": "2026000187",
       "type": "new",
       "detected_at": "2026-05-15",
@@ -757,7 +1015,7 @@
       "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000126&pblancNo=2026000126"
     }
   ],
-  "updated_at": "2026-05-15T00:03:16Z",
+  "updated_at": "2026-05-15T23:59:48Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
