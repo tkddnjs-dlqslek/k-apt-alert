@@ -1202,6 +1202,12 @@ if (!(Test-Path $FILE)) { New-Item -ItemType File -Path $FILE | Out-Null }
 
 **v2.7 추가**: `sh`·`gh` 카테고리는 공식 OpenAPI 부재로 각 공사 게시판 HTML 크롤링. 일정 필드(`rcept_end`·`period`)는 상세 페이지에서 별도 파싱 필요 — 현재는 `schedule_source="unavailable"`로 기본 표기. 사용자가 `url`을 클릭해 공식 사이트에서 일정 직접 확인 권장.
 
+**공공API 빈 카테고리 안내 (필수 인지)**:
+공공데이터포털 API는 카테고리별로 데이터 반영 시점·완성도가 달라 `category=lh` / `category=remndr` 등이 **0건으로 응답하는 시기가 흔합니다**. 이는 proxy 버그가 아니라 source 자체 특성.
+- `lh` 빈 응답: LH는 분기·반기별 일괄 모집 — 비활성 시즌 정상. "현재 LH 접수 중 공고 없습니다" 안내.
+- `remndr` 빈 응답: 잔여세대는 청약홈 HTML에 등재되지만 공공API 반영이 지연/누락되는 알려진 한계. 사용자가 잔여세대를 보려면 **`/v1/apt/changes?change_type=new`** (changes-tracker는 청약홈 HTML 크롤로 잔여세대도 잡음) 또는 청약홈 잔여세대 페이지 직접 안내로 우회.
+- "어제 새로 뜬 공고"에서 `selectAPTRemndrLttotPblancDetailView.do` URL 보이는데 `/announcements?category=remndr`이 0건 → **정상 동작이며, 사용자에게 changes 엔드포인트 활용을 안내**할 것.
+
 ## 워크플로우
 
 ### 0단계: 프록시 웜업 (기본 SKIP)

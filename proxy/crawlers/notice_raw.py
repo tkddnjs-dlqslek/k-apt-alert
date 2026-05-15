@@ -11,6 +11,7 @@ LLM이 사용자 프로필 컨텍스트로 요약·해석하기 위한 입력.
 - max_chars truncation
 """
 
+import json
 import logging
 import os
 import re
@@ -19,7 +20,7 @@ import tempfile
 import time
 from pathlib import Path
 from threading import Lock
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urlencode, urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -144,9 +145,11 @@ def _find_pdf_links(soup: BeautifulSoup, base_url: str) -> list[str]:
 
     사이트별 패턴:
     - 직접 .pdf 링크
+    - 청약홈: `static.applyhome.co.kr/.../getAtchmnfl.do?...` ← `atchmnfl` 시그널
     - GH: `?mode=download&articleNo=X&attachNo=Y` (텍스트 "다운로드")
     - SH: `filedown.do?...` 또는 `atchFileDownload`
     - 일반: `/download`, `filedownload`, `attach`
+    - 텍스트 fallback: 링크 텍스트가 "모집공고문"/"공고문"/"첨부" 포함 시도
 
     실제 PDF/HWP 여부는 _extract_attachment_text()의 매직 바이트 판별로 확정.
     """
@@ -162,13 +165,22 @@ def _find_pdf_links(soup: BeautifulSoup, base_url: str) -> list[str]:
             continue
 
         # 2. 다운로드 패턴 매칭 (URL)
+        # `atchmnfl`은 청약홈 전용 시그널 (`getAtchmnfl.do`) — 추가 안 하면 청약홈 PDF 100% 누락
         download_patterns = (
-            "filedown", "filedownload", "atchfile", "attach", "download",
+            "filedown", "filedownload", "atchfile", "atchmnfl", "attach", "download",
             "mode=download", "fileno", "atchnno",
         )
         if any(p in href_lower for p in download_patterns):
             # URL에 명백한 다운로드 신호 있으면 텍스트 무관 통과
             candidates.append(urljoin(base_url, href))
+            continue
+
+        # 3. 텍스트 fallback — href에 신호 없어도 텍스트가 명백한 첨부 안내면 후보로
+        # (청약홈 redesign 등으로 URL 패턴 변경 시에도 살아남는 보험)
+        if text and any(kw in text for kw in ("모집공고문", "공고문 보기", "첨부파일", "첨부 파일")):
+            # 단, http(s) 절대주소이거나 같은 호스트 상대주소만 (외부 링크 배제)
+            if href_lower.startswith(("http://", "https://", "/")):
+                candidates.append(urljoin(base_url, href))
 
     # 중복 제거 (순서 보존)
     seen = set()
@@ -484,8 +496,50 @@ def _extract_lh(html: str, fallback_title: str = "", page_url: str = "") -> dict
     return _augment_with_attachments(soup, text, title, page_url)
 
 
+_SH_DOWNLIST_RE = re.compile(
+    r"initParam\.downList\s*=\s*(\[[^;]+\])\s*;",
+    re.DOTALL,
+)
+_SH_DOWNLOAD_BASE = "https://www.i-sh.co.kr/com/file/innoFD.do"
+
+
+def _extract_sh_attachment_urls(html: str) -> list[str]:
+    """SH 이노릭스 다운로드 URL 조립.
+
+    SH는 첨부 링크가 `<a href>`가 아니라 JS 변수 `initParam.downList`에 JSON으로 임베드됨.
+    각 항목의 brdId·seq·fileTp·fileSeq로 `/com/file/innoFD.do?...` URL 조립.
+    PDF/HWP만 우선 (fileTp='A'는 일반 첨부; oriFileNm 확장자로 필터).
+    """
+    m = _SH_DOWNLIST_RE.search(html)
+    if not m:
+        return []
+    try:
+        items = json.loads(m.group(1))
+    except json.JSONDecodeError:
+        logger.warning("[sh] downList JSON parse failed")
+        return []
+
+    urls: list[str] = []
+    for it in items:
+        name = (it.get("oriFileNm") or "").lower()
+        if not (name.endswith(".pdf") or name.endswith(".hwp") or name.endswith(".hwpx")):
+            continue
+        params = urlencode({
+            "brdId": it.get("brdId", ""),
+            "seq": it.get("seq", ""),
+            "fileTp": it.get("fileTp", "A"),
+            "fileSeq": it.get("fileSeq", ""),
+        })
+        urls.append(f"{_SH_DOWNLOAD_BASE}?{params}")
+    return urls
+
+
 def _extract_sh(html: str, fallback_title: str = "", page_url: str = "") -> dict:
-    """SH (i-sh.co.kr) 게시판 view.do 상세 페이지 + 첨부 PDF 통합 추출."""
+    """SH (i-sh.co.kr) 게시판 view.do 상세 페이지 + 첨부 PDF/HWP 통합 추출.
+
+    SH 첨부는 이노릭스 솔루션 — `<a href>`에 직접 URL이 없고 JS `initParam.downList`에 JSON.
+    별도 파서로 URL 조립 후 `_augment_with_attachments` 우회 (자체 합산).
+    """
     soup = BeautifulSoup(html, "html.parser")
     title = _extract_title(soup, fallback=fallback_title)
 
@@ -497,7 +551,35 @@ def _extract_sh(html: str, fallback_title: str = "", page_url: str = "") -> dict
         container = soup.body or soup
 
     html_text = _clean_text(BeautifulSoup(str(container), "html.parser"))
-    return _augment_with_attachments(soup, html_text, title, page_url)
+
+    # SH 이노릭스 다운로드 URL 조립 후 _augment_with_attachments 와 동일 합산 로직
+    sh_urls = _extract_sh_attachment_urls(html)[:3]  # 최대 3개 (Render 메모리 보호)
+    parts: list[str] = []
+    kinds: list[str] = []
+    pages_total = 0
+    fetched = 0
+    for url in sh_urls:
+        result = _extract_attachment_text(url)
+        if result:
+            text, pages, kind = result
+            label = "PDF" if kind == "pdf" else "HWP" if kind == "hwp" else "HWPX"
+            parts.append(f"\n=== 첨부 {label} 본문 ===\n{text}")
+            pages_total += pages
+            fetched += 1
+            kinds.append(kind)
+
+    combined = html_text + ("\n\n" + "\n\n".join(parts) if parts else "")
+    return {
+        "title": title,
+        "text": combined,
+        "has_pdf": "pdf" in kinds,
+        "has_hwp": "hwp" in kinds or "hwpx" in kinds,
+        "attachment_kinds": kinds,
+        "pdf_pages": pages_total,
+        "pdf_count": fetched,
+        "attachment_urls_found": len(sh_urls),
+        "attachment_urls_sample": sh_urls[:3],
+    }
 
 
 def _extract_gh(html: str, fallback_title: str = "", page_url: str = "") -> dict:
