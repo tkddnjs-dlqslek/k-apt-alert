@@ -1,6 +1,116 @@
 {
   "changes": [
     {
+      "id": "opt_2026940097",
+      "type": "new",
+      "detected_at": "2026-05-19",
+      "name": "파주 운정신도시 A2블록 호반써밋 이스트파크(4차)",
+      "region": "경기",
+      "district": "파주시",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940097&pblancNo=2026940097"
+    },
+    {
+      "id": "rem_2026910115",
+      "type": "new",
+      "detected_at": "2026-05-19",
+      "name": "옥정중앙역 대방 디에트르(중상1, 복합1BL)",
+      "region": "경기",
+      "district": "양주시",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910115&pblancNo=2026910115"
+    },
+    {
+      "id": "rem_2026910120",
+      "type": "new",
+      "detected_at": "2026-05-19",
+      "name": "야목역 서희스타힐스 그랜드힐",
+      "region": "경기",
+      "district": "효행구",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910120&pblancNo=2026910120"
+    },
+    {
+      "id": "rem_2026910113",
+      "type": "removed",
+      "detected_at": "2026-05-19",
+      "name": "업성 푸르지오 레이크시티",
+      "region": "충남",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910113&pblancNo=2026910113"
+    },
+    {
+      "id": "sh_304295",
+      "type": "removed",
+      "detected_at": "2026-05-19",
+      "name": "2026년 휘경마을 두레주택 잔여세대 입주자 모집공고(26. 5. 13.)",
+      "region": "서울",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=304295&multi_itm_seq=2"
+    },
+    {
+      "id": "rem_2026910108",
+      "type": "removed",
+      "detected_at": "2026-05-19",
+      "name": "대방역 여의도 더로드캐슬(3차)",
+      "region": "서울",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910108&pblancNo=2026910108"
+    },
+    {
+      "id": "oft_2026950044",
+      "type": "removed",
+      "detected_at": "2026-05-19",
+      "name": "수원역 아너스빌 플라츠",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950044&pblancNo=2026950044&houseSecd=02"
+    },
+    {
+      "id": "rem_2026910114",
+      "type": "removed",
+      "detected_at": "2026-05-19",
+      "name": "의정부역 센트럴 아이파크",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910114&pblancNo=2026910114"
+    },
+    {
+      "id": "rem_2026910107",
+      "type": "removed",
+      "detected_at": "2026-05-19",
+      "name": "북전주 광신프로그레스",
+      "region": "전북",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910107&pblancNo=2026910107"
+    },
+    {
+      "id": "rem_2026910109",
+      "type": "removed",
+      "detected_at": "2026-05-19",
+      "name": "르네오션 고성 퍼스트뷰",
+      "region": "강원",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910109&pblancNo=2026910109"
+    },
+    {
+      "id": "rem_2026910106",
+      "type": "removed",
+      "detected_at": "2026-05-19",
+      "name": "풍무역세권 수자인 그라센트 2차",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910106&pblancNo=2026910106"
+    },
+    {
+      "id": "rem_2026910111",
+      "type": "removed",
+      "detected_at": "2026-05-19",
+      "name": "온천장 하늘채 엘리시움",
+      "region": "부산",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910111&pblancNo=2026910111"
+    },
+    {
+      "id": "rem_2026930018",
+      "type": "removed",
+      "detected_at": "2026-05-19",
+      "name": "DMC 가재울 아이파크",
+      "region": "서울",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026930018&pblancNo=2026930018"
+    },
+    {
       "id": "opt_2026940093",
       "type": "removed",
       "detected_at": "2026-05-17",
@@ -1023,7 +1133,7 @@
       "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000126&pblancNo=2026000126"
     }
   ],
-  "updated_at": "2026-05-18T00:02:56Z",
+  "updated_at": "2026-05-19T00:15:15Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
