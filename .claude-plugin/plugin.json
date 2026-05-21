@@ -1,0 +1,28 @@
+{
+  "name": "k-apt-alert",
+  "displayName": "한국 청약 알리미",
+  "description": "한국 청약 공고를 개인 프로필 기반으로 조회·분석하고 Slack/Telegram으로 알림받는 플러그인. APT·오피스텔·LH·SH·GH 8개 채널 통합, 모집공고 PDF/HWP 자동 해석, 가점·1순위 자격 판정. API 키 불필요.",
+  "version": "1.0.0",
+  "author": {
+    "name": "tkddnjs-dlqslek",
+    "url": "https://github.com/tkddnjs-dlqslek"
+  },
+  "homepage": "https://github.com/tkddnjs-dlqslek/k-apt-alert",
+  "repository": "https://github.com/tkddnjs-dlqslek/k-apt-alert",
+  "license": "MIT",
+  "keywords": [
+    "korean",
+    "real-estate",
+    "apartment",
+    "subscription",
+    "notification",
+    "cheongyak"
+  ],
+  "skills": [
+    "./skills/korea-apt-alert"
+  ],
+  "agents": [
+    "./agents/apt-eligibility.md"
+  ],
+  "mcpServers": "./.mcp.json"
+}

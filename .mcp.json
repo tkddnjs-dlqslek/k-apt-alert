@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "k-apt-alert": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp-server/server.py"],
+      "env": {
+        "KAPT_PROXY_URL": "https://k-apt-alert-proxy.onrender.com",
+        "KAPT_TIMEOUT": "180"
+      }
+    }
+  }
+}

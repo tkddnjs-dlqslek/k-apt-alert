@@ -131,52 +131,39 @@
 
 ## 처음 시작하는 순서
 
-### 1단계: 스킬 설치
+### 1단계: 설치
 
-**가장 간단한 방법 — 에이전트에게 이 URL만 전달**하면 알아서 설치합니다:
+이 레포는 **Claude Code 플러그인** + **단독 스킬** 두 방식으로 설치할 수 있습니다. 스킬 본문(SKILL.md)은 [`skills/korea-apt-alert/SKILL.md`](skills/korea-apt-alert/SKILL.md) 한 곳에만 존재합니다 (단일 소스).
+
+#### A) 플러그인으로 설치 (권장 — Claude Code)
+
+스킬 + 자격 판별 에이전트(apt-eligibility) + MCP 서버를 한 번에 설치합니다.
 ```
-https://github.com/tkddnjs-dlqslek/k-apt-alert
+/plugin marketplace add tkddnjs-dlqslek/k-apt-alert
+/plugin install k-apt-alert@k-apt-alert-marketplace
 ```
-Claude Code / Codex 대화창에 "이 스킬 설치해줘"라고 하면 됩니다.
+MCP 서버는 로컬에서 `python3`로 기동됩니다 (Windows에서 `python3`이 안 잡히면 [`.mcp.json`](.mcp.json)의 `command`를 `python`으로 변경).
 
----
+#### B) 단독 스킬 설치 (Claude Code 또는 Codex)
 
-**수동 설치 (1-라이너):**
+플러그인 없이 스킬만 쓰고 싶을 때. MCP 서버 대신 스킬이 프록시를 직접 호출합니다 (curl 폴백).
 
-#### A) Claude Code — macOS / Linux / WSL
+**Claude Code — macOS / Linux / WSL**
 ```bash
-mkdir -p ~/.claude/skills && git clone https://github.com/tkddnjs-dlqslek/k-apt-alert.git ~/.claude/skills/korea-apt-alert
+git clone https://github.com/tkddnjs-dlqslek/k-apt-alert.git /tmp/k-apt-alert \
+  && cp -r /tmp/k-apt-alert/skills/korea-apt-alert ~/.claude/skills/korea-apt-alert
 ```
-
-#### A) Claude Code — Windows PowerShell
+**Claude Code — Windows PowerShell**
 ```powershell
-$dst = "$env:USERPROFILE\.claude\skills\korea-apt-alert"
-New-Item -ItemType Directory -Force -Path (Split-Path $dst) | Out-Null
-git clone https://github.com/tkddnjs-dlqslek/k-apt-alert.git $dst
+git clone https://github.com/tkddnjs-dlqslek/k-apt-alert.git $env:TEMP\k-apt-alert
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.claude\skills" | Out-Null
+Copy-Item -Recurse -Force "$env:TEMP\k-apt-alert\skills\korea-apt-alert" "$env:USERPROFILE\.claude\skills\korea-apt-alert"
 ```
+**Codex CLI** — 위 명령에서 `~/.claude/skills` → `~/.agents/skills` (PowerShell은 `.claude` → `.agents`)로 바꾸면 됩니다.
 
-#### B) Codex CLI — macOS / Linux / WSL
-```bash
-mkdir -p ~/.agents/skills && git clone https://github.com/tkddnjs-dlqslek/k-apt-alert.git ~/.agents/skills/korea-apt-alert
-```
-
-#### B) Codex CLI — Windows PowerShell
-```powershell
-$dst = "$env:USERPROFILE\.agents\skills\korea-apt-alert"
-New-Item -ItemType Directory -Force -Path (Split-Path $dst) | Out-Null
-git clone https://github.com/tkddnjs-dlqslek/k-apt-alert.git $dst
-```
-
-#### C) 둘 다 사용 — Unix 심볼릭 링크 (선택)
-파일 1벌만 유지하려면:
-```bash
-# Claude Code 경로에 실제 설치
-mkdir -p ~/.claude/skills && git clone https://github.com/tkddnjs-dlqslek/k-apt-alert.git ~/.claude/skills/korea-apt-alert
-# Codex는 그 위치를 심볼릭 링크
-mkdir -p ~/.agents/skills && ln -s ~/.claude/skills/korea-apt-alert ~/.agents/skills/korea-apt-alert
-```
-
-> **중요:** `korea-apt-alert` 대상 폴더명을 그대로 유지해야 합니다 (기본 clone 폴더명은 `k-apt-alert`이지만, SKILL.md의 스킬명이 `korea-apt-alert`라서 폴더명이 일치해야 `/korea-apt-alert` 명령이 동작).
+> **중요:** 대상 폴더명을 `korea-apt-alert`로 유지해야 `/korea-apt-alert` 명령이 동작합니다 (SKILL.md의 스킬명과 일치 필요).
+>
+> **간단한 방법:** 에이전트에게 `https://github.com/tkddnjs-dlqslek/k-apt-alert` URL을 주고 "이 스킬 설치해줘"라고 하면 위 과정을 알아서 처리합니다.
 
 ### 설치 검증
 
@@ -297,8 +284,13 @@ curl -X POST "https://k-apt-alert-proxy.onrender.com/v1/apt/notify?webhook_url=.
 
 ## 포함된 기능
 
-### 스킬 (사용자가 설치)
-- [`SKILL.md`](SKILL.md) — 전체 워크플로우, 프로필 스키마, 자격 매칭 로직, 가점 계산, Top 3 추천, D-day, 인접 지역 확장 등
+### 플러그인 (Claude Code)
+- [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) — 플러그인 매니페스트 (스킬·에이전트·MCP 서버 묶음)
+- [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json) — `/plugin marketplace add`로 설치 가능하게
+- [`skills/korea-apt-alert/SKILL.md`](skills/korea-apt-alert/SKILL.md) — **스킬 본문 (단일 소스)**: 전체 워크플로우, 프로필 스키마, 자격 매칭, 가점 계산, Top 3 추천, D-day, 인접 지역 확장 등
+- [`agents/apt-eligibility.md`](agents/apt-eligibility.md) — 가점·자격 판별 전담 서브에이전트 (결정론 계산은 `/v1/apt/score` 위임)
+- [`mcp-server/server.py`](mcp-server/server.py) — 프록시를 MCP(stdio)로 노출하는 의존성 0 서버. 툴 7종 (search_announcements·list_categories·score_profile·get_notice_raw·get_changes·send_notification·get_competition)
+- [`.mcp.json`](.mcp.json) — MCP 서버 기동 설정
 
 ### 프록시 서버 (운영자가 배포)
 - [`proxy/main.py`](proxy/main.py) — FastAPI 엔드포인트 (15개 라우트)

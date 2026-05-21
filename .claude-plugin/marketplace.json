@@ -1,0 +1,20 @@
+{
+  "name": "k-apt-alert-marketplace",
+  "owner": {
+    "name": "tkddnjs-dlqslek",
+    "url": "https://github.com/tkddnjs-dlqslek"
+  },
+  "metadata": {
+    "description": "한국 청약 알리미 플러그인 마켓플레이스",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "k-apt-alert",
+      "source": "./",
+      "description": "한국 청약 공고 조회·분석·알림 — 8개 채널 통합, 프로필 기반 맞춤 추천, 모집공고 PDF/HWP 자동 해석.",
+      "version": "1.0.0",
+      "category": "productivity"
+    }
+  ]
+}
