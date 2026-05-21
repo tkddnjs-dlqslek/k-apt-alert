@@ -151,6 +151,7 @@ MCP 서버는 로컬에서 `python3`로 기동됩니다 (Windows에서 `python3`
 **Claude Code — macOS / Linux / WSL**
 ```bash
 git clone https://github.com/tkddnjs-dlqslek/k-apt-alert.git /tmp/k-apt-alert \
+  && mkdir -p ~/.claude/skills \
   && cp -r /tmp/k-apt-alert/skills/korea-apt-alert ~/.claude/skills/korea-apt-alert
 ```
 **Claude Code — Windows PowerShell**

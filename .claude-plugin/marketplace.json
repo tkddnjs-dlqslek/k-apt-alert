@@ -13,8 +13,7 @@
       "name": "k-apt-alert",
       "source": "./",
       "description": "한국 청약 공고 조회·분석·알림 — 8개 채널 통합, 프로필 기반 맞춤 추천, 모집공고 PDF/HWP 자동 해석.",
-      "version": "1.0.0",
-      "category": "productivity"
+      "version": "1.0.0"
     }
   ]
 }

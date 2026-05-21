@@ -18,6 +18,10 @@ Claude Code 플러그인이 .mcp.json으로 이 서버를 stdio 기동한다.
   GET  /v1/apt/announcements/{id}/competition → get_competition
 """
 
+# PEP 604(`dict | None`) 어노테이션을 문자열로 지연 평가 → Python 3.7~3.9에서도
+# import 단계 TypeError 없이 동작 (의존성 0 + 어떤 Python에서도 동작 보장).
+from __future__ import annotations
+
 import json
 import os
 import sys
@@ -320,6 +324,15 @@ def handle(msg: dict):
                 pass
             return _result(rid, {
                 "content": [{"type": "text", "text": f"프록시 HTTP {e.code}: {detail}"}],
+                "isError": True,
+            })
+        except urllib.error.URLError as e:
+            # 타임아웃·DNS·연결거부 — Render free tier cold start가 흔한 원인.
+            return _result(rid, {
+                "content": [{"type": "text", "text": (
+                    f"프록시 응답 없음 ({e.reason}). Render free tier가 슬립 중일 수 "
+                    "있습니다 — 15~30초 후 한 번 재시도하세요."
+                )}],
                 "isError": True,
             })
         except Exception as e:  # noqa: BLE001
