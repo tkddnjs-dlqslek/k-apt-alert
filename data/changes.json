@@ -1,6 +1,88 @@
 {
   "changes": [
     {
+      "id": "opt_2026940104",
+      "type": "new",
+      "detected_at": "2026-05-27",
+      "name": "풍무역 롯데캐슬 시그니처",
+      "region": "경기",
+      "district": "김포시",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940104&pblancNo=2026940104"
+    },
+    {
+      "id": "opt_2026940105",
+      "type": "new",
+      "detected_at": "2026-05-27",
+      "name": "용인 푸르지오 원클러스터파크(4차)",
+      "region": "경기",
+      "district": "처인구",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940105&pblancNo=2026940105"
+    },
+    {
+      "id": "oft_2026950049",
+      "type": "removed",
+      "detected_at": "2026-05-27",
+      "name": "힐스테이트 안양펠루스",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950049&pblancNo=2026950049&houseSecd=02"
+    },
+    {
+      "id": "rem_2026910118",
+      "type": "removed",
+      "detected_at": "2026-05-27",
+      "name": "도안자이 센텀리체 2단지",
+      "region": "대전",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910118&pblancNo=2026910118"
+    },
+    {
+      "id": "rem_2026910116",
+      "type": "removed",
+      "detected_at": "2026-05-27",
+      "name": "더샵 안동더퍼스트",
+      "region": "경북",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910116&pblancNo=2026910116"
+    },
+    {
+      "id": "rem_2026910117",
+      "type": "removed",
+      "detected_at": "2026-05-27",
+      "name": "도안자이 센텀리체 1단지",
+      "region": "대전",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910117&pblancNo=2026910117"
+    },
+    {
+      "id": "rem_2026910121",
+      "type": "removed",
+      "detected_at": "2026-05-27",
+      "name": "라클라체자이드파인",
+      "region": "서울",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910121&pblancNo=2026910121"
+    },
+    {
+      "id": "rem_2026910122",
+      "type": "removed",
+      "detected_at": "2026-05-27",
+      "name": "문수로 라티에르 673",
+      "region": "울산",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910122&pblancNo=2026910122"
+    },
+    {
+      "id": "sh_304683",
+      "type": "updated",
+      "detected_at": "2026-05-27",
+      "name": "[청년형] 특화형 매입임대주택(송파구) 입주자 모집 공고(운영기관 : 협동조합 큰바위얼굴)",
+      "region": "서울",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=304683&multi_itm_seq=2",
+      "field_changes": {
+        "name": {
+          "before": "NEW [청년형] 특화형 매입임대주택(송파구) 입주자 모집 공고(운영기관 : 협동조합 큰바위얼굴)",
+          "after": "[청년형] 특화형 매입임대주택(송파구) 입주자 모집 공고(운영기관 : 협동조합 큰바위얼굴)"
+        }
+      }
+    },
+    {
       "id": "2026000173",
       "type": "new",
       "detected_at": "2026-05-23",
@@ -1529,7 +1611,7 @@
       "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000126&pblancNo=2026000126"
     }
   ],
-  "updated_at": "2026-05-26T00:12:04Z",
+  "updated_at": "2026-05-27T00:14:44Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
