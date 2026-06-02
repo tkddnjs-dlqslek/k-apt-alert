@@ -1,6 +1,80 @@
 {
   "changes": [
     {
+      "id": "oft_2026950052",
+      "type": "new",
+      "detected_at": "2026-06-02",
+      "name": "풍무역 푸르지오 시티",
+      "region": "경기",
+      "district": "김포시",
+      "house_category": "오피스텔/도시형",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950052&pblancNo=2026950052&houseSecd=02"
+    },
+    {
+      "id": "opt_2026940103",
+      "type": "new",
+      "detected_at": "2026-06-02",
+      "name": "고촌센트럴자이(11차)",
+      "region": "경기",
+      "district": "김포시",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940103&pblancNo=2026940103"
+    },
+    {
+      "id": "rem_2026910133",
+      "type": "new",
+      "detected_at": "2026-06-02",
+      "name": "청주 푸르지오 씨엘리체",
+      "region": "충북",
+      "district": "서원구",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910133&pblancNo=2026910133"
+    },
+    {
+      "id": "opt_2026940106",
+      "type": "new",
+      "detected_at": "2026-06-02",
+      "name": "수원이목지구 대방 디에트르 더 리체Ⅱ(A3BL) (16차)",
+      "region": "경기",
+      "district": "장안구",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940106&pblancNo=2026940106"
+    },
+    {
+      "id": "opt_2026940109",
+      "type": "new",
+      "detected_at": "2026-06-02",
+      "name": "옥정중앙역 대방 디에트르(중상1, 복합1BL)",
+      "region": "경기",
+      "district": "양주시",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940109&pblancNo=2026940109"
+    },
+    {
+      "id": "rem_2026910126",
+      "type": "removed",
+      "detected_at": "2026-06-02",
+      "name": "두산위브더제니스 구미(조합원취소분)",
+      "region": "경북",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910126&pblancNo=2026910126"
+    },
+    {
+      "id": "rem_2026930017",
+      "type": "removed",
+      "detected_at": "2026-06-02",
+      "name": "레이카운티",
+      "region": "부산",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026930017&pblancNo=2026930017"
+    },
+    {
+      "id": "opt_2026940105",
+      "type": "removed",
+      "detected_at": "2026-06-02",
+      "name": "용인 푸르지오 원클러스터파크(4차)",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940105&pblancNo=2026940105"
+    },
+    {
       "id": "sh_304968",
       "type": "new",
       "detected_at": "2026-05-30",
@@ -1873,7 +1947,7 @@
       "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000126&pblancNo=2026000126"
     }
   ],
-  "updated_at": "2026-06-01T00:12:23Z",
+  "updated_at": "2026-06-02T00:19:50Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
