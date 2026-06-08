@@ -1903,97 +1903,9 @@
       "name": "송도 한내들 센트럴리버",
       "region": "인천",
       "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940088&pblancNo=2026940088"
-    },
-    {
-      "id": "2026000132",
-      "type": "new",
-      "detected_at": "2026-05-08",
-      "name": "청주 한양립스 더 벨루체",
-      "region": "충북",
-      "district": "상당구",
-      "house_category": "APT",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000132&pblancNo=2026000132"
-    },
-    {
-      "id": "2026000178",
-      "type": "new",
-      "detected_at": "2026-05-08",
-      "name": "중앙하이츠 원종역",
-      "region": "경기",
-      "district": "오정구",
-      "house_category": "APT",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000178&pblancNo=2026000178"
-    },
-    {
-      "id": "ppr_2026850025",
-      "type": "new",
-      "detected_at": "2026-05-08",
-      "name": "서면 지원 더뷰 드림아파트(공공지원민간임대)",
-      "region": "부산",
-      "district": "부산진구",
-      "house_category": "공공지원민간임대",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026850025&pblancNo=2026850025&houseSecd=03"
-    },
-    {
-      "id": "2026000172",
-      "type": "new",
-      "detected_at": "2026-05-08",
-      "name": "두산위브 트리니뷰 구명역",
-      "region": "부산",
-      "district": "북구",
-      "house_category": "APT",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000172&pblancNo=2026000172"
-    },
-    {
-      "id": "2026820002",
-      "type": "removed",
-      "detected_at": "2026-05-08",
-      "name": "시흥하중지구 A1블록 신혼희망타운(공공분양)(본청약)",
-      "region": "경기",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026820002&pblancNo=2026820002"
-    },
-    {
-      "id": "2026820003",
-      "type": "removed",
-      "detected_at": "2026-05-08",
-      "name": "인천계양 A9블록 신혼희망타운(공공분양)(본청약)",
-      "region": "인천",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026820003&pblancNo=2026820003"
-    },
-    {
-      "id": "2026000174",
-      "type": "removed",
-      "detected_at": "2026-05-08",
-      "name": "더샵 중앙로역센터폴",
-      "region": "대구",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000174&pblancNo=2026000174"
-    },
-    {
-      "id": "opt_2026940089",
-      "type": "removed",
-      "detected_at": "2026-05-08",
-      "name": "안양역 센트럴 아이파크 수자인",
-      "region": "경기",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940089&pblancNo=2026940089"
-    },
-    {
-      "id": "sh_303777",
-      "type": "removed",
-      "detected_at": "2026-05-08",
-      "name": "[토지지원 사회주택] 유니버설디자인하우스 수락 입주자 모집공고",
-      "region": "서울",
-      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=303777&multi_itm_seq=2"
-    },
-    {
-      "id": "sh_303773",
-      "type": "removed",
-      "detected_at": "2026-05-08",
-      "name": "[토지지원 사회주택] 함께주택 성산 입주자 모집공고",
-      "region": "서울",
-      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=303773&multi_itm_seq=2"
     }
   ],
-  "updated_at": "2026-06-07T00:10:11Z",
+  "updated_at": "2026-06-08T00:15:48Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
