@@ -1,6 +1,84 @@
 {
   "changes": [
     {
+      "id": "opt_2026940113",
+      "type": "new",
+      "detected_at": "2026-06-10",
+      "name": "용인 푸르지오 클루센트(3차)",
+      "region": "경기",
+      "district": "처인구",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940113&pblancNo=2026940113"
+    },
+    {
+      "id": "rem_2026910143",
+      "type": "new",
+      "detected_at": "2026-06-10",
+      "name": "상주북천 하늘채 파크원",
+      "region": "경북",
+      "district": "상주시",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910143&pblancNo=2026910143"
+    },
+    {
+      "id": "rem_2026910152",
+      "type": "new",
+      "detected_at": "2026-06-10",
+      "name": "e편한세상 부천 어반스퀘어",
+      "region": "경기",
+      "district": "원미구",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910152&pblancNo=2026910152"
+    },
+    {
+      "id": "rem_2026910145",
+      "type": "removed",
+      "detected_at": "2026-06-10",
+      "name": "엘리프 성성호수공원 2BL",
+      "region": "충남",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910145&pblancNo=2026910145"
+    },
+    {
+      "id": "opt_2026940110",
+      "type": "removed",
+      "detected_at": "2026-06-10",
+      "name": "화곡더리브스카이(3차)",
+      "region": "서울",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940110&pblancNo=2026940110"
+    },
+    {
+      "id": "opt_2026940107",
+      "type": "removed",
+      "detected_at": "2026-06-10",
+      "name": "대전 문화공원 수자인(2차)",
+      "region": "대전",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940107&pblancNo=2026940107"
+    },
+    {
+      "id": "ppr_2026850030",
+      "type": "removed",
+      "detected_at": "2026-06-10",
+      "name": "부경경마공원역 대방 디에트르 더리버(AP1BL)",
+      "region": "부산",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026850030&pblancNo=2026850030&houseSecd=03"
+    },
+    {
+      "id": "oft_2026950052",
+      "type": "removed",
+      "detected_at": "2026-06-10",
+      "name": "풍무역 푸르지오 시티",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950052&pblancNo=2026950052&houseSecd=02"
+    },
+    {
+      "id": "rem_2026910144",
+      "type": "removed",
+      "detected_at": "2026-06-10",
+      "name": "엘리프 성성호수공원 1BL",
+      "region": "충남",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910144&pblancNo=2026910144"
+    },
+    {
       "id": "sh_305240",
       "type": "new",
       "detected_at": "2026-06-09",
@@ -2003,19 +2081,9 @@
       "name": "해링턴 스퀘어 과천",
       "region": "경기",
       "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950045&pblancNo=2026950045&houseSecd=02"
-    },
-    {
-      "id": "sh_304050",
-      "type": "new",
-      "detected_at": "2026-05-10",
-      "name": "NEW [청년형] 특화형 매입임대주택(금천구) 입주자 모집 공고(운영기관 : 한지붕 협동조합)",
-      "region": "서울",
-      "district": "금천구",
-      "house_category": "SH 공공주택",
-      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=304050&multi_itm_seq=2"
     }
   ],
-  "updated_at": "2026-06-09T00:12:17Z",
+  "updated_at": "2026-06-10T00:20:54Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
