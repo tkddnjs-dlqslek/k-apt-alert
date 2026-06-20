@@ -1,6 +1,22 @@
 {
   "changes": [
     {
+      "id": "opt_2026940122",
+      "type": "removed",
+      "detected_at": "2026-06-20",
+      "name": "석남역 센트럴파크 그랑베르(4차)",
+      "region": "인천",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940122&pblancNo=2026940122"
+    },
+    {
+      "id": "oft_2026950058",
+      "type": "removed",
+      "detected_at": "2026-06-20",
+      "name": "선유 노블레르",
+      "region": "서울",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950058&pblancNo=2026950058&houseSecd=02"
+    },
+    {
       "id": "ppr_2026850032",
       "type": "removed",
       "detected_at": "2026-06-19",
@@ -1835,125 +1851,9 @@
       "name": "의왕청계역 시티프라디움 디하모니",
       "region": "경기",
       "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026850026&pblancNo=2026850026&houseSecd=03"
-    },
-    {
-      "id": "2026000122",
-      "type": "new",
-      "detected_at": "2026-05-20",
-      "name": "오정 해모로 스마트시티(조합원 취소분)",
-      "region": "경기",
-      "district": "오정구",
-      "house_category": "APT",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000122&pblancNo=2026000122"
-    },
-    {
-      "id": "opt_2026940101",
-      "type": "new",
-      "detected_at": "2026-05-20",
-      "name": "부천역 에피트 어바닉",
-      "region": "경기",
-      "district": "원미구",
-      "house_category": "임의공급",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940101&pblancNo=2026940101"
-    },
-    {
-      "id": "opt_2026940094",
-      "type": "new",
-      "detected_at": "2026-05-20",
-      "name": "중흥S-클래스 힐더포레(4차)",
-      "region": "경기",
-      "district": "구리시",
-      "house_category": "임의공급",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940094&pblancNo=2026940094"
-    },
-    {
-      "id": "rem_2026910119",
-      "type": "new",
-      "detected_at": "2026-05-20",
-      "name": "래미안 엘라비네(2차)",
-      "region": "서울",
-      "district": "강서구",
-      "house_category": "APT잔여세대",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910119&pblancNo=2026910119"
-    },
-    {
-      "id": "rem_2026910121",
-      "type": "new",
-      "detected_at": "2026-05-20",
-      "name": "라클라체자이드파인",
-      "region": "서울",
-      "district": "동작구",
-      "house_category": "APT잔여세대",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910121&pblancNo=2026910121"
-    },
-    {
-      "id": "sh_304555",
-      "type": "new",
-      "detected_at": "2026-05-20",
-      "name": "2026년 충신동 연극인두레주택 잔여세대 입주자 모집공고(26. 5. 19.)",
-      "region": "서울",
-      "district": "",
-      "house_category": "SH 공공주택",
-      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=304555&multi_itm_seq=2"
-    },
-    {
-      "id": "opt_2026940091",
-      "type": "removed",
-      "detected_at": "2026-05-20",
-      "name": "용인 푸르지오 원클러스터파크(3차)",
-      "region": "경기",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940091&pblancNo=2026940091"
-    },
-    {
-      "id": "oft_2026950048",
-      "type": "removed",
-      "detected_at": "2026-05-20",
-      "name": "한양 더챔버파크로지아",
-      "region": "경기",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950048&pblancNo=2026950048&houseSecd=02"
-    },
-    {
-      "id": "opt_2026940099",
-      "type": "removed",
-      "detected_at": "2026-05-20",
-      "name": "용인 플랫폼시티 라온프라이빗 아르디에(2차)",
-      "region": "경기",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940099&pblancNo=2026940099"
-    },
-    {
-      "id": "ppr_2026850028",
-      "type": "removed",
-      "detected_at": "2026-05-20",
-      "name": "부경경마공원역 대방 디에트르 더리버(AP1BL)",
-      "region": "부산",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026850028&pblancNo=2026850028&houseSecd=03"
-    },
-    {
-      "id": "opt_2026940100",
-      "type": "removed",
-      "detected_at": "2026-05-20",
-      "name": "용인 푸르지오 클루센트(2차)",
-      "region": "경기",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940100&pblancNo=2026940100"
-    },
-    {
-      "id": "oft_2026950050",
-      "type": "removed",
-      "detected_at": "2026-05-20",
-      "name": "영통역 우미 린",
-      "region": "경기",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950050&pblancNo=2026950050&houseSecd=02"
-    },
-    {
-      "id": "2026000178",
-      "type": "removed",
-      "detected_at": "2026-05-20",
-      "name": "중앙하이츠 원종역",
-      "region": "경기",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000178&pblancNo=2026000178"
     }
   ],
-  "updated_at": "2026-06-19T01:48:29Z",
+  "updated_at": "2026-06-20T00:13:04Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
