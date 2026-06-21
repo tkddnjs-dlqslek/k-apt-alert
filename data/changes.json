@@ -1805,55 +1805,9 @@
       "name": "리아츠 더 인천(19차)",
       "region": "인천",
       "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940098&pblancNo=2026940098"
-    },
-    {
-      "id": "rem_2026910117",
-      "type": "new",
-      "detected_at": "2026-05-21",
-      "name": "도안자이 센텀리체 1단지",
-      "region": "대전",
-      "district": "유성구",
-      "house_category": "APT잔여세대",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910117&pblancNo=2026910117"
-    },
-    {
-      "id": "oft_2026950049",
-      "type": "new",
-      "detected_at": "2026-05-21",
-      "name": "힐스테이트 안양펠루스",
-      "region": "경기",
-      "district": "만안구",
-      "house_category": "오피스텔/도시형",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950049&pblancNo=2026950049&houseSecd=02"
-    },
-    {
-      "id": "rem_2026910118",
-      "type": "new",
-      "detected_at": "2026-05-21",
-      "name": "도안자이 센텀리체 2단지",
-      "region": "대전",
-      "district": "유성구",
-      "house_category": "APT잔여세대",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910118&pblancNo=2026910118"
-    },
-    {
-      "id": "opt_2026940095",
-      "type": "removed",
-      "detected_at": "2026-05-21",
-      "name": "왕길역 아테라(4차)",
-      "region": "인천",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940095&pblancNo=2026940095"
-    },
-    {
-      "id": "ppr_2026850026",
-      "type": "removed",
-      "detected_at": "2026-05-21",
-      "name": "의왕청계역 시티프라디움 디하모니",
-      "region": "경기",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026850026&pblancNo=2026850026&houseSecd=03"
     }
   ],
-  "updated_at": "2026-06-20T00:13:04Z",
+  "updated_at": "2026-06-21T00:12:50Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
