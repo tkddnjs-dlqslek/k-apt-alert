@@ -279,6 +279,7 @@ def test_notify_all_channels_fail_502(monkeypatch):
 def _fake_resp(html: str, status: int = 200):
     resp = mock.Mock()
     resp.text = html
+    resp.content = html.encode("utf-8")
     resp.status_code = status
     resp.raise_for_status = mock.Mock()
     if status >= 400:

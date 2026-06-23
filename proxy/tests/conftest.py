@@ -43,3 +43,19 @@ def reset_dedup_store():
     _nd.reset()
     yield
     _nd.reset()
+
+
+@pytest.fixture(autouse=True)
+def disable_notice_data_branch(monkeypatch):
+    """notice_raw의 data 브랜치 영속 캐시를 단위 테스트에서 차단.
+
+    _load_from_data_branch는 requests.get().json()을 호출하므로, HTML용으로
+    목킹된 requests.get이 새어들어 full_text에 Mock이 들어간다. 단위 테스트는
+    HTML 추출 경로만 검증하므로 항상 None을 반환시켜 그 경로를 강제한다.
+    data 브랜치 hit 경로는 test_data_branch_cache_hit에서 명시적으로 재패치해 검증.
+    """
+    try:
+        from crawlers import notice_raw
+    except Exception:
+        return
+    monkeypatch.setattr(notice_raw, "_load_from_data_branch", lambda notice_id: None)

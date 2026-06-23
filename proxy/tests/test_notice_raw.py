@@ -28,6 +28,7 @@ def _load(name: str) -> str:
 def _fake_response(html: str, status: int = 200):
     resp = mock.Mock()
     resp.text = html
+    resp.content = html.encode("utf-8")
     resp.status_code = status
     resp.raise_for_status = mock.Mock()
     if status >= 400:
@@ -281,3 +282,26 @@ def test_live_applyhome_smoke():
     result = notice_raw.extract_notice_raw("live_smoke", url, 30000, force_refresh=True)
     assert result["char_count"] > 100
     assert result["title"]
+
+
+def test_data_branch_cache_hit(monkeypatch):
+    warmed = {
+        "url": "https://www.applyhome.co.kr/x",
+        "source": "html",
+        "title": "워밍된 공고",
+        "text": "워밍된 본문 텍스트입니다.",
+        "sections": {},
+        "has_pdf": False,
+    }
+    monkeypatch.setattr(notice_raw, "_load_from_data_branch", lambda notice_id: warmed)
+    # requests.get이 호출되면 안 됨 — 호출되면 data-branch 경로를 안 탔다는 뜻
+    def _boom(*a, **kw):
+        raise AssertionError("data-branch hit이면 네트워크 fetch 금지")
+    monkeypatch.setattr(notice_raw.requests, "get", _boom)
+
+    out = notice_raw.extract_notice_raw(
+        "apt_warm", "https://www.applyhome.co.kr/x", 30000
+    )
+    assert out["text"] == "워밍된 본문 텍스트입니다."
+    assert out["title"] == "워밍된 공고"
+    assert out["truncated"] is False
