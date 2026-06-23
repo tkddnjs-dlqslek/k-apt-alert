@@ -1,6 +1,342 @@
 {
   "changes": [
     {
+      "id": "sh_305877",
+      "type": "new",
+      "detected_at": "2026-06-23",
+      "name": "2026년 1차 행복주택 입주자 모집(2026.05.28.공고) 최종 청약 경쟁률 게시",
+      "region": "서울",
+      "district": "",
+      "house_category": "SH 공공주택",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=305877&multi_itm_seq=2"
+    },
+    {
+      "id": "2026000261",
+      "type": "new",
+      "detected_at": "2026-06-23",
+      "name": "밀양 수자인 더퍼스트 2단지 공공분양주택",
+      "region": "경남",
+      "district": "부북지구",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000261&pblancNo=2026000261"
+    },
+    {
+      "id": "2026000270",
+      "type": "new",
+      "detected_at": "2026-06-23",
+      "name": "김해 신문 센트럴 아이파크",
+      "region": "경남",
+      "district": "김해시",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000270&pblancNo=2026000270"
+    },
+    {
+      "id": "2026000260",
+      "type": "new",
+      "detected_at": "2026-06-23",
+      "name": "밀양 수자인 더퍼스트 1단지 공공분양주택",
+      "region": "경남",
+      "district": "부북지구",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000260&pblancNo=2026000260"
+    },
+    {
+      "id": "opt_2026940124",
+      "type": "new",
+      "detected_at": "2026-06-23",
+      "name": "옥정중앙역 대방 디에트르(중상1, 복합1BL) (2차)",
+      "region": "경기",
+      "district": "양주시",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940124&pblancNo=2026940124"
+    },
+    {
+      "id": "oft_2026950062",
+      "type": "new",
+      "detected_at": "2026-06-23",
+      "name": "대방역 여의도 더로드캐슬",
+      "region": "서울",
+      "district": "영등포구",
+      "house_category": "오피스텔/도시형",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950062&pblancNo=2026950062&houseSecd=02"
+    },
+    {
+      "id": "rem_2026910153",
+      "type": "new",
+      "detected_at": "2026-06-23",
+      "name": "두산위브 트리니뷰 구명역",
+      "region": "부산",
+      "district": "북구",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910153&pblancNo=2026910153"
+    },
+    {
+      "id": "rem_2026910157",
+      "type": "new",
+      "detected_at": "2026-06-23",
+      "name": "중앙하이츠 원종역",
+      "region": "경기",
+      "district": "오정구",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910157&pblancNo=2026910157"
+    },
+    {
+      "id": "opt_2026940126",
+      "type": "new",
+      "detected_at": "2026-06-23",
+      "name": "청계백상앨리츠(2차)",
+      "region": "서울",
+      "district": "성동구",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940126&pblancNo=2026940126"
+    },
+    {
+      "id": "2026000272",
+      "type": "new",
+      "detected_at": "2026-06-23",
+      "name": "함안가야 휴니온아르떼",
+      "region": "경남",
+      "district": "함안군",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000272&pblancNo=2026000272"
+    },
+    {
+      "id": "opt_2026940123",
+      "type": "new",
+      "detected_at": "2026-06-23",
+      "name": "의정부역 센트럴 아이파크",
+      "region": "경기",
+      "district": "의정부시",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940123&pblancNo=2026940123"
+    },
+    {
+      "id": "2026000263",
+      "type": "new",
+      "detected_at": "2026-06-23",
+      "name": "신문 대상 웰라움 라시엘",
+      "region": "경남",
+      "district": "김해시",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000263&pblancNo=2026000263"
+    },
+    {
+      "id": "2026000278",
+      "type": "new",
+      "detected_at": "2026-06-23",
+      "name": "양주 회천지구 A-8BL 로제비앙 엘가",
+      "region": "경기",
+      "district": "양주시",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000278&pblancNo=2026000278"
+    },
+    {
+      "id": "2026000273",
+      "type": "new",
+      "detected_at": "2026-06-23",
+      "name": "펜타힐즈 더블유 1단지",
+      "region": "경북",
+      "district": "경산시",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000273&pblancNo=2026000273"
+    },
+    {
+      "id": "rem_2026910155",
+      "type": "new",
+      "detected_at": "2026-06-23",
+      "name": "더 리치먼드 미아",
+      "region": "서울",
+      "district": "강북구",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910155&pblancNo=2026910155"
+    },
+    {
+      "id": "opt_2026940130",
+      "type": "new",
+      "detected_at": "2026-06-23",
+      "name": "안양역 센트럴 아이파크 수자인",
+      "region": "경기",
+      "district": "만안구",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940130&pblancNo=2026940130"
+    },
+    {
+      "id": "oft_2026950059",
+      "type": "new",
+      "detected_at": "2026-06-23",
+      "name": "청량리역 요진 와이시티 오피스텔",
+      "region": "서울",
+      "district": "동대문구",
+      "house_category": "오피스텔/도시형",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950059&pblancNo=2026950059&houseSecd=02"
+    },
+    {
+      "id": "2026000281",
+      "type": "new",
+      "detected_at": "2026-06-23",
+      "name": "이천 서희스타힐스 SKY(조합원 취소분)",
+      "region": "경기",
+      "district": "이천시",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000281&pblancNo=2026000281"
+    },
+    {
+      "id": "2026000275",
+      "type": "new",
+      "detected_at": "2026-06-23",
+      "name": "장위 푸르지오 마크원",
+      "region": "서울",
+      "district": "성북구",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000275&pblancNo=2026000275"
+    },
+    {
+      "id": "opt_2026940121",
+      "type": "new",
+      "detected_at": "2026-06-23",
+      "name": "디엠 그레이스 서초(2차)",
+      "region": "서울",
+      "district": "서초구",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940121&pblancNo=2026940121"
+    },
+    {
+      "id": "2026000241",
+      "type": "new",
+      "detected_at": "2026-06-23",
+      "name": "드파인 아르티아",
+      "region": "서울",
+      "district": "동작구",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000241&pblancNo=2026000241"
+    },
+    {
+      "id": "ppr_2026850035",
+      "type": "new",
+      "detected_at": "2026-06-23",
+      "name": "부경경마공원역 대방 디에트르 더리버(AP1BL)",
+      "region": "부산",
+      "district": "강서구",
+      "house_category": "공공지원민간임대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026850035&pblancNo=2026850035&houseSecd=03"
+    },
+    {
+      "id": "opt_2026940128",
+      "type": "new",
+      "detected_at": "2026-06-23",
+      "name": "구리역 하이니티 리버파크",
+      "region": "경기",
+      "district": "구리시",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940128&pblancNo=2026940128"
+    },
+    {
+      "id": "ppr_2026850034",
+      "type": "new",
+      "detected_at": "2026-06-23",
+      "name": "의왕청계역 시티프라디움 디하모니",
+      "region": "경기",
+      "district": "의왕시",
+      "house_category": "공공지원민간임대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026850034&pblancNo=2026850034&houseSecd=03"
+    },
+    {
+      "id": "2026000195",
+      "type": "removed",
+      "detected_at": "2026-06-23",
+      "name": "더샵 검단레이크파크(AB23BL)",
+      "region": "인천",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000195&pblancNo=2026000195"
+    },
+    {
+      "id": "rem_2026910154",
+      "type": "removed",
+      "detected_at": "2026-06-23",
+      "name": "인천시청역 한신더휴",
+      "region": "인천",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910154&pblancNo=2026910154"
+    },
+    {
+      "id": "2026000235",
+      "type": "removed",
+      "detected_at": "2026-06-23",
+      "name": "북서울자이 폴라리스(보류지)",
+      "region": "서울",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000235&pblancNo=2026000235"
+    },
+    {
+      "id": "2026000224",
+      "type": "removed",
+      "detected_at": "2026-06-23",
+      "name": "힐스테이트 양산더스카이 2단지",
+      "region": "경남",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000224&pblancNo=2026000224"
+    },
+    {
+      "id": "oft_2026950057",
+      "type": "removed",
+      "detected_at": "2026-06-23",
+      "name": "힐스테이트 장안 라보니타",
+      "region": "서울",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950057&pblancNo=2026950057&houseSecd=02"
+    },
+    {
+      "id": "sh_305759",
+      "type": "removed",
+      "detected_at": "2026-06-23",
+      "name": "[청년형] 특화형 매입임대주택(서초구) 입주자 모집 공고(운영기관 : 한지붕 협동조합)",
+      "region": "서울",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=305759&multi_itm_seq=2"
+    },
+    {
+      "id": "opt_2026940118",
+      "type": "removed",
+      "detected_at": "2026-06-23",
+      "name": "리아츠 더 인천(20차) ",
+      "region": "인천",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940118&pblancNo=2026940118"
+    },
+    {
+      "id": "2026000258",
+      "type": "removed",
+      "detected_at": "2026-06-23",
+      "name": "고덕국제신도시 수자인하우스디",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000258&pblancNo=2026000258"
+    },
+    {
+      "id": "rem_2026910158",
+      "type": "removed",
+      "detected_at": "2026-06-23",
+      "name": "파주금촌 금호어울림(조합원 취소분)",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910158&pblancNo=2026910158"
+    },
+    {
+      "id": "rem_2026930019",
+      "type": "removed",
+      "detected_at": "2026-06-23",
+      "name": "강변역 센트럴 아이파크",
+      "region": "서울",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026930019&pblancNo=2026930019"
+    },
+    {
+      "id": "2026000248",
+      "type": "removed",
+      "detected_at": "2026-06-23",
+      "name": "북오산자이 드포레",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000248&pblancNo=2026000248"
+    },
+    {
+      "id": "2026000223",
+      "type": "removed",
+      "detected_at": "2026-06-23",
+      "name": "힐스테이트 양산더스카이 1단지",
+      "region": "경남",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000223&pblancNo=2026000223"
+    },
+    {
       "id": "opt_2026940122",
       "type": "removed",
       "detected_at": "2026-06-20",
@@ -1571,143 +1907,9 @@
           "after": "[청년형] 특화형 매입임대주택(송파구) 입주자 모집 공고(운영기관 : 협동조합 큰바위얼굴)"
         }
       }
-    },
-    {
-      "id": "2026000173",
-      "type": "new",
-      "detected_at": "2026-05-23",
-      "name": "더 리치먼드 리버센트 소양",
-      "region": "강원",
-      "district": "춘천시",
-      "house_category": "APT",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000173&pblancNo=2026000173"
-    },
-    {
-      "id": "rem_2026910123",
-      "type": "new",
-      "detected_at": "2026-05-23",
-      "name": "신림스카이아파트(19차)",
-      "region": "서울",
-      "district": "관악구",
-      "house_category": "APT잔여세대",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910123&pblancNo=2026910123"
-    },
-    {
-      "id": "rem_2026910129",
-      "type": "new",
-      "detected_at": "2026-05-23",
-      "name": "용인 고림 동문 디 이스트",
-      "region": "경기",
-      "district": "처인구",
-      "house_category": "APT잔여세대",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910129&pblancNo=2026910129"
-    },
-    {
-      "id": "sh_304703",
-      "type": "new",
-      "detected_at": "2026-05-23",
-      "name": "[토지지원 사회주택] 유니버설디자인하우스 수유 입주자 모집공고",
-      "region": "서울",
-      "district": "강북구",
-      "house_category": "SH 공공주택",
-      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=304703&multi_itm_seq=2"
-    },
-    {
-      "id": "oft_2026950051",
-      "type": "new",
-      "detected_at": "2026-05-23",
-      "name": "호반써밋 풍무Ⅱ",
-      "region": "경기",
-      "district": "김포시",
-      "house_category": "오피스텔/도시형",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950051&pblancNo=2026950051&houseSecd=02"
-    },
-    {
-      "id": "2026000205",
-      "type": "new",
-      "detected_at": "2026-05-23",
-      "name": "수원역 아너스빌 타임원",
-      "region": "경기",
-      "district": "권선구",
-      "house_category": "APT",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000205&pblancNo=2026000205"
-    },
-    {
-      "id": "rem_2026930017",
-      "type": "new",
-      "detected_at": "2026-05-23",
-      "name": "레이카운티",
-      "region": "부산",
-      "district": "연제구",
-      "house_category": "APT잔여세대",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026930017&pblancNo=2026930017"
-    },
-    {
-      "id": "rem_2026910128",
-      "type": "new",
-      "detected_at": "2026-05-23",
-      "name": "인천 작전 한라비발디",
-      "region": "인천",
-      "district": "계양구",
-      "house_category": "APT잔여세대",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910128&pblancNo=2026910128"
-    },
-    {
-      "id": "2026000098",
-      "type": "removed",
-      "detected_at": "2026-05-23",
-      "name": "식사 푸르지오 파크센트(조합원 취소분)",
-      "region": "경기",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000098&pblancNo=2026000098"
-    },
-    {
-      "id": "opt_2026940094",
-      "type": "removed",
-      "detected_at": "2026-05-23",
-      "name": "중흥S-클래스 힐더포레(4차)",
-      "region": "경기",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940094&pblancNo=2026940094"
-    },
-    {
-      "id": "2025000422",
-      "type": "removed",
-      "detected_at": "2026-05-23",
-      "name": "오남역 서희스타힐스 여의재 3단지",
-      "region": "경기",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2025000422&pblancNo=2025000422"
-    },
-    {
-      "id": "2026000116",
-      "type": "removed",
-      "detected_at": "2026-05-23",
-      "name": "아크로 리버스카이",
-      "region": "서울",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000116&pblancNo=2026000116"
-    },
-    {
-      "id": "rem_2026910120",
-      "type": "removed",
-      "detected_at": "2026-05-23",
-      "name": "야목역 서희스타힐스 그랜드힐",
-      "region": "경기",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910120&pblancNo=2026910120"
-    },
-    {
-      "id": "2026000217",
-      "type": "updated",
-      "detected_at": "2026-05-23",
-      "name": "동래사적공원 오네뜨",
-      "region": "부산",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000217&pblancNo=2026000217",
-      "field_changes": {
-        "size": {
-          "before": "대형",
-          "after": ""
-        }
-      }
     }
   ],
-  "updated_at": "2026-06-22T00:15:21Z",
+  "updated_at": "2026-06-23T00:13:42Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
