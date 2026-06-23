@@ -56,6 +56,6 @@ def disable_notice_data_branch(monkeypatch):
     """
     try:
         from crawlers import notice_raw
-    except Exception:
+    except ImportError:
         return
     monkeypatch.setattr(notice_raw, "_load_from_data_branch", lambda notice_id: None)

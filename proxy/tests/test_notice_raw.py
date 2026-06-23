@@ -305,3 +305,4 @@ def test_data_branch_cache_hit(monkeypatch):
     assert out["text"] == "워밍된 본문 텍스트입니다."
     assert out["title"] == "워밍된 공고"
     assert out["truncated"] is False
+    assert notice_raw._cache.get("apt_warm") is not None
