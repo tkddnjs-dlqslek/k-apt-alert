@@ -2123,93 +2123,9 @@
       "name": "신검단중앙역 금강펜테리움 센트럴파크(3차)",
       "region": "인천",
       "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910139&pblancNo=2026910139"
-    },
-    {
-      "id": "rem_2026910139",
-      "type": "new",
-      "detected_at": "2026-06-05",
-      "name": "신검단중앙역 금강펜테리움 센트럴파크(3차)",
-      "region": "인천",
-      "district": "서구",
-      "house_category": "APT잔여세대",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910139&pblancNo=2026910139"
-    },
-    {
-      "id": "opt_2026940108",
-      "type": "new",
-      "detected_at": "2026-06-05",
-      "name": "연수 월드메르디앙 어반포레(2차)",
-      "region": "인천",
-      "district": "연수구",
-      "house_category": "임의공급",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940108&pblancNo=2026940108"
-    },
-    {
-      "id": "rem_2026910144",
-      "type": "new",
-      "detected_at": "2026-06-05",
-      "name": "엘리프 성성호수공원 1BL",
-      "region": "충남",
-      "district": "서북구",
-      "house_category": "APT잔여세대",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910144&pblancNo=2026910144"
-    },
-    {
-      "id": "rem_2026910145",
-      "type": "new",
-      "detected_at": "2026-06-05",
-      "name": "엘리프 성성호수공원 2BL",
-      "region": "충남",
-      "district": "서북구",
-      "house_category": "APT잔여세대",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910145&pblancNo=2026910145"
-    },
-    {
-      "id": "rem_2026910138",
-      "type": "new",
-      "detected_at": "2026-06-05",
-      "name": "청계 노르웨이숲(9차)",
-      "region": "서울",
-      "district": "중구",
-      "house_category": "APT잔여세대",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910138&pblancNo=2026910138"
-    },
-    {
-      "id": "opt_2026940110",
-      "type": "new",
-      "detected_at": "2026-06-05",
-      "name": "화곡더리브스카이(3차)",
-      "region": "서울",
-      "district": "강서구",
-      "house_category": "임의공급",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940110&pblancNo=2026940110"
-    },
-    {
-      "id": "oft_2026950051",
-      "type": "removed",
-      "detected_at": "2026-06-05",
-      "name": "호반써밋 풍무Ⅱ",
-      "region": "경기",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950051&pblancNo=2026950051&houseSecd=02"
-    },
-    {
-      "id": "2026000173",
-      "type": "removed",
-      "detected_at": "2026-06-05",
-      "name": "더 리치먼드 리버센트 소양",
-      "region": "강원",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000173&pblancNo=2026000173"
-    },
-    {
-      "id": "2026000205",
-      "type": "removed",
-      "detected_at": "2026-06-05",
-      "name": "수원역 아너스빌 타임원",
-      "region": "경기",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000205&pblancNo=2026000205"
     }
   ],
-  "updated_at": "2026-07-05T00:07:18Z",
+  "updated_at": "2026-07-06T00:13:04Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
