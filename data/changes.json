@@ -1,6 +1,26 @@
 {
   "changes": [
     {
+      "id": "opt_2026940145",
+      "type": "new",
+      "detected_at": "2026-07-13",
+      "name": "서수원 에피트 센트럴마크(M2BL)",
+      "region": "경기",
+      "district": "권선구",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940145&pblancNo=2026940145"
+    },
+    {
+      "id": "sh_306908",
+      "type": "new",
+      "detected_at": "2026-07-13",
+      "name": "은평구 청년 창업인의 집(수요자맞춤형) 추가 입주자 모집 공고",
+      "region": "서울",
+      "district": "은평구",
+      "house_category": "SH 공공주택",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=306908&multi_itm_seq=2"
+    },
+    {
       "id": "2026000301",
       "type": "new",
       "detected_at": "2026-07-11",
@@ -1835,7 +1855,7 @@
       "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910124&pblancNo=2026910124"
     }
   ],
-  "updated_at": "2026-07-13T00:01:34Z",
+  "updated_at": "2026-07-13T23:58:46Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
