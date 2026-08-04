@@ -1,6 +1,38 @@
 {
   "changes": [
     {
+      "id": "rem_2026910200",
+      "type": "removed",
+      "detected_at": "2026-08-04",
+      "name": "한화포레나 안산고잔2차",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910200&pblancNo=2026910200"
+    },
+    {
+      "id": "rem_2026910199",
+      "type": "removed",
+      "detected_at": "2026-08-04",
+      "name": "펜타힐즈 더블유 1단지",
+      "region": "경북",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910199&pblancNo=2026910199"
+    },
+    {
+      "id": "rem_2026910201",
+      "type": "removed",
+      "detected_at": "2026-08-04",
+      "name": "동탄신도시 금강펜테리움 6차 센트럴파크(A59BL) (3차)",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910201&pblancNo=2026910201"
+    },
+    {
+      "id": "rem_2026910193",
+      "type": "removed",
+      "detected_at": "2026-08-04",
+      "name": "김해 신문 센트럴 아이파크",
+      "region": "경남",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910193&pblancNo=2026910193"
+    },
+    {
       "id": "2026000323",
       "type": "new",
       "detected_at": "2026-08-02",
@@ -1643,7 +1675,7 @@
       "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910169&pblancNo=2026910169"
     }
   ],
-  "updated_at": "2026-08-03T00:03:20Z",
+  "updated_at": "2026-08-04T00:14:03Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
