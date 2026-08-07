@@ -1,6 +1,182 @@
 {
   "changes": [
     {
+      "id": "sh_308196",
+      "type": "new",
+      "detected_at": "2026-08-07",
+      "name": "[토지지원 사회주택]유니버설디자인하우스_장안 입주자 모집 공고",
+      "region": "서울",
+      "district": "동대문구",
+      "house_category": "SH 공공주택",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=308196&multi_itm_seq=2"
+    },
+    {
+      "id": "ppr_2026850039",
+      "type": "new",
+      "detected_at": "2026-08-07",
+      "name": "성동스페이스",
+      "region": "서울",
+      "district": "성동구",
+      "house_category": "공공지원민간임대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026850039&pblancNo=2026850039&houseSecd=03"
+    },
+    {
+      "id": "2026820006",
+      "type": "new",
+      "detected_at": "2026-08-07",
+      "name": "시흥거모 A-5블록 신혼희망타운(공공분양)(본청약)",
+      "region": "경기",
+      "district": "시흥시",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026820006&pblancNo=2026820006"
+    },
+    {
+      "id": "rem_2026910213",
+      "type": "new",
+      "detected_at": "2026-08-07",
+      "name": "청계 노르웨이숲(11차)",
+      "region": "서울",
+      "district": "중구",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910213&pblancNo=2026910213"
+    },
+    {
+      "id": "2026000364",
+      "type": "new",
+      "detected_at": "2026-08-07",
+      "name": "써밋 클라비온",
+      "region": "서울",
+      "district": "영등포구",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000364&pblancNo=2026000364"
+    },
+    {
+      "id": "ppr_2026850040",
+      "type": "new",
+      "detected_at": "2026-08-07",
+      "name": "의왕 백운밸리 리젠시빌 란트",
+      "region": "경기",
+      "district": "의왕시",
+      "house_category": "공공지원민간임대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026850040&pblancNo=2026850040&houseSecd=03"
+    },
+    {
+      "id": "sh_308167",
+      "type": "new",
+      "detected_at": "2026-08-07",
+      "name": "(수정) 2026년 1~2인가구를 위한 도시형생활주택(건설형원룸) 잔여세대 입주자 모집공고(26. 8. 5.)",
+      "region": "서울",
+      "district": "",
+      "house_category": "SH 공공주택",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=308167&multi_itm_seq=2"
+    },
+    {
+      "id": "2026000371",
+      "type": "new",
+      "detected_at": "2026-08-07",
+      "name": "용인반도체클러스터 동일하이빌 파크밸리(D1-1블록)",
+      "region": "경기",
+      "district": "처인구",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000371&pblancNo=2026000371"
+    },
+    {
+      "id": "2026000374",
+      "type": "new",
+      "detected_at": "2026-08-07",
+      "name": "더샵 신길센트럴시티(조합원 취소분)",
+      "region": "서울",
+      "district": "영등포구",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000374&pblancNo=2026000374"
+    },
+    {
+      "id": "oft_2026950071",
+      "type": "new",
+      "detected_at": "2026-08-07",
+      "name": "동탄2신도시 동탄역 디에트르 퍼스티지",
+      "region": "경기",
+      "district": "화성시",
+      "house_category": "오피스텔/도시형",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950071&pblancNo=2026950071&houseSecd=02"
+    },
+    {
+      "id": "rem_2026910214",
+      "type": "new",
+      "detected_at": "2026-08-07",
+      "name": "드파인 아르티아",
+      "region": "서울",
+      "district": "동작구",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910214&pblancNo=2026910214"
+    },
+    {
+      "id": "sh_308134",
+      "type": "new",
+      "detected_at": "2026-08-07",
+      "name": "성동스페이스 공공지원민간임대주택 임차인 모집공고",
+      "region": "서울",
+      "district": "",
+      "house_category": "SH 공공주택",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=308134&multi_itm_seq=2"
+    },
+    {
+      "id": "2026000358",
+      "type": "new",
+      "detected_at": "2026-08-07",
+      "name": "충정로역자이르네",
+      "region": "서울",
+      "district": "중구",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000358&pblancNo=2026000358"
+    },
+    {
+      "id": "rem_2026910216",
+      "type": "new",
+      "detected_at": "2026-08-07",
+      "name": "더샵 검단레이크파크(AB23BL)",
+      "region": "인천",
+      "district": "검단구",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910216&pblancNo=2026910216"
+    },
+    {
+      "id": "rem_2026910210",
+      "type": "new",
+      "detected_at": "2026-08-07",
+      "name": "오산세교2지구 A-13블록 호반써밋(2차)",
+      "region": "경기",
+      "district": "오산시",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910210&pblancNo=2026910210"
+    },
+    {
+      "id": "2026000376",
+      "type": "new",
+      "detected_at": "2026-08-07",
+      "name": "달서자이 제니크",
+      "region": "대구",
+      "district": "달서구",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000376&pblancNo=2026000376"
+    },
+    {
+      "id": "sh_308123",
+      "type": "removed",
+      "detected_at": "2026-08-07",
+      "name": "2026년 1~2인가구를 위한 도시형생활주택(건설형원룸) 잔여세대 입주자 모집공고(26. 8. 5.)",
+      "region": "서울",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=308123&multi_itm_seq=2"
+    },
+    {
+      "id": "sh_307835",
+      "type": "removed",
+      "detected_at": "2026-08-07",
+      "name": "2026년 2차 청년안심주택(공공임대) 입주자 모집공고",
+      "region": "서울",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=307835&multi_itm_seq=2"
+    },
+    {
       "id": "sh_308167",
       "type": "new",
       "detected_at": "2026-08-07",
@@ -1657,7 +1833,7 @@
       "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026820005&pblancNo=2026820005"
     }
   ],
-  "updated_at": "2026-08-07T01:42:46Z",
+  "updated_at": "2026-08-07T23:36:34Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
