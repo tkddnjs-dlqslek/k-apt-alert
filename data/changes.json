@@ -1,6 +1,102 @@
 {
   "changes": [
     {
+      "id": "opt_2026940166",
+      "type": "new",
+      "detected_at": "2026-08-13",
+      "name": "중앙하이츠 원종역",
+      "region": "경기",
+      "district": "오정구",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940166&pblancNo=2026940166"
+    },
+    {
+      "id": "2026000377",
+      "type": "new",
+      "detected_at": "2026-08-13",
+      "name": "의왕역 한신더휴",
+      "region": "경기",
+      "district": "의왕시",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000377&pblancNo=2026000377"
+    },
+    {
+      "id": "sh_308379",
+      "type": "new",
+      "detected_at": "2026-08-13",
+      "name": "[청년형] 특화형 매입임대주택(강동구) 입주자 모집 공고(운영기관 : 마을과집 협동조합)",
+      "region": "서울",
+      "district": "강동구",
+      "house_category": "SH 공공주택",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=308379&multi_itm_seq=2"
+    },
+    {
+      "id": "2026000365",
+      "type": "new",
+      "detected_at": "2026-08-13",
+      "name": "오남역 서희스타힐스 여의재 1단지",
+      "region": "경기",
+      "district": "남양주시",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000365&pblancNo=2026000365"
+    },
+    {
+      "id": "rem_2026910210",
+      "type": "removed",
+      "detected_at": "2026-08-13",
+      "name": "오산세교2지구 A-13블록 호반써밋(2차)",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910210&pblancNo=2026910210"
+    },
+    {
+      "id": "rem_2026910214",
+      "type": "removed",
+      "detected_at": "2026-08-13",
+      "name": "드파인 아르티아",
+      "region": "서울",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910214&pblancNo=2026910214"
+    },
+    {
+      "id": "rem_2026910216",
+      "type": "removed",
+      "detected_at": "2026-08-13",
+      "name": "더샵 검단레이크파크(AB23BL)",
+      "region": "인천",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910216&pblancNo=2026910216"
+    },
+    {
+      "id": "2026000323",
+      "type": "removed",
+      "detected_at": "2026-08-13",
+      "name": "세종 우미 린 센터파크(행정중심복합도시 5-2생활권 S1블록, 글미마을 9단지)",
+      "region": "세종",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000323&pblancNo=2026000323"
+    },
+    {
+      "id": "2026000367",
+      "type": "removed",
+      "detected_at": "2026-08-13",
+      "name": "한강 푸르지오 리버프론트",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000367&pblancNo=2026000367"
+    },
+    {
+      "id": "oft_2026950071",
+      "type": "removed",
+      "detected_at": "2026-08-13",
+      "name": "동탄2신도시 동탄역 디에트르 퍼스티지",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950071&pblancNo=2026950071&houseSecd=02"
+    },
+    {
+      "id": "ppr_2026850040",
+      "type": "removed",
+      "detected_at": "2026-08-13",
+      "name": "의왕 백운밸리 리젠시빌 란트",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026850040&pblancNo=2026850040&houseSecd=03"
+    },
+    {
       "id": "opt_2026940168",
       "type": "new",
       "detected_at": "2026-08-12",
@@ -1821,29 +1917,9 @@
       "name": "수원역 아너스빌 타임원",
       "region": "경기",
       "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910172&pblancNo=2026910172"
-    },
-    {
-      "id": "opt_2026940145",
-      "type": "new",
-      "detected_at": "2026-07-13",
-      "name": "서수원 에피트 센트럴마크(M2BL)",
-      "region": "경기",
-      "district": "권선구",
-      "house_category": "임의공급",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940145&pblancNo=2026940145"
-    },
-    {
-      "id": "sh_306908",
-      "type": "new",
-      "detected_at": "2026-07-13",
-      "name": "은평구 청년 창업인의 집(수요자맞춤형) 추가 입주자 모집 공고",
-      "region": "서울",
-      "district": "은평구",
-      "house_category": "SH 공공주택",
-      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=306908&multi_itm_seq=2"
     }
   ],
-  "updated_at": "2026-08-12T23:48:06Z",
+  "updated_at": "2026-08-13T23:47:29Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
