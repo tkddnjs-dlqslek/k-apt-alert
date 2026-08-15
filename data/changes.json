@@ -1,6 +1,14 @@
 {
   "changes": [
     {
+      "id": "ppr_2026850039",
+      "type": "removed",
+      "detected_at": "2026-08-15",
+      "name": "성동스페이스",
+      "region": "서울",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026850039&pblancNo=2026850039&houseSecd=03"
+    },
+    {
       "id": "2026000372",
       "type": "new",
       "detected_at": "2026-08-14",
@@ -2043,7 +2051,7 @@
       "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000310&pblancNo=2026000310"
     }
   ],
-  "updated_at": "2026-08-14T23:24:48Z",
+  "updated_at": "2026-08-15T23:24:50Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
