@@ -1,6 +1,64 @@
 {
   "changes": [
     {
+      "id": "oft_2026950072",
+      "type": "new",
+      "detected_at": "2026-08-18",
+      "name": "덕은 DMC에일린의뜰 센트럴 1차",
+      "region": "경기",
+      "district": "덕양구",
+      "house_category": "오피스텔/도시형",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950072&pblancNo=2026950072&houseSecd=02"
+    },
+    {
+      "id": "opt_2026940174",
+      "type": "new",
+      "detected_at": "2026-08-18",
+      "name": "서수원 에피트 센트럴마크(M2BL)(2차)",
+      "region": "경기",
+      "district": "권선구",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940174&pblancNo=2026940174"
+    },
+    {
+      "id": "oft_2026950074",
+      "type": "new",
+      "detected_at": "2026-08-18",
+      "name": "둔촌 월드메르디앙 올림픽파크",
+      "region": "서울",
+      "district": "강동구",
+      "house_category": "오피스텔/도시형",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950074&pblancNo=2026950074&houseSecd=02"
+    },
+    {
+      "id": "opt_2026940172",
+      "type": "new",
+      "detected_at": "2026-08-18",
+      "name": "의정부역 센트럴 아이파크 (3차)",
+      "region": "경기",
+      "district": "의정부시",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940172&pblancNo=2026940172"
+    },
+    {
+      "id": "sh_308549",
+      "type": "new",
+      "detected_at": "2026-08-18",
+      "name": "[청년형] 특화형 매입임대주택(금천구) 입주자 모집 공고(운영기관 : 한지붕 협동조합)",
+      "region": "서울",
+      "district": "금천구",
+      "house_category": "SH 공공주택",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=308549&multi_itm_seq=2"
+    },
+    {
+      "id": "sh_308379",
+      "type": "removed",
+      "detected_at": "2026-08-18",
+      "name": "[청년형] 특화형 매입임대주택(강동구) 입주자 모집 공고(운영기관 : 마을과집 협동조합)",
+      "region": "서울",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=308379&multi_itm_seq=2"
+    },
+    {
       "id": "ppr_2026850039",
       "type": "removed",
       "detected_at": "2026-08-15",
@@ -1869,7 +1927,7 @@
       "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910188&pblancNo=2026910188"
     }
   ],
-  "updated_at": "2026-08-17T23:28:28Z",
+  "updated_at": "2026-08-18T23:27:30Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
