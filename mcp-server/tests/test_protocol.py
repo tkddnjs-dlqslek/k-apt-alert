@@ -1,6 +1,13 @@
 """server.py JSON-RPC 디스패치 테스트. 네트워크 없음: HANDLERS를 monkeypatch."""
 
+import json
+import subprocess
+import sys
+from pathlib import Path
+
 import server
+
+SERVER = Path(__file__).resolve().parent.parent / "server.py"
 
 LEGACY_INIT = {
     "jsonrpc": "2.0", "id": 1, "method": "initialize",
@@ -114,3 +121,30 @@ def test_tool_error_result_keeps_is_error_and_result_type(monkeypatch):
     monkeypatch.setitem(server.HANDLERS, "list_categories", boom)
     r = server.handle(_modern(40, "tools/call", name="list_categories", arguments={}))["result"]
     assert r["isError"] is True and r["resultType"] == "complete"
+
+
+def test_main_loop_survives_malformed_params():
+    lines = [
+        {"jsonrpc": "2.0", "id": 1, "method": "tools/list", "params": {"_meta": 5}},
+        {"jsonrpc": "2.0", "id": 2, "method": "ping", "params": [1, 2]},
+        {"jsonrpc": "2.0", "id": 3, "method": "ping"},
+    ]
+    stdin = "".join(json.dumps(l) + "\n" for l in lines)
+    proc = subprocess.run([sys.executable, str(SERVER)], input=stdin, capture_output=True,
+                          text=True, encoding="utf-8", timeout=30)
+    out = [json.loads(l) for l in proc.stdout.splitlines() if l.strip()]
+    assert proc.returncode == 0
+    assert [o["id"] for o in out] == [1, 2, 3]
+    assert out[0]["error"]["code"] == -32603 and out[1]["error"]["code"] == -32603
+    assert "result" in out[2] and "resultType" in out[2]["result"]
+
+
+def test_error_response_has_no_result_type():
+    resp = server.handle({"jsonrpc": "2.0", "id": 50, "method": "nope"})
+    assert "result" not in resp and "resultType" not in resp["error"]
+
+
+def test_notification_with_modern_meta_is_silent():
+    msg = {"jsonrpc": "2.0", "method": "notifications/initialized",
+           "params": {"_meta": {"io.modelcontextprotocol/protocolVersion": "1900-01-01"}}}
+    assert server.handle(msg) is None

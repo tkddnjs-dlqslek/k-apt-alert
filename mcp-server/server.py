@@ -414,7 +414,11 @@ def main():
             msg = json.loads(line)
         except json.JSONDecodeError:
             continue
-        resp = handle(msg)
+        try:
+            resp = handle(msg)
+        except Exception as e:  # noqa: BLE001
+            rid = msg.get("id") if isinstance(msg, dict) else None
+            resp = _error(rid, -32603, f"Internal error: {type(e).__name__}") if rid is not None else None
         if resp is not None:
             sys.stdout.write(json.dumps(resp, ensure_ascii=False) + "\n")
             sys.stdout.flush()
