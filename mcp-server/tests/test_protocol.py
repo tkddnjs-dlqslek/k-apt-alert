@@ -41,3 +41,51 @@ def test_legacy_tools_call_dispatches(monkeypatch):
 def test_unknown_method_returns_32601():
     resp = server.handle({"jsonrpc": "2.0", "id": 5, "method": "nope"})
     assert resp["error"]["code"] == -32601
+
+
+META = {
+    "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+    "io.modelcontextprotocol/clientInfo": {"name": "t", "version": "0"},
+    "io.modelcontextprotocol/clientCapabilities": {},
+}
+
+
+def _modern(rid, method, **params):
+    params["_meta"] = dict(META)
+    return {"jsonrpc": "2.0", "id": rid, "method": method, "params": params}
+
+
+def test_discover_returns_versions_caps_identity():
+    resp = server.handle(_modern("d1", "server/discover"))
+    r = resp["result"]
+    assert r["supportedVersions"] == ["2026-07-28"]
+    assert r["capabilities"] == {"tools": {}}
+    assert r["_meta"]["io.modelcontextprotocol/serverInfo"] == {
+        "name": server.SERVER_NAME, "version": server.SERVER_VERSION}
+
+
+def test_modern_unsupported_version_returns_32022():
+    msg = _modern(10, "tools/list")
+    msg["params"]["_meta"]["io.modelcontextprotocol/protocolVersion"] = "1900-01-01"
+    resp = server.handle(msg)
+    assert resp["error"]["code"] == -32022
+    assert resp["error"]["data"] == {"supported": ["2026-07-28"], "requested": "1900-01-01"}
+
+
+def test_modern_missing_client_capabilities_returns_32602():
+    msg = _modern(11, "tools/list")
+    del msg["params"]["_meta"]["io.modelcontextprotocol/clientCapabilities"]
+    resp = server.handle(msg)
+    assert resp["error"]["code"] == -32602
+
+
+def test_modern_tools_call_dispatches(monkeypatch):
+    monkeypatch.setitem(server.HANDLERS, "list_categories", lambda a: {"ok": True})
+    resp = server.handle(_modern(12, "tools/call", name="list_categories", arguments={}))
+    assert '"ok": true' in resp["result"]["content"][0]["text"]
+
+
+def test_discover_without_meta_is_still_answered():
+    """Legacy 클라이언트가 보낸 server/discover에도 답해야 Dual-era 클라이언트 프로브가 동작."""
+    resp = server.handle({"jsonrpc": "2.0", "id": 13, "method": "server/discover"})
+    assert resp["result"]["supportedVersions"] == ["2026-07-28"]

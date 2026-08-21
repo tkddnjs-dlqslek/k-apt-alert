@@ -36,6 +36,15 @@ SERVER_VERSION = "1.0.0"
 DEFAULT_PROTOCOL = "2025-06-18"
 UA = f"{SERVER_NAME}-mcp/{SERVER_VERSION}"
 
+# ── MCP 2026-07-28 (Modern, stateless) ──
+# Modern 클라이언트는 initialize 대신 요청마다 _meta에 버전·capabilities를 싣는다.
+# Legacy(initialize 핸드셰이크) 경로는 그대로 유지 → dual-era 서버.
+MODERN_VERSIONS = ["2026-07-28"]
+META_VER = "io.modelcontextprotocol/protocolVersion"
+META_CAPS = "io.modelcontextprotocol/clientCapabilities"
+META_SERVER = "io.modelcontextprotocol/serverInfo"
+SERVER_INFO = {"name": SERVER_NAME, "version": SERVER_VERSION}
+
 
 # ─────────────────────────────────────────────────────────────
 # HTTP 헬퍼 (urllib — 외부 의존성 없음)
@@ -277,8 +286,25 @@ def _result(rid, result):
     return {"jsonrpc": "2.0", "id": rid, "result": result}
 
 
-def _error(rid, code, message):
-    return {"jsonrpc": "2.0", "id": rid, "error": {"code": code, "message": message}}
+def _error(rid, code, message, data=None):
+    err = {"code": code, "message": message}
+    if data is not None:
+        err["data"] = data
+    return {"jsonrpc": "2.0", "id": rid, "error": err}
+
+
+def _check_modern(rid, params: dict):
+    """Modern(_meta 동봉) 요청 검증. 오류면 error 응답 dict, 정상이거나 Legacy면 None."""
+    meta = params.get("_meta") or {}
+    if META_VER not in meta:
+        return None  # Legacy 요청 → 기존 경로
+    ver = meta[META_VER]
+    if ver not in MODERN_VERSIONS:
+        return _error(rid, -32022, "Unsupported protocol version",
+                      {"supported": MODERN_VERSIONS, "requested": ver})
+    if META_CAPS not in meta:
+        return _error(rid, -32602, f"Invalid params: missing _meta[{META_CAPS}]")
+    return None
 
 
 def _tool_text(obj) -> dict:
@@ -290,6 +316,21 @@ def handle(msg: dict):
     method = msg.get("method")
     rid = msg.get("id")
     params = msg.get("params") or {}
+
+    if rid is not None:
+        bad = _check_modern(rid, params)
+        if bad:
+            return bad
+
+    if method == "server/discover":
+        return _result(rid, {
+            "supportedVersions": MODERN_VERSIONS,
+            "capabilities": {"tools": {}},
+            "_meta": {META_SERVER: SERVER_INFO},
+            "instructions": "한국 청약 공고 조회·가점 계산·알림 발송 툴 7종. 먼저 search_announcements로 캐시를 채운 뒤 get_competition을 호출할 것.",
+            "ttlMs": 3600000,
+            "cacheScope": "public",
+        })
 
     if method == "initialize":
         proto = params.get("protocolVersion", DEFAULT_PROTOCOL)
