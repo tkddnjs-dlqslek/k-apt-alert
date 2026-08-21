@@ -282,8 +282,15 @@ HANDLERS = {
 # ─────────────────────────────────────────────────────────────
 # JSON-RPC 디스패치
 # ─────────────────────────────────────────────────────────────
-def _result(rid, result):
-    return {"jsonrpc": "2.0", "id": rid, "result": result}
+def _result(rid, result: dict):
+    # 2026-07-28: 모든 result에 resultType 필수, serverInfo SHOULD.
+    # Legacy 클라이언트는 모르는 필드를 무시하므로 공통 적용.
+    out = dict(result)
+    out.setdefault("resultType", "complete")
+    meta = dict(out.get("_meta") or {})
+    meta.setdefault(META_SERVER, SERVER_INFO)
+    out["_meta"] = meta
+    return {"jsonrpc": "2.0", "id": rid, "result": out}
 
 
 def _error(rid, code, message, data=None):
@@ -347,7 +354,7 @@ def handle(msg: dict):
         return _result(rid, {})
 
     if method == "tools/list":
-        return _result(rid, {"tools": TOOLS})
+        return _result(rid, {"tools": TOOLS, "ttlMs": 3600000, "cacheScope": "public"})
 
     if method == "tools/call":
         name = params.get("name")

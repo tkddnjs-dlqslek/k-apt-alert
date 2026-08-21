@@ -89,3 +89,28 @@ def test_discover_without_meta_is_still_answered():
     """Legacy 클라이언트가 보낸 server/discover에도 답해야 Dual-era 클라이언트 프로브가 동작."""
     resp = server.handle({"jsonrpc": "2.0", "id": 13, "method": "server/discover"})
     assert resp["result"]["supportedVersions"] == ["2026-07-28"]
+
+
+def test_every_result_has_result_type_and_server_info():
+    for msg in (LEGACY_INIT,
+                {"jsonrpc": "2.0", "id": 20, "method": "tools/list"},
+                _modern(21, "tools/list"),
+                _modern(22, "server/discover")):
+        r = server.handle(msg)["result"]
+        assert r["resultType"] == "complete", msg["method"]
+        assert r["_meta"]["io.modelcontextprotocol/serverInfo"] == server.SERVER_INFO, msg["method"]
+
+
+def test_tools_list_is_cacheable_and_deterministic():
+    a = server.handle(_modern(30, "tools/list"))["result"]
+    b = server.handle(_modern(31, "tools/list"))["result"]
+    assert a["ttlMs"] == 3600000 and a["cacheScope"] == "public"
+    assert [t["name"] for t in a["tools"]] == [t["name"] for t in b["tools"]]
+
+
+def test_tool_error_result_keeps_is_error_and_result_type(monkeypatch):
+    def boom(a):
+        raise RuntimeError("x")
+    monkeypatch.setitem(server.HANDLERS, "list_categories", boom)
+    r = server.handle(_modern(40, "tools/call", name="list_categories", arguments={}))["result"]
+    assert r["isError"] is True and r["resultType"] == "complete"
