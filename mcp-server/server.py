@@ -2,6 +2,8 @@
 """k-apt-alert MCP 서버 — 의존성 0개 (Python 표준 라이브러리만).
 
 Render에 떠 있는 FastAPI 프록시(REST)를 MCP(stdio, JSON-RPC 2.0)로 감싼다.
+Dual-era: MCP 2026-07-28(Modern, 요청별 _meta 버전·capabilities, server/discover)과
+2025-11-25 이전(Legacy, initialize 핸드셰이크)을 한 프로세스에서 동시에 처리한다.
 Claude Code 플러그인이 .mcp.json으로 이 서버를 stdio 기동한다.
 
 왜 SDK(pip install mcp) 안 쓰고 stdlib만? — 어떤 Python 3.8+ 환경에서도
@@ -32,7 +34,7 @@ import urllib.request
 PROXY = os.environ.get("KAPT_PROXY_URL", "https://k-apt-alert-proxy.onrender.com").rstrip("/")
 TIMEOUT = int(os.environ.get("KAPT_TIMEOUT", "180"))
 SERVER_NAME = "k-apt-alert"
-SERVER_VERSION = "1.0.0"
+SERVER_VERSION = "1.1.0"
 DEFAULT_PROTOCOL = "2025-06-18"
 UA = f"{SERVER_NAME}-mcp/{SERVER_VERSION}"
 
