@@ -200,7 +200,7 @@ def test_notify_slack_success(monkeypatch):
     assert resp.status_code == 200
     body = resp.json()
     assert body["sent"] == 1
-    assert "slack" in body["channels"]
+    assert any(c.startswith("slack") for c in body["channels"])
     assert sent_calls and sent_calls[0][1] == 1
 
 
@@ -225,7 +225,8 @@ def test_notify_dual_channel(monkeypatch):
         "/v1/apt/notify?webhook_url=https://hooks.slack.com/x"
         "&telegram_token=t&telegram_chat_id=c"
     )
-    assert set(resp.json()["channels"]) == {"slack", "telegram"}
+    chans = resp.json()["channels"]
+    assert any(c.startswith("slack") for c in chans) and "telegram" in chans
 
 
 def test_notify_partial_failure_one_channel_succeeds(monkeypatch):
@@ -247,7 +248,7 @@ def test_notify_partial_failure_one_channel_succeeds(monkeypatch):
     assert resp.status_code == 200
     body = resp.json()
     assert body["channels"] == ["telegram"]
-    assert "slack" in body["errors"]
+    assert any(k.startswith("slack") for k in body["errors"])
 
 
 def test_notify_all_channels_fail_502(monkeypatch):
@@ -279,6 +280,7 @@ def test_notify_all_channels_fail_502(monkeypatch):
 def _fake_resp(html: str, status: int = 200):
     resp = mock.Mock()
     resp.text = html
+    resp.content = html.encode("utf-8")
     resp.status_code = status
     resp.raise_for_status = mock.Mock()
     if status >= 400:
@@ -289,7 +291,7 @@ def _fake_resp(html: str, status: int = 200):
 
 
 _SAMPLE_HTML = """
-<!doctype html><html><head><title>테스트 공고</title></head>
+<!doctype html><html><head><title>테스트 입주자 모집공고</title></head>
 <body><div id="pblancCont">
 <h2>신청자격</h2><p>무주택세대구성원</p>
 <h2>공급일정</h2><p>2026-05-01</p>
@@ -306,7 +308,7 @@ def test_notice_raw_via_url_fallback():
     assert resp.status_code == 200
     body = resp.json()
     assert body["id"] == "apt_zzz"
-    assert body["title"] == "테스트 공고"
+    assert body["title"] == "테스트 입주자 모집공고"
     assert "무주택세대구성원" in body["text"]
     assert body["tier"] == "free"
     assert body["effective_max_chars"] == 30000

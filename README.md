@@ -290,7 +290,7 @@ curl -X POST "https://k-apt-alert-proxy.onrender.com/v1/apt/notify?webhook_url=.
 - [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json) — `/plugin marketplace add`로 설치 가능하게
 - [`skills/korea-apt-alert/SKILL.md`](skills/korea-apt-alert/SKILL.md) — **스킬 본문 (단일 소스)**: 전체 워크플로우, 프로필 스키마, 자격 매칭, 가점 계산, Top 3 추천, D-day, 인접 지역 확장 등
 - [`agents/apt-eligibility.md`](agents/apt-eligibility.md) — 가점·자격 판별 전담 서브에이전트 (결정론 계산은 `/v1/apt/score` 위임)
-- [`mcp-server/server.py`](mcp-server/server.py) — 프록시를 MCP(stdio)로 노출하는 의존성 0 서버. 툴 7종 (search_announcements·list_categories·score_profile·get_notice_raw·get_changes·send_notification·get_competition)
+- [`mcp-server/server.py`](mcp-server/server.py) — 프록시를 MCP(stdio)로 노출하는 의존성 0 서버. 툴 7종 (search_announcements·list_categories·score_profile·get_notice_raw·get_changes·send_notification·get_competition). MCP 스펙 2026-07-28(stateless, `server/discover`)과 기존 `initialize` 핸드셰이크를 모두 지원하는 dual-era 구현. 테스트: `cd mcp-server && python -m pytest -q`
 - [`.mcp.json`](.mcp.json) — MCP 서버 기동 설정
 
 ### 프록시 서버 (운영자가 배포)
