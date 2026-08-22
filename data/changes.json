@@ -1,6 +1,30 @@
 {
   "changes": [
     {
+      "id": "opt_2026940172",
+      "type": "removed",
+      "detected_at": "2026-08-22",
+      "name": "의정부역 센트럴 아이파크 (3차)",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940172&pblancNo=2026940172"
+    },
+    {
+      "id": "2026000382",
+      "type": "removed",
+      "detected_at": "2026-08-22",
+      "name": "두산위브더제니스 부천",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000382&pblancNo=2026000382"
+    },
+    {
+      "id": "opt_2026940174",
+      "type": "removed",
+      "detected_at": "2026-08-22",
+      "name": "서수원 에피트 센트럴마크(M2BL)(2차)",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940174&pblancNo=2026940174"
+    },
+    {
       "id": "oft_2026950072",
       "type": "new",
       "detected_at": "2026-08-18",
@@ -1831,7 +1855,7 @@
       "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=307016&multi_itm_seq=2"
     }
   ],
-  "updated_at": "2026-08-21T23:29:53Z",
+  "updated_at": "2026-08-22T23:25:59Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
