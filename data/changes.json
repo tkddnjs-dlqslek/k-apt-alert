@@ -1675,67 +1675,9 @@
       "name": "역북 서희스타힐스 프라임시티(조합원 취소분)",
       "region": "경기",
       "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000327&pblancNo=2026000327"
-    },
-    {
-      "id": "2026000295",
-      "type": "new",
-      "detected_at": "2026-07-28",
-      "name": "아산테크노밸리 더원 7차 (Ab4BL)",
-      "region": "충남",
-      "district": "아산시",
-      "house_category": "APT",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000295&pblancNo=2026000295"
-    },
-    {
-      "id": "rem_2026910191",
-      "type": "removed",
-      "detected_at": "2026-07-28",
-      "name": "힐스테이트 양산더스카이 1단지",
-      "region": "경남",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910191&pblancNo=2026910191"
-    },
-    {
-      "id": "rem_2026910195",
-      "type": "removed",
-      "detected_at": "2026-07-28",
-      "name": "아산배방(2-A13BL) 금강펜테리움 센트럴파크",
-      "region": "충남",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910195&pblancNo=2026910195"
-    },
-    {
-      "id": "rem_2026930024",
-      "type": "removed",
-      "detected_at": "2026-07-28",
-      "name": "e편한세상 강동 프레스티지원",
-      "region": "서울",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026930024&pblancNo=2026930024"
-    },
-    {
-      "id": "opt_2026940157",
-      "type": "removed",
-      "detected_at": "2026-07-28",
-      "name": "해링턴 플레이스 노원 센트럴",
-      "region": "서울",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940157&pblancNo=2026940157"
-    },
-    {
-      "id": "rem_2026910198",
-      "type": "removed",
-      "detected_at": "2026-07-28",
-      "name": "판교TH212",
-      "region": "경기",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910198&pblancNo=2026910198"
-    },
-    {
-      "id": "rem_2026910192",
-      "type": "removed",
-      "detected_at": "2026-07-28",
-      "name": "힐스테이트 양산더스카이 2단지",
-      "region": "경남",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910192&pblancNo=2026910192"
     }
   ],
-  "updated_at": "2026-08-25T23:27:22Z",
+  "updated_at": "2026-08-28T06:51:36Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
