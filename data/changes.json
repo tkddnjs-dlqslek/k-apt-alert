@@ -1,6 +1,110 @@
 {
   "changes": [
     {
+      "id": "sh_309403",
+      "type": "new",
+      "detected_at": "2026-08-29",
+      "name": "2026년 2차 장기미임대 매입임대주택 입주자모집공고(2026. 8. 28.)",
+      "region": "서울",
+      "district": "",
+      "house_category": "SH 공공주택",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=309403&multi_itm_seq=2"
+    },
+    {
+      "id": "rem_2026930030",
+      "type": "new",
+      "detected_at": "2026-08-29",
+      "name": "제일풍경채 검단Ⅳ",
+      "region": "인천",
+      "district": "검단구",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026930030&pblancNo=2026930030"
+    },
+    {
+      "id": "opt_2026940184",
+      "type": "new",
+      "detected_at": "2026-08-29",
+      "name": "더샵 분당센트로(5차)",
+      "region": "경기",
+      "district": "분당구",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940184&pblancNo=2026940184"
+    },
+    {
+      "id": "rem_2026910225",
+      "type": "new",
+      "detected_at": "2026-08-29",
+      "name": "의왕역 SK VIEW",
+      "region": "경기",
+      "district": "의왕시",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910225&pblancNo=2026910225"
+    },
+    {
+      "id": "sh_309337",
+      "type": "new",
+      "detected_at": "2026-08-29",
+      "name": "2026년 2차 행복주택 입주자 모집공고 (2026. 8. 28. 공고)",
+      "region": "서울",
+      "district": "",
+      "house_category": "SH 공공주택",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=309337&multi_itm_seq=2"
+    },
+    {
+      "id": "rem_2026930029",
+      "type": "new",
+      "detected_at": "2026-08-29",
+      "name": "세종 한신더휴 리저브Ⅱ(행정중심복합도시 1-5생활권 H5블록) [한뜰마을4단지]",
+      "region": "세종",
+      "district": "",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026930029&pblancNo=2026930029"
+    },
+    {
+      "id": "2026000399",
+      "type": "new",
+      "detected_at": "2026-08-29",
+      "name": "브라운스톤 월곡 센트럴",
+      "region": "서울",
+      "district": "성북구",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000399&pblancNo=2026000399"
+    },
+    {
+      "id": "2026000401",
+      "type": "new",
+      "detected_at": "2026-08-29",
+      "name": "문수데시앙2단지 공가세대 일반공급",
+      "region": "울산",
+      "district": "울주군",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000401&pblancNo=2026000401"
+    },
+    {
+      "id": "sh_308944",
+      "type": "removed",
+      "detected_at": "2026-08-29",
+      "name": "제8차 장기전세주택2(미리내집) 입주자 모집 공고(2026. 8. 21.)",
+      "region": "서울",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=308944&multi_itm_seq=2"
+    },
+    {
+      "id": "sh_309073",
+      "type": "removed",
+      "detected_at": "2026-08-29",
+      "name": "성동구 마장 행복마을 사회적경제조직 종사자(수요자맞춤형) 추가 입주자 모집 공고",
+      "region": "서울",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=309073&multi_itm_seq=2"
+    },
+    {
+      "id": "sh_308971",
+      "type": "removed",
+      "detected_at": "2026-08-29",
+      "name": "2026년 일반주택형 미리내집(공공한옥) 잔여세대 입주자 모집공고(2026. 8. 24.)",
+      "region": "서울",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=308971&multi_itm_seq=2"
+    },
+    {
       "id": "rem_2026910222",
       "type": "new",
       "detected_at": "2026-08-25",
@@ -1561,123 +1665,9 @@
       "name": "월계 중흥S-클래스 리비에르",
       "region": "서울",
       "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000355&pblancNo=2026000355"
-    },
-    {
-      "id": "ppr_2026850041",
-      "type": "new",
-      "detected_at": "2026-07-29",
-      "name": "부경경마공원역 대방 디에트르 더리버(AP1BL)",
-      "region": "부산",
-      "district": "강서구",
-      "house_category": "공공지원민간임대",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026850041&pblancNo=2026850041&houseSecd=03"
-    },
-    {
-      "id": "rem_2026910200",
-      "type": "new",
-      "detected_at": "2026-07-29",
-      "name": "한화포레나 안산고잔2차",
-      "region": "경기",
-      "district": "단원구",
-      "house_category": "APT잔여세대",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910200&pblancNo=2026910200"
-    },
-    {
-      "id": "sh_307643",
-      "type": "new",
-      "detected_at": "2026-07-29",
-      "name": "[정정]2026년 지원주택 입주자 모집공고(2026. 7. 24.)",
-      "region": "서울",
-      "district": "",
-      "house_category": "SH 공공주택",
-      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=307643&multi_itm_seq=2"
-    },
-    {
-      "id": "oft_2026950067",
-      "type": "new",
-      "detected_at": "2026-07-29",
-      "name": "신대방역 더하이브퍼스트",
-      "region": "서울",
-      "district": "관악구",
-      "house_category": "오피스텔/도시형",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950067&pblancNo=2026950067&houseSecd=02"
-    },
-    {
-      "id": "rem_2026910193",
-      "type": "new",
-      "detected_at": "2026-07-29",
-      "name": "김해 신문 센트럴 아이파크",
-      "region": "경남",
-      "district": "김해시",
-      "house_category": "APT잔여세대",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910193&pblancNo=2026910193"
-    },
-    {
-      "id": "sh_307101",
-      "type": "removed",
-      "detected_at": "2026-07-29",
-      "name": "강북구 예술인마을(수요자맞춤형) 추가 입주자 모집 공고",
-      "region": "서울",
-      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=307101&multi_itm_seq=2"
-    },
-    {
-      "id": "rem_2026910194",
-      "type": "removed",
-      "detected_at": "2026-07-29",
-      "name": "아크로 리버스카이",
-      "region": "서울",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910194&pblancNo=2026910194"
-    },
-    {
-      "id": "opt_2026940158",
-      "type": "removed",
-      "detected_at": "2026-07-29",
-      "name": "트리븐 서산",
-      "region": "충남",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940158&pblancNo=2026940158"
-    },
-    {
-      "id": "sh_307469",
-      "type": "removed",
-      "detected_at": "2026-07-29",
-      "name": "2026년 지원주택 입주자 모집공고(2026. 7. 24.)",
-      "region": "서울",
-      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=307469&multi_itm_seq=2"
-    },
-    {
-      "id": "rem_2026910197",
-      "type": "removed",
-      "detected_at": "2026-07-29",
-      "name": "상무 양우내안애 퍼스트힐(조합원 취소분)",
-      "region": "광주",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910197&pblancNo=2026910197"
-    },
-    {
-      "id": "opt_2026940153",
-      "type": "removed",
-      "detected_at": "2026-07-29",
-      "name": "수원이목지구 대방 디에트르 더 리체Ⅱ(A3BL) (18차)",
-      "region": "경기",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940153&pblancNo=2026940153"
-    },
-    {
-      "id": "opt_2026940152",
-      "type": "removed",
-      "detected_at": "2026-07-29",
-      "name": "리아츠 더 인천(21차)",
-      "region": "인천",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940152&pblancNo=2026940152"
-    },
-    {
-      "id": "2026000327",
-      "type": "removed",
-      "detected_at": "2026-07-29",
-      "name": "역북 서희스타힐스 프라임시티(조합원 취소분)",
-      "region": "경기",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000327&pblancNo=2026000327"
     }
   ],
-  "updated_at": "2026-08-28T06:51:36Z",
+  "updated_at": "2026-08-29T04:06:51Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
