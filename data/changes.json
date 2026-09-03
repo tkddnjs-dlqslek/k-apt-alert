@@ -1,6 +1,102 @@
 {
   "changes": [
     {
+      "id": "2026000403",
+      "type": "new",
+      "detected_at": "2026-09-03",
+      "name": "그랑라크 에일린의 뜰",
+      "region": "울산",
+      "district": "남구",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000403&pblancNo=2026000403"
+    },
+    {
+      "id": "sh_309699",
+      "type": "new",
+      "detected_at": "2026-09-03",
+      "name": "[토지지원 사회주택]함께주택4호 401-1호 입주자 모집 공고",
+      "region": "서울",
+      "district": "",
+      "house_category": "SH 공공주택",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=309699&multi_itm_seq=2"
+    },
+    {
+      "id": "sh_309717",
+      "type": "new",
+      "detected_at": "2026-09-03",
+      "name": "NEW [토지지원 사회주택]유니버설디자인하우스_창동 입주자 모집 공고",
+      "region": "서울",
+      "district": "도봉구",
+      "house_category": "SH 공공주택",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=309717&multi_itm_seq=2"
+    },
+    {
+      "id": "2026000419",
+      "type": "new",
+      "detected_at": "2026-09-03",
+      "name": "올 뉴 챔피언스시티 1차",
+      "region": "광주",
+      "district": "북구",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000419&pblancNo=2026000419"
+    },
+    {
+      "id": "rem_2026910225",
+      "type": "removed",
+      "detected_at": "2026-09-03",
+      "name": "의왕역 SK VIEW",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910225&pblancNo=2026910225"
+    },
+    {
+      "id": "rem_2026930030",
+      "type": "removed",
+      "detected_at": "2026-09-03",
+      "name": "제일풍경채 검단Ⅳ",
+      "region": "인천",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026930030&pblancNo=2026930030"
+    },
+    {
+      "id": "2026000404",
+      "type": "removed",
+      "detected_at": "2026-09-03",
+      "name": "검암역 푸르지오 프라베뉴 (B-1BL) 공공분양주택",
+      "region": "인천",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000404&pblancNo=2026000404"
+    },
+    {
+      "id": "2026000388",
+      "type": "removed",
+      "detected_at": "2026-09-03",
+      "name": "시티오씨엘 9단지 오션파크뷰",
+      "region": "인천",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000388&pblancNo=2026000388"
+    },
+    {
+      "id": "rem_2026930029",
+      "type": "removed",
+      "detected_at": "2026-09-03",
+      "name": "세종 한신더휴 리저브Ⅱ(행정중심복합도시 1-5생활권 H5블록) [한뜰마을4단지]",
+      "region": "세종",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026930029&pblancNo=2026930029"
+    },
+    {
+      "id": "sh_309403",
+      "type": "removed",
+      "detected_at": "2026-09-03",
+      "name": "2026년 2차 장기미임대 매입임대주택 입주자모집공고(2026. 8. 28.)",
+      "region": "서울",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=309403&multi_itm_seq=2"
+    },
+    {
+      "id": "oft_2026950079",
+      "type": "removed",
+      "detected_at": "2026-09-03",
+      "name": "동탄2신도시 동탄역 디에트르 퍼스티지",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950079&pblancNo=2026950079&houseSecd=02"
+    },
+    {
       "id": "sh_309403",
       "type": "new",
       "detected_at": "2026-08-29",
@@ -1121,7 +1217,7 @@
       "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910193&pblancNo=2026910193"
     }
   ],
-  "updated_at": "2026-09-02T00:56:34Z",
+  "updated_at": "2026-09-03T01:03:32Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
