@@ -1,6 +1,108 @@
 {
   "changes": [
     {
+      "id": "sh_310300",
+      "type": "new",
+      "detected_at": "2026-09-15",
+      "name": "NEW [토지임대부 사회주택] 옥류서원 입주자 모집 공고문",
+      "region": "서울",
+      "district": "",
+      "house_category": "SH 공공주택",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=310300&multi_itm_seq=2"
+    },
+    {
+      "id": "opt_2026940200",
+      "type": "new",
+      "detected_at": "2026-09-15",
+      "name": "이천자이 더 레브(2차)",
+      "region": "경기",
+      "district": "이천시",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940200&pblancNo=2026940200"
+    },
+    {
+      "id": "ppr_2026850048",
+      "type": "new",
+      "detected_at": "2026-09-15",
+      "name": "의왕청계역 시티프라디움 디하모니",
+      "region": "경기",
+      "district": "의왕시",
+      "house_category": "공공지원민간임대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026850048&pblancNo=2026850048&houseSecd=03"
+    },
+    {
+      "id": "rem_2026910235",
+      "type": "removed",
+      "detected_at": "2026-09-15",
+      "name": "청계 노르웨이숲(12차)",
+      "region": "서울",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910235&pblancNo=2026910235"
+    },
+    {
+      "id": "rem_2026910234",
+      "type": "removed",
+      "detected_at": "2026-09-15",
+      "name": "두산위브더제니스 대연",
+      "region": "부산",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910234&pblancNo=2026910234"
+    },
+    {
+      "id": "oft_2026950080",
+      "type": "removed",
+      "detected_at": "2026-09-15",
+      "name": "힐스테이트 송파더그리드",
+      "region": "서울",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950080&pblancNo=2026950080&houseSecd=02"
+    },
+    {
+      "id": "rem_2026910237",
+      "type": "removed",
+      "detected_at": "2026-09-15",
+      "name": "제일풍경채 검단Ⅳ",
+      "region": "인천",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910237&pblancNo=2026910237"
+    },
+    {
+      "id": "opt_2026940191",
+      "type": "removed",
+      "detected_at": "2026-09-15",
+      "name": "고덕신도시 아테라 A-63블록 공공분양주택",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940191&pblancNo=2026940191"
+    },
+    {
+      "id": "rem_2026910232",
+      "type": "removed",
+      "detected_at": "2026-09-15",
+      "name": "역북 서희스타힐스 프라임시티(조합원 취소분)",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910232&pblancNo=2026910232"
+    },
+    {
+      "id": "rem_2026910227",
+      "type": "removed",
+      "detected_at": "2026-09-15",
+      "name": "한강 푸르지오 리버프론트",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910227&pblancNo=2026910227"
+    },
+    {
+      "id": "opt_2026940189",
+      "type": "removed",
+      "detected_at": "2026-09-15",
+      "name": "이천 휴먼빌 클래스원",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940189&pblancNo=2026940189"
+    },
+    {
+      "id": "rem_2026910233",
+      "type": "removed",
+      "detected_at": "2026-09-15",
+      "name": "드파인 아르티아(2차)",
+      "region": "서울",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910233&pblancNo=2026910233"
+    },
+    {
       "id": "rem_2026910231",
       "type": "new",
       "detected_at": "2026-09-05",
@@ -623,17 +725,9 @@
       "name": "[청년형] 특화형 매입임대주택(강동구) 입주자 모집 공고(운영기관 : 마을과집 협동조합)",
       "region": "서울",
       "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=308379&multi_itm_seq=2"
-    },
-    {
-      "id": "ppr_2026850039",
-      "type": "removed",
-      "detected_at": "2026-08-15",
-      "name": "성동스페이스",
-      "region": "서울",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026850039&pblancNo=2026850039&houseSecd=03"
     }
   ],
-  "updated_at": "2026-09-14T00:52:36Z",
+  "updated_at": "2026-09-15T01:18:58Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
