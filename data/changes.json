@@ -1,6 +1,148 @@
 {
   "changes": [
     {
+      "id": "rem_2026930032",
+      "type": "new",
+      "detected_at": "2026-09-16",
+      "name": "태화강 에피트",
+      "region": "울산",
+      "district": "울주군",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026930032&pblancNo=2026930032"
+    },
+    {
+      "id": "rem_2026910240",
+      "type": "new",
+      "detected_at": "2026-09-16",
+      "name": "아야진 라메르 데시앙",
+      "region": "강원",
+      "district": "고성군",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910240&pblancNo=2026910240"
+    },
+    {
+      "id": "opt_2026940206",
+      "type": "new",
+      "detected_at": "2026-09-16",
+      "name": "청계백상앨리츠(3차)",
+      "region": "서울",
+      "district": "성동구",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940206&pblancNo=2026940206"
+    },
+    {
+      "id": "opt_2026940201",
+      "type": "new",
+      "detected_at": "2026-09-16",
+      "name": "이천 중리지구 B3블록 금성백조 예미지",
+      "region": "경기",
+      "district": "중리지구",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940201&pblancNo=2026940201"
+    },
+    {
+      "id": "opt_2026940193",
+      "type": "new",
+      "detected_at": "2026-09-16",
+      "name": "밀양 수자인 더퍼스트 2단지 공공분양주택",
+      "region": "경남",
+      "district": "부북지구",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940193&pblancNo=2026940193"
+    },
+    {
+      "id": "rem_2026910242",
+      "type": "removed",
+      "detected_at": "2026-09-16",
+      "name": "더샵 송도마리나베이(조합원 자격상실세대 3회차)",
+      "region": "인천",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910242&pblancNo=2026910242"
+    },
+    {
+      "id": "sh_310037",
+      "type": "removed",
+      "detected_at": "2026-09-16",
+      "name": "[토지지원 사회주택]함께주택4호 401-3호 입주자 모집 공고",
+      "region": "서울",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=310037&multi_itm_seq=2"
+    },
+    {
+      "id": "rem_2026910238",
+      "type": "removed",
+      "detected_at": "2026-09-16",
+      "name": "북오산자이 드포레",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910238&pblancNo=2026910238"
+    },
+    {
+      "id": "opt_2026940199",
+      "type": "removed",
+      "detected_at": "2026-09-16",
+      "name": "인하대역 수자인 로이센트(4차)",
+      "region": "인천",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940199&pblancNo=2026940199"
+    },
+    {
+      "id": "rem_2026910239",
+      "type": "removed",
+      "detected_at": "2026-09-16",
+      "name": "더샵 트리센트",
+      "region": "부산",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910239&pblancNo=2026910239"
+    },
+    {
+      "id": "oft_2026950081",
+      "type": "removed",
+      "detected_at": "2026-09-16",
+      "name": "테라스99 동탄",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950081&pblancNo=2026950081&houseSecd=02"
+    },
+    {
+      "id": "ppr_2026850047",
+      "type": "removed",
+      "detected_at": "2026-09-16",
+      "name": "오산세교2지구 A5BL 우미 린 포레아시티",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026850047&pblancNo=2026850047&houseSecd=03"
+    },
+    {
+      "id": "opt_2026940190",
+      "type": "removed",
+      "detected_at": "2026-09-16",
+      "name": "아산자이 그랜드파크 2단지(2차)",
+      "region": "충남",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940190&pblancNo=2026940190"
+    },
+    {
+      "id": "sh_310300",
+      "type": "updated",
+      "detected_at": "2026-09-16",
+      "name": "[토지임대부 사회주택] 옥류서원 입주자 모집 공고문",
+      "region": "서울",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=310300&multi_itm_seq=2",
+      "field_changes": {
+        "name": {
+          "before": "NEW [토지임대부 사회주택] 옥류서원 입주자 모집 공고문",
+          "after": "[토지임대부 사회주택] 옥류서원 입주자 모집 공고문"
+        }
+      }
+    },
+    {
+      "id": "opt_2026940200",
+      "type": "updated",
+      "detected_at": "2026-09-16",
+      "name": "이천자이 더 레브(2차)",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940200&pblancNo=2026940200",
+      "field_changes": {
+        "size": {
+          "before": "대형",
+          "after": ""
+        }
+      }
+    },
+    {
       "id": "sh_310300",
       "type": "new",
       "detected_at": "2026-09-15",
@@ -727,7 +869,7 @@
       "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=308379&multi_itm_seq=2"
     }
   ],
-  "updated_at": "2026-09-15T01:18:58Z",
+  "updated_at": "2026-09-16T01:13:17Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
