@@ -1,6 +1,108 @@
 {
   "changes": [
     {
+      "id": "sh_310575",
+      "type": "new",
+      "detected_at": "2026-09-22",
+      "name": "[토지임대부 사회주택] 쌍문생활 302호 입주자 모집 공고문",
+      "region": "서울",
+      "district": "도봉구",
+      "house_category": "SH 공공주택",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=310575&multi_itm_seq=2"
+    },
+    {
+      "id": "opt_2026940212",
+      "type": "new",
+      "detected_at": "2026-09-22",
+      "name": "리아츠 더 인천(23차)",
+      "region": "인천",
+      "district": "제물포구",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940212&pblancNo=2026940212"
+    },
+    {
+      "id": "opt_2026940209",
+      "type": "new",
+      "detected_at": "2026-09-22",
+      "name": "중앙하이츠 갈산역 센트럴",
+      "region": "인천",
+      "district": "부평구",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940209&pblancNo=2026940209"
+    },
+    {
+      "id": "opt_2026940208",
+      "type": "new",
+      "detected_at": "2026-09-22",
+      "name": "부천역 에피트 어바닉(4차)",
+      "region": "경기",
+      "district": "원미구",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940208&pblancNo=2026940208"
+    },
+    {
+      "id": "ppr_2026850049",
+      "type": "new",
+      "detected_at": "2026-09-22",
+      "name": "부경경마공원역 대방 디에트르 더리버(AP1BL)",
+      "region": "부산",
+      "district": "강서구",
+      "house_category": "공공지원민간임대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026850049&pblancNo=2026850049&houseSecd=03"
+    },
+    {
+      "id": "rem_2026930035",
+      "type": "new",
+      "detected_at": "2026-09-22",
+      "name": "더샵 청주그리니티",
+      "region": "충북",
+      "district": "서원구",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026930035&pblancNo=2026930035"
+    },
+    {
+      "id": "opt_2026940203",
+      "type": "new",
+      "detected_at": "2026-09-22",
+      "name": "회천중앙역 파라곤",
+      "region": "경기",
+      "district": "회천지구",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940203&pblancNo=2026940203"
+    },
+    {
+      "id": "rem_2026910246",
+      "type": "removed",
+      "detected_at": "2026-09-22",
+      "name": "용인반도체클러스터 동일하이빌 파크밸리(D1-1블록)",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910246&pblancNo=2026910246"
+    },
+    {
+      "id": "ppr_2026850048",
+      "type": "removed",
+      "detected_at": "2026-09-22",
+      "name": "의왕청계역 시티프라디움 디하모니",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026850048&pblancNo=2026850048&houseSecd=03"
+    },
+    {
+      "id": "rem_2026910241",
+      "type": "removed",
+      "detected_at": "2026-09-22",
+      "name": "두산위브더제니스 부천",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910241&pblancNo=2026910241"
+    },
+    {
+      "id": "rem_2026910240",
+      "type": "removed",
+      "detected_at": "2026-09-22",
+      "name": "아야진 라메르 데시앙",
+      "region": "강원",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910240&pblancNo=2026910240"
+    },
+    {
       "id": "rem_2026930032",
       "type": "new",
       "detected_at": "2026-09-16",
@@ -785,33 +887,9 @@
       "name": "2026년 1~2인가구를 위한 도시형생활주택(건설형원룸) 잔여세대 입주자 모집공고(26. 8. 5.) 1순위 청약경쟁률 및 2순위 청약안내",
       "region": "서울",
       "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=308828&multi_itm_seq=2"
-    },
-    {
-      "id": "opt_2026940172",
-      "type": "removed",
-      "detected_at": "2026-08-22",
-      "name": "의정부역 센트럴 아이파크 (3차)",
-      "region": "경기",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940172&pblancNo=2026940172"
-    },
-    {
-      "id": "2026000382",
-      "type": "removed",
-      "detected_at": "2026-08-22",
-      "name": "두산위브더제니스 부천",
-      "region": "경기",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000382&pblancNo=2026000382"
-    },
-    {
-      "id": "opt_2026940174",
-      "type": "removed",
-      "detected_at": "2026-08-22",
-      "name": "서수원 에피트 센트럴마크(M2BL)(2차)",
-      "region": "경기",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940174&pblancNo=2026940174"
     }
   ],
-  "updated_at": "2026-09-21T00:56:10Z",
+  "updated_at": "2026-09-22T01:32:54Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
