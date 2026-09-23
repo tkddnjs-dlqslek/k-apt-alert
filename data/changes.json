@@ -1,6 +1,58 @@
 {
   "changes": [
     {
+      "id": "sh_310629",
+      "type": "new",
+      "detected_at": "2026-09-23",
+      "name": "[토지임대부 사회주택] 옥류서원 입주자 모집 공고문",
+      "region": "서울",
+      "district": "",
+      "house_category": "SH 공공주택",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=310629&multi_itm_seq=2"
+    },
+    {
+      "id": "rem_2026910248",
+      "type": "new",
+      "detected_at": "2026-09-23",
+      "name": "제일풍경채 첨단3지구(A6BL)",
+      "region": "광주",
+      "district": "북구",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910248&pblancNo=2026910248"
+    },
+    {
+      "id": "rem_2026910236",
+      "type": "removed",
+      "detected_at": "2026-09-23",
+      "name": "철산자이 더 헤리티지",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910236&pblancNo=2026910236"
+    },
+    {
+      "id": "oft_2026950084",
+      "type": "removed",
+      "detected_at": "2026-09-23",
+      "name": "호반써밋 풍무Ⅱ",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950084&pblancNo=2026950084&houseSecd=02"
+    },
+    {
+      "id": "sh_310258",
+      "type": "removed",
+      "detected_at": "2026-09-23",
+      "name": "2026년 2차 희망하우징(공공기숙사) 입주자 모집공고(2026. 9. 17.)",
+      "region": "서울",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=310258&multi_itm_seq=2"
+    },
+    {
+      "id": "rem_2026910244",
+      "type": "removed",
+      "detected_at": "2026-09-23",
+      "name": "더 리치먼드 미아(3차)",
+      "region": "서울",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910244&pblancNo=2026910244"
+    },
+    {
       "id": "sh_310575",
       "type": "new",
       "detected_at": "2026-09-22",
@@ -889,7 +941,7 @@
       "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=308828&multi_itm_seq=2"
     }
   ],
-  "updated_at": "2026-09-22T01:32:54Z",
+  "updated_at": "2026-09-23T01:22:26Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
