@@ -1,6 +1,16 @@
 {
   "changes": [
     {
+      "id": "sh_310672",
+      "type": "new",
+      "detected_at": "2026-09-28",
+      "name": "NEW [토지지원 사회주택]유니버설디자인하우스_망우 입주자 모집 공고",
+      "region": "서울",
+      "district": "중랑구",
+      "house_category": "SH 공공주택",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=310672&multi_itm_seq=2"
+    },
+    {
       "id": "rem_2026930036",
       "type": "new",
       "detected_at": "2026-09-24",
@@ -971,7 +981,7 @@
       "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=308971&multi_itm_seq=2"
     }
   ],
-  "updated_at": "2026-09-27T01:15:02Z",
+  "updated_at": "2026-09-28T01:30:46Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
