@@ -1,6 +1,130 @@
 {
   "changes": [
     {
+      "id": "rem_2026910281",
+      "type": "new",
+      "detected_at": "2026-11-03",
+      "name": "빌리브센트하이(2차)",
+      "region": "경기",
+      "district": "남양주시",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910281&pblancNo=2026910281"
+    },
+    {
+      "id": "opt_2026940245",
+      "type": "new",
+      "detected_at": "2026-11-03",
+      "name": "고강휴먼빌",
+      "region": "경기",
+      "district": "오정구",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940245&pblancNo=2026940245"
+    },
+    {
+      "id": "sh_312658",
+      "type": "new",
+      "detected_at": "2026-11-03",
+      "name": "2027년 강남주거안심종합센터 희망돌보미(사무지원) 모집공고",
+      "region": "서울",
+      "district": "",
+      "house_category": "SH 공공주택",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=312658&multi_itm_seq=2"
+    },
+    {
+      "id": "ppr_2026850054",
+      "type": "new",
+      "detected_at": "2026-11-03",
+      "name": "부경경마공원역 대방 디에트르 더리버(AP1BL)",
+      "region": "부산",
+      "district": "강서구",
+      "house_category": "공공지원민간임대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026850054&pblancNo=2026850054&houseSecd=03"
+    },
+    {
+      "id": "opt_2026940246",
+      "type": "new",
+      "detected_at": "2026-11-03",
+      "name": "고촌센트럴자이(14차)",
+      "region": "경기",
+      "district": "김포시",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940246&pblancNo=2026940246"
+    },
+    {
+      "id": "rem_2026930043",
+      "type": "removed",
+      "detected_at": "2026-11-03",
+      "name": "과천 디에트르 퍼스티지(S2BL)",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026930043&pblancNo=2026930043"
+    },
+    {
+      "id": "rem_2026930042",
+      "type": "removed",
+      "detected_at": "2026-11-03",
+      "name": "파주 운정신도시 우미 린 더 센텀",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026930042&pblancNo=2026930042"
+    },
+    {
+      "id": "rem_2026910269",
+      "type": "removed",
+      "detected_at": "2026-11-03",
+      "name": "화서역 호수공원 아너스빌",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910269&pblancNo=2026910269"
+    },
+    {
+      "id": "rem_2026910275",
+      "type": "removed",
+      "detected_at": "2026-11-03",
+      "name": "더샵 분당하이스트",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910275&pblancNo=2026910275"
+    },
+    {
+      "id": "sh_312053",
+      "type": "updated",
+      "detected_at": "2026-11-03",
+      "name": "[청년형] 특화형 매입임대주택(구로구) 입주자 모집 공고(운영기관 : 마을과집 협동조합)",
+      "region": "서울",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=312053&multi_itm_seq=2",
+      "field_changes": {
+        "name": {
+          "before": "NEW [청년형] 특화형 매입임대주택(구로구) 입주자 모집 공고(운영기관 : 마을과집 협동조합)",
+          "after": "[청년형] 특화형 매입임대주택(구로구) 입주자 모집 공고(운영기관 : 마을과집 협동조합)"
+        }
+      }
+    },
+    {
+      "id": "sh_312601",
+      "type": "updated",
+      "detected_at": "2026-11-03",
+      "name": "2027년 양천영등포주거안심종합센터 희망돌보미(사무지원)모집공고",
+      "region": "서울",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=312601&multi_itm_seq=2",
+      "field_changes": {
+        "name": {
+          "before": "NEW 2027년 양천영등포주거안심종합센터 희망돌보미(사무지원)모집공고",
+          "after": "2027년 양천영등포주거안심종합센터 희망돌보미(사무지원)모집공고"
+        }
+      }
+    },
+    {
+      "id": "sh_312351",
+      "type": "updated",
+      "detected_at": "2026-11-03",
+      "name": "[토지지원 사회주택]유니버설디자인하우스_수락 입주자 모집 공고",
+      "region": "서울",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=312351&multi_itm_seq=2",
+      "field_changes": {
+        "name": {
+          "before": "NEW [토지지원 사회주택]유니버설디자인하우스_수락 입주자 모집 공고",
+          "after": "[토지지원 사회주택]유니버설디자인하우스_수락 입주자 모집 공고"
+        }
+      }
+    },
+    {
       "id": "sh_312325",
       "type": "new",
       "detected_at": "2026-10-29",
@@ -1045,7 +1169,7 @@
       }
     }
   ],
-  "updated_at": "2026-11-02T02:13:17Z",
+  "updated_at": "2026-11-03T03:54:45Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
