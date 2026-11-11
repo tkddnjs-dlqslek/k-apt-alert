@@ -1,6 +1,142 @@
 {
   "changes": [
     {
+      "id": "opt_2026940254",
+      "type": "new",
+      "detected_at": "2026-11-11",
+      "name": "의정부역 센트럴 아이파크(6차)",
+      "region": "경기",
+      "district": "의정부시",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940254&pblancNo=2026940254"
+    },
+    {
+      "id": "opt_2026940251",
+      "type": "new",
+      "detected_at": "2026-11-11",
+      "name": "해링턴플레이스 노원 센트럴(4차)",
+      "region": "서울",
+      "district": "노원구",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940251&pblancNo=2026940251"
+    },
+    {
+      "id": "rem_2026910284",
+      "type": "new",
+      "detected_at": "2026-11-11",
+      "name": "중동역 다채로움 더원",
+      "region": "경기",
+      "district": "소사구",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910284&pblancNo=2026910284"
+    },
+    {
+      "id": "gh_65302",
+      "type": "new",
+      "detected_at": "2026-11-11",
+      "name": "광교 A17블록 자연&센트레빌 지분적립형 분양주택 및 공공분양주택 입주자 모집공고",
+      "region": "경기",
+      "district": "양주시",
+      "house_category": "GH 공공주택",
+      "url": "https://www.gh.or.kr/gh/announcement-of-salerental001.do?mode=view&articleNo=65302"
+    },
+    {
+      "id": "sh_312903",
+      "type": "new",
+      "detected_at": "2026-11-11",
+      "name": "NEW [청년형] 특화형 매입임대주택 입주자 모집 공고(운영기관 : 한지붕 협동조합)",
+      "region": "서울",
+      "district": "",
+      "house_category": "SH 공공주택",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=312903&multi_itm_seq=2"
+    },
+    {
+      "id": "sh_313161",
+      "type": "new",
+      "detected_at": "2026-11-11",
+      "name": "NEW [토지임대부 사회주택] 옥류서원 입주자 모집 공고문",
+      "region": "서울",
+      "district": "",
+      "house_category": "SH 공공주택",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=313161&multi_itm_seq=2"
+    },
+    {
+      "id": "gh_65333",
+      "type": "new",
+      "detected_at": "2026-11-11",
+      "name": "안성공도 참아름 국민임대주택 예비입주자 모집공고문",
+      "region": "경기",
+      "district": "안성시",
+      "house_category": "GH 공공주택",
+      "url": "https://www.gh.or.kr/gh/announcement-of-salerental001.do?mode=view&articleNo=65333"
+    },
+    {
+      "id": "opt_2026940247",
+      "type": "new",
+      "detected_at": "2026-11-11",
+      "name": "수원이목지구 대방 디에트르 더 리체Ⅰ(A4BL)",
+      "region": "경기",
+      "district": "장안구",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940247&pblancNo=2026940247"
+    },
+    {
+      "id": "opt_2026940243",
+      "type": "removed",
+      "detected_at": "2026-11-11",
+      "name": "도안자이 센텀리체 2단지(2차)",
+      "region": "대전",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940243&pblancNo=2026940243"
+    },
+    {
+      "id": "opt_2026940244",
+      "type": "removed",
+      "detected_at": "2026-11-11",
+      "name": "해링턴플레이스 오룡역 (2차)",
+      "region": "대전",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940244&pblancNo=2026940244"
+    },
+    {
+      "id": "rem_2026910279",
+      "type": "removed",
+      "detected_at": "2026-11-11",
+      "name": "봉담자이 프라이드시티",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910279&pblancNo=2026910279"
+    },
+    {
+      "id": "rem_2026910282",
+      "type": "removed",
+      "detected_at": "2026-11-11",
+      "name": "광명 시티프라디움 에듀하임",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910282&pblancNo=2026910282"
+    },
+    {
+      "id": "ppr_2026850055",
+      "type": "removed",
+      "detected_at": "2026-11-11",
+      "name": "힐스테이트 회룡역파크뷰",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026850055&pblancNo=2026850055&houseSecd=03"
+    },
+    {
+      "id": "ppr_2026850054",
+      "type": "removed",
+      "detected_at": "2026-11-11",
+      "name": "부경경마공원역 대방 디에트르 더리버(AP1BL)",
+      "region": "부산",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026850054&pblancNo=2026850054&houseSecd=03"
+    },
+    {
+      "id": "opt_2026940242",
+      "type": "removed",
+      "detected_at": "2026-11-11",
+      "name": "도안자이 센텀리체 1단지(2차)",
+      "region": "대전",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940242&pblancNo=2026940242"
+    },
+    {
       "id": "rem_2026910281",
       "type": "new",
       "detected_at": "2026-11-03",
@@ -711,7 +847,7 @@
       "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000498&pblancNo=2026000498"
     }
   ],
-  "updated_at": "2026-11-10T04:33:49Z",
+  "updated_at": "2026-11-11T02:39:53Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
