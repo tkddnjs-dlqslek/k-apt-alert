@@ -1,6 +1,234 @@
 {
   "changes": [
     {
+      "id": "2026000598",
+      "type": "new",
+      "detected_at": "2026-11-21",
+      "name": "고창 데시앙 2블록(공공분양)",
+      "region": "전북",
+      "district": "고창군",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000598&pblancNo=2026000598"
+    },
+    {
+      "id": "2026000510",
+      "type": "new",
+      "detected_at": "2026-11-21",
+      "name": "연산역 수자인 센트리오",
+      "region": "부산",
+      "district": "연제구",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000510&pblancNo=2026000510"
+    },
+    {
+      "id": "oft_2026950097",
+      "type": "new",
+      "detected_at": "2026-11-21",
+      "name": "힐스테이트 오송레이크센트럴",
+      "region": "충북",
+      "district": "흥덕구",
+      "house_category": "오피스텔/도시형",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950097&pblancNo=2026950097&houseSecd=02"
+    },
+    {
+      "id": "opt_2026940258",
+      "type": "new",
+      "detected_at": "2026-11-21",
+      "name": "중앙하이츠 원종역(4차)",
+      "region": "경기",
+      "district": "오정구",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940258&pblancNo=2026940258"
+    },
+    {
+      "id": "opt_2026940264",
+      "type": "new",
+      "detected_at": "2026-11-21",
+      "name": "용인 고림 동문 디 이스트",
+      "region": "경기",
+      "district": "처인구",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940264&pblancNo=2026940264"
+    },
+    {
+      "id": "rem_2026910306",
+      "type": "new",
+      "detected_at": "2026-11-21",
+      "name": "광안센텀 비스타동원(조합원 취소분)",
+      "region": "부산",
+      "district": "수영구",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910306&pblancNo=2026910306"
+    },
+    {
+      "id": "2026000590",
+      "type": "new",
+      "detected_at": "2026-11-21",
+      "name": "두산위브 시그니처 광양",
+      "region": "전남",
+      "district": "광양시",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000590&pblancNo=2026000590"
+    },
+    {
+      "id": "rem_2026910298",
+      "type": "new",
+      "detected_at": "2026-11-21",
+      "name": "한양립스 에듀포레(조합원 취소분)",
+      "region": "광주",
+      "district": "광산구",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910298&pblancNo=2026910298"
+    },
+    {
+      "id": "2026000597",
+      "type": "new",
+      "detected_at": "2026-11-21",
+      "name": "고창 데시앙 3블록(공공분양)",
+      "region": "전북",
+      "district": "고창군",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000597&pblancNo=2026000597"
+    },
+    {
+      "id": "2026000591",
+      "type": "new",
+      "detected_at": "2026-11-21",
+      "name": "소사 휴먼빌",
+      "region": "경기",
+      "district": "소사구",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000591&pblancNo=2026000591"
+    },
+    {
+      "id": "opt_2026940259",
+      "type": "new",
+      "detected_at": "2026-11-21",
+      "name": "음성자이 센트럴시티",
+      "region": "충북",
+      "district": "음성군",
+      "house_category": "임의공급",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940259&pblancNo=2026940259"
+    },
+    {
+      "id": "oft_2026950089",
+      "type": "new",
+      "detected_at": "2026-11-21",
+      "name": "청라 아크원 푸르지오",
+      "region": "인천",
+      "district": "서해구",
+      "house_category": "오피스텔/도시형",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950089&pblancNo=2026950089&houseSecd=02"
+    },
+    {
+      "id": "sh_313227",
+      "type": "removed",
+      "detected_at": "2026-11-21",
+      "name": "2026년 하반기 금천구 홀몸어르신(수요자맞춤형)주택 잔여세대 입주자 모집 공고",
+      "region": "서울",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=313227&multi_itm_seq=2"
+    },
+    {
+      "id": "opt_2026940262",
+      "type": "removed",
+      "detected_at": "2026-11-21",
+      "name": "리아츠 더 인천(24차)",
+      "region": "인천",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940262&pblancNo=2026940262"
+    },
+    {
+      "id": "2026000558",
+      "type": "removed",
+      "detected_at": "2026-11-21",
+      "name": "화정1지구 아르엘",
+      "region": "울산",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000558&pblancNo=2026000558"
+    },
+    {
+      "id": "sh_313225",
+      "type": "removed",
+      "detected_at": "2026-11-21",
+      "name": "2026년 하반기 금천구 신혼부부(수요자맞춤형)주택 잔여세대 입주자 모집 공고",
+      "region": "서울",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=313225&multi_itm_seq=2"
+    },
+    {
+      "id": "opt_2026940263",
+      "type": "removed",
+      "detected_at": "2026-11-21",
+      "name": "이천역 예미지 센트럴파크(4차)",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940263&pblancNo=2026940263"
+    },
+    {
+      "id": "2026000563",
+      "type": "removed",
+      "detected_at": "2026-11-21",
+      "name": "더샵 트리센트(조합원 자격상실 세대분)",
+      "region": "부산",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000563&pblancNo=2026000563"
+    },
+    {
+      "id": "2026000536",
+      "type": "removed",
+      "detected_at": "2026-11-21",
+      "name": "구미 파크원 데시앙",
+      "region": "경북",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000536&pblancNo=2026000536"
+    },
+    {
+      "id": "2026000540",
+      "type": "removed",
+      "detected_at": "2026-11-21",
+      "name": "엘리프 논산 디에디션",
+      "region": "충남",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000540&pblancNo=2026000540"
+    },
+    {
+      "id": "2026000566",
+      "type": "removed",
+      "detected_at": "2026-11-21",
+      "name": "호반써밋 초량",
+      "region": "부산",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000566&pblancNo=2026000566"
+    },
+    {
+      "id": "2026000560",
+      "type": "removed",
+      "detected_at": "2026-11-21",
+      "name": "해링턴 플레이스 문래",
+      "region": "서울",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000560&pblancNo=2026000560"
+    },
+    {
+      "id": "sh_313509",
+      "type": "updated",
+      "detected_at": "2026-11-21",
+      "name": "[토지지원 사회주택]에어스페이스 신림4호점_어울리 입주자 모집 공고",
+      "region": "서울",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=313509&multi_itm_seq=2",
+      "field_changes": {
+        "name": {
+          "before": "NEW [토지지원 사회주택]에어스페이스 신림4호점_어울리 입주자 모집 공고",
+          "after": "[토지지원 사회주택]에어스페이스 신림4호점_어울리 입주자 모집 공고"
+        }
+      }
+    },
+    {
+      "id": "sh_313503",
+      "type": "updated",
+      "detected_at": "2026-11-21",
+      "name": "[토지지원 사회주택]에어스페이스 신림3호점_어울리 입주자 모집 공고",
+      "region": "서울",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=313503&multi_itm_seq=2",
+      "field_changes": {
+        "name": {
+          "before": "NEW [토지지원 사회주택]에어스페이스 신림3호점_어울리 입주자 모집 공고",
+          "after": "[토지지원 사회주택]에어스페이스 신림3호점_어울리 입주자 모집 공고"
+        }
+      }
+    },
+    {
       "id": "rem_2026910291",
       "type": "removed",
       "detected_at": "2026-11-15",
@@ -989,7 +1217,7 @@
       "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=311908&multi_itm_seq=2"
     }
   ],
-  "updated_at": "2026-11-20T03:56:45Z",
+  "updated_at": "2026-11-21T03:53:00Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
