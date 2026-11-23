@@ -1,6 +1,26 @@
 {
   "changes": [
     {
+      "id": "sh_313481",
+      "type": "new",
+      "detected_at": "2026-11-23",
+      "name": "NEW [청년형] 특화형 매입임대주택(서초구) 입주자 모집 공고(운영기관 : 마을과집 협동조합)",
+      "region": "서울",
+      "district": "서초구",
+      "house_category": "SH 공공주택",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=313481&multi_itm_seq=2"
+    },
+    {
+      "id": "sh_313647",
+      "type": "new",
+      "detected_at": "2026-11-23",
+      "name": "NEW [토지임대부 사회주택] 옥류서원 입주자 모집 공고문",
+      "region": "서울",
+      "district": "",
+      "house_category": "SH 공공주택",
+      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=313647&multi_itm_seq=2"
+    },
+    {
       "id": "2026000598",
       "type": "new",
       "detected_at": "2026-11-21",
@@ -1155,69 +1175,9 @@
           "after": ""
         }
       }
-    },
-    {
-      "id": "rem_2026910271",
-      "type": "new",
-      "detected_at": "2026-10-23",
-      "name": "힐스테이트 레이크 송도 4차(2차)",
-      "region": "인천",
-      "district": "연수구",
-      "house_category": "APT잔여세대",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910271&pblancNo=2026910271"
-    },
-    {
-      "id": "2026000496",
-      "type": "new",
-      "detected_at": "2026-10-23",
-      "name": "청라 아크원 푸르지오",
-      "region": "인천",
-      "district": "서해구",
-      "house_category": "APT",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000496&pblancNo=2026000496"
-    },
-    {
-      "id": "oft_2026950088",
-      "type": "new",
-      "detected_at": "2026-10-23",
-      "name": "GD 메트로 타워",
-      "region": "서울",
-      "district": "영등포구",
-      "house_category": "오피스텔/도시형",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950088&pblancNo=2026950088&houseSecd=02"
-    },
-    {
-      "id": "opt_2026940227",
-      "type": "new",
-      "detected_at": "2026-10-23",
-      "name": "화곡더리브스카이(4차)",
-      "region": "서울",
-      "district": "강서구",
-      "house_category": "임의공급",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940227&pblancNo=2026940227"
-    },
-    {
-      "id": "rem_2026910270",
-      "type": "new",
-      "detected_at": "2026-10-23",
-      "name": "충정로역자이르네(2차)",
-      "region": "서울",
-      "district": "중구",
-      "house_category": "APT잔여세대",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910270&pblancNo=2026910270"
-    },
-    {
-      "id": "sh_311908",
-      "type": "new",
-      "detected_at": "2026-10-23",
-      "name": "NEW 노원구 도전숙(수요자맞춤형) 잔여세대 입주자 모집 공고",
-      "region": "서울",
-      "district": "노원구",
-      "house_category": "SH 공공주택",
-      "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=311908&multi_itm_seq=2"
     }
   ],
-  "updated_at": "2026-11-22T02:56:32Z",
+  "updated_at": "2026-11-23T03:38:07Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
