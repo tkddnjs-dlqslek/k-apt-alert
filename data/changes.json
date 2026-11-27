@@ -1,6 +1,80 @@
 {
   "changes": [
     {
+      "id": "rem_2026930047",
+      "type": "new",
+      "detected_at": "2026-11-27",
+      "name": "청량리 롯데캐슬 하이루체",
+      "region": "서울",
+      "district": "동대문구",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026930047&pblancNo=2026930047"
+    },
+    {
+      "id": "2026000568",
+      "type": "new",
+      "detected_at": "2026-11-27",
+      "name": "사천선인지구 S4블록(한림풀에버)",
+      "region": "경남",
+      "district": "사천시",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000568&pblancNo=2026000568"
+    },
+    {
+      "id": "2026000611",
+      "type": "new",
+      "detected_at": "2026-11-27",
+      "name": "병점복합타운 주복1블록 공공분양",
+      "region": "경기",
+      "district": "병점구",
+      "house_category": "APT",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000611&pblancNo=2026000611"
+    },
+    {
+      "id": "rem_2026910311",
+      "type": "new",
+      "detected_at": "2026-11-27",
+      "name": "향남역 그로브 스위첸",
+      "region": "경기",
+      "district": "만세구",
+      "house_category": "APT잔여세대",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026910311&pblancNo=2026910311"
+    },
+    {
+      "id": "oft_2026950099",
+      "type": "new",
+      "detected_at": "2026-11-27",
+      "name": "더샵 퍼스트월드",
+      "region": "서울",
+      "district": "중랑구",
+      "house_category": "오피스텔/도시형",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950099&pblancNo=2026950099&houseSecd=02"
+    },
+    {
+      "id": "oft_2026950090",
+      "type": "removed",
+      "detected_at": "2026-11-27",
+      "name": "중화역 라온프라이빗 센트로",
+      "region": "서울",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950090&pblancNo=2026950090&houseSecd=02"
+    },
+    {
+      "id": "opt_2026940258",
+      "type": "removed",
+      "detected_at": "2026-11-27",
+      "name": "중앙하이츠 원종역(4차)",
+      "region": "경기",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940258&pblancNo=2026940258"
+    },
+    {
+      "id": "2026000521",
+      "type": "removed",
+      "detected_at": "2026-11-27",
+      "name": "더샵 천안라크원",
+      "region": "충남",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000521&pblancNo=2026000521"
+    },
+    {
       "id": "rem_2026910294",
       "type": "new",
       "detected_at": "2026-11-26",
@@ -1329,7 +1403,7 @@
       "url": "https://www.i-sh.co.kr/app/lay2/program/S48T1581C563/www/brd/m_247/view.do?seq=311908&multi_itm_seq=2"
     }
   ],
-  "updated_at": "2026-11-26T04:48:28Z",
+  "updated_at": "2026-11-27T04:54:37Z",
   "first_diff_date": null,
   "tracking_status": "ready",
   "retention_days": 30,
